@@ -12,14 +12,25 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       User.belongsTo(models.Account,{
-        foreignKey: "idAcc",
+        foreignKey: "idAccount",
         
       });
       
       User.hasMany(models.Cart,{
         foreignKey: "idUser",
       });
-      
+      User.hasMany(models.Contract,{
+        foreignKey: "idUser",
+      });
+      User.hasMany(models.Detail_contract,{
+        foreignKey: "idBeneficiary",
+      });
+      User.hasMany(models.Benefit_history,{
+        foreignKey: "idUser",
+      });
+      User.hasMany(models.Payment_schedule,{
+        foreignKey: "idUser",
+      });
     }
   }
   User.init({
@@ -30,15 +41,32 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
     },
     name: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
-    
-    
-    isShare: {
+    mail: {
+      type: DataTypes.STRING(255),
       allowNull: false,
+    },
+    address: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    phone: {
       type: DataTypes.INTEGER,
-    }
+      allowNull: false,
+    },
+    idCard:{
+      type: DataTypes.INTEGER,
+      allowNull:false,
+      unique: true,
+    },
+    isActive: {
+      allowNull: false,
+      type: DataTypes.BOOLEAN,
+    },
+    
+   
   },
   {
     sequelize,

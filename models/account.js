@@ -11,31 +11,30 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Account.hasOne(models.User,{
-        foreignKey: "idUser",
+        foreignKey: "idAccount",
        
       })
       Account.hasOne(models.Staff,{
-        foreignKey: "idAcc",
+        foreignKey: "idAccount",
        
       })
       // define association here
     }
   }
   Account.init({
-    idAcc: {
+    idAccount: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       autoIncrement: true,
     },
-    phone: {
+    username: {
       type: DataTypes.STRING,
       allowNull: false, 
       unique: true, 
       
     },
     password: { type: DataTypes.STRING, allowNull: false },
-    role: {type: DataTypes.INTEGER, allowNull: false},
     forgot: {
       type: DataTypes.STRING,
       allowNull: true,

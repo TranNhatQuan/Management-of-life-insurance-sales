@@ -12,11 +12,23 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Staff.belongsTo(models.Account,{
-        foreignKey: "idAcc",
+        foreignKey: "idAccount",
        
       });
-      Staff.belongsTo(models.Shop,{
-        foreignKey: "idShop",
+      Staff.hasMany(models.Staff_permission,{
+        foreignKey: "idStaff",
+      });
+      Staff.hasMany(models.Payment_schedule,{
+        foreignKey: "idStaff",
+      });
+      Staff.hasMany(models.Contract,{
+        foreignKey: "idStaff",
+      });
+      Staff.hasMany(models.Benefit_history,{
+        foreignKey: "idStaff",
+      });
+      Staff.hasMany(models.Post,{
+        foreignKey: "idStaff",
       });
      
     }
@@ -29,15 +41,25 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
     },
     name: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
-    
-    
-    isShare: {
+    mail: {
+      type: DataTypes.STRING(255),
       allowNull: false,
+    },
+    address: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    phone: {
       type: DataTypes.INTEGER,
-    }
+      allowNull: false,
+    },
+    isActive: {
+      allowNull: false,
+      type: DataTypes.BOOLEAN,
+    },
   },
   {
     sequelize,

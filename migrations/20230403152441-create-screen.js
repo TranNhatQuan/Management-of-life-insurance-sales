@@ -2,32 +2,26 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Accounts', {
-      idAccount: {
+    await queryInterface.createTable('Screens', {
+      idScreen: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER
       },
-     
-      
-      username: {
-        type: Sequelize.STRING,
+      name: {
         allowNull: false,
         unique: true,
-      },
-      password: {
         type: Sequelize.STRING,
+      },
+      info: {
         allowNull: false,
+        unique: true,
+        type: Sequelize.TEXT,
       },
-      forgot: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Accounts');
+    await queryInterface.dropTable('Screens');
   }
 };
