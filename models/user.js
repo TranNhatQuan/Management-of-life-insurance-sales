@@ -16,9 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         
       });
       
-      User.hasMany(models.Cart,{
-        foreignKey: "idUser",
-      });
+    
       User.hasMany(models.Contract,{
         foreignKey: "idUser",
       });
@@ -57,7 +55,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     idCard:{
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(15),
       allowNull:false,
       unique: true,
     },

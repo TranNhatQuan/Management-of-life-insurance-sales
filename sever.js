@@ -2,10 +2,13 @@ const express = require("express");
 const {sequelize} = require("./models");
 const {rootRouter} = require("./routers")
 const cookieParser = require("cookie-parser");
-const port = 3005;
+const port = 3007;
 const app = express();
 const cors = require("cors");
+app.set('view engine', 'ejs');
 
+// Định dạng tệp view EJS sẽ được lưu trữ trong thư mục "views"
+app.set('views', './views');
 app.use(cookieParser());
 app.use(cors());
 //cài ứng dụng sử dụng json

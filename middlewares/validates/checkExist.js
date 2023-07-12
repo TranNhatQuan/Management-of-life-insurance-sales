@@ -52,31 +52,31 @@ const checkExistAccount = () => {
     try {
       //console.log(1)
       //const staff = req.staff
-      const { phone } = req.body;
+      const { username } = req.body;
 
-      if (phone === '') {
-        return res.status(400).json({ isSuccess: false, mes: 'checkNotExistAcc1' });
+      if (username === '') {
+        return res.status(400).json({ error: 'Mời nhập đầy đủ các trường!'  });
       }
-      if (isNaN(phone)) {
-        return res.status(400).json({ isSuccess: false, mes: 'checkNotExistAcc2' });
+      if (username===undefined) {
+        return res.status(400).json({ error: 'Mời nhập đầy đủ các trường!'  });
       }
       
       const account = await Account.findOne({
         where: {
-          phone,
+          username,
         },
       });
       
       //console.log(created)
       if (!account) {
-        return res.status(404).send({ isSuccess: false, mes: 'Tài khoản không tồn tại' });;
+        return res.status(404).send({  error: 'Sai tên tài khoản hoặc mật khẩu!' });;
       }
       else {
         req.account= account
         next();
       }
     } catch (error) {
-      return res.status(500).send({ isSuccess: false, mes: 'Có lỗi trong quá trình sửa tài khoản' });;
+      return res.status(500).send({ error: 'Có lỗi xảy ra!' });;
     }
   }
 };
