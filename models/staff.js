@@ -53,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     phone: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(13),
       allowNull: false,
     },
     isActive: {

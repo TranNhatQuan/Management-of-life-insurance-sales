@@ -76,7 +76,7 @@ const createAccountForCustomer = async (req, res) => {
 
 const loginAdmin = async (req, res) => {
     try {
-        const {password } = req.body;
+        const { password } = req.body;
         const account = req.account
         //console.log(account)
         const isAuth = bcrypt.compareSync(password, account.password);
@@ -90,23 +90,18 @@ const loginAdmin = async (req, res) => {
 
 
 
-            const token = jwt.sign({ username: account.username }, "hehehe", {
+            const token = jwt.sign({ idAccount: account.idAccount }, "hehehe", {
                 expiresIn: 30 * 60 * 60 * 60,
             });
-
-            res
-                .status(200)
-                .json({
-                    staff,
-                    isSuccess: true,
-                    token,
-                    expireTime: 30 * 60 * 60 * 60,
-                });
+            req.session.token = token;
+            res.redirect('/staff/listStaff');
         } else {
-            return res.status(401).json({ error:'Sai tên tài khoản hoặc mật khẩu' });
+            req.flash('error', 'Sai tên tài khoản hoặc mật khẩu');
+            return res.redirect('/account/admin/login');
         }
     } catch (error) {
-        return res.status(500).json({ error:'Có lỗi xảy ra' });
+        req.flash('error', 'Có lỗi xảy ra');
+        return res.redirect('/account/admin/login');
     }
 };
 
@@ -200,17 +195,22 @@ const changePassword = async (req, res) => {
 };
 
 const logout = async (req, res, next) => {
-    res.removeHeader("access_token");
+    delete req.session.token;
 
-    res.status(200).json({ isSuccess: true });
+    return res.redirect('/account/login'); // Chuyển hướng về trang đăng nhập
+};
+const logoutAdmin = async (req, res, next) => {
+    delete req.session.token;
+
+    return res.redirect('/account/admin/login'); // Chuyển hướng về trang đăng nhập
 };
 const getLogin = async (req, res) => {
-    res.render('userLogin', { error: '' });
+    const error = req.flash('error')[0];
+    res.render('account/userLogin', { error: error });
 };
 const getLoginAdmin = async (req, res) => {
-    res.removeHeader("access_token");
-
-    res.status(200).json({ isSuccess: true });
+    const error = req.flash('error')[0];
+    res.render('account/adminLogin', { error: error });
 };
 const forgotPassword = async (req, res) => {
     const { mail } = req.body;
@@ -334,5 +334,5 @@ const accessForgotPassword = async (req, res, next) => {
 module.exports = {
     // getDetailTaiKhoan,
     login, logout, createAccountForCustomer, changePassword, forgotPassword, loginAdmin, verify, accessForgotPassword,
-    getLogin, getLoginAdmin
+    getLogin, getLoginAdmin, logoutAdmin
 };

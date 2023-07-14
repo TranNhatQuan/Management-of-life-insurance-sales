@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Trang chủ</title>
+  <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar {
+      /* Thiết lập vị trí */
+      position: relative;
+      z-index: 2;
+    }
+
+    #info {
+      /* Thiết lập vị trí */
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+      /* Thiết lập vị trí */
+      position: relative;
+      z-index: 0;
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      /* Định dạng chiều rộng của popup */
+      height: 400px;
+      /* Định dạng chiều cao của popup */
+      background: #fff;
+      /* Màu nền của popup */
+      border: 1px solid #ccc;
+      /* Viền của popup */
+      padding: 20px;
+      /* Khoảng cách giữa nội dung và viền của popup */
+      display: none;
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('../../layout/sidebar.ejs') %>
+
+
+
+    <div class="container">
+      <h2>Danh sách nhân viên</h2>
+      <h3>Đây là danh sách nhân viên, ấn vào dòng chứa thông tin nhân viên bất kỳ để xem và sửa thông tin nhân viên đó.
+      </h3>
+      <table id="employeeTable" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên</th>
+            <th>Email</th>
+            <th>Địa chỉ</th>
+            <th>Số điện thoại</th>
+            <th>ID tài khoản</th>
+            <th>Trạng thái tài khoản</th>
+            <th>Xoá</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% employees.forEach(function(employee) { %>
+            <tr onclick="viewEmployeeDetail('<%= employee.idStaff %>')">
+              <td>
+                <%= employee.idStaff %>
+              </td>
+              <td>
+                <%= employee.name %>
+              </td>
+              <td>
+                <%= employee.mail %>
+              </td>
+              <td>
+                <%= employee.address %>
+              </td>
+              <td>
+                <%= employee.phone %>
+              </td>
+              <td>
+                <%= employee.idAccount %>
+              </td>
+              <td>
+                <% if (employee.isActive===1) { %>
+                  <button onclick="inActiveEmployee('<%= employee.idStaff %>', event)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                      class="bi bi-toggle-on" viewBox="0 0 16 16">
+                      <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                    </svg>
+                  </button>
+                  <% } else { %>
+                    <button onclick="activeEmployee('<%= employee.idStaff %>', event)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-toggle-off" viewBox="0 0 16 16">
+                        <path
+                          d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
+                      </svg>
+                    </button>
+                    <% } %>
+              </td>
+              <td>
+                <button onclick="deleteEmployee('<%= employee.idStaff %>', event)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+            <% }); %>
+        </tbody>
+
+      </table>
+    </div>
+    <div id="popup" class="popup"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+    <script src="https://cdn.datatables.net/searchbuilder/1.2.1/js/dataTables.searchBuilder.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+
+    <script>
+      $(document).ready(function () {
+        var table = $('#employeeTable').DataTable({
+          dom: 'Blfrtip',
+          buttons: ['excelHtml5', 'pdfHtml5'],
+          language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.11.3/i18n/vi.json'
+          },
+          paging: true,
+          pagingType: 'full_numbers',
+          pageLength: 10,
+          searching: true,
+
+        });
+      });
+
+      var popupVisible = false;
+
+      function showPopup() {
+        var popup = document.getElementById("popup");
+        popup.style.display = "block";
+        popupVisible = true;
+        // Thêm sự kiện mousedown cho document để ẩn popup khi người dùng nhấp chuột ra ngoài
+        document.addEventListener("mousedown", hidePopupOutside);
+      }
+
+      function hidePopup() {
+        var popup = document.getElementById("popup");
+        popup.style.display = "none";
+        popupVisible = false;
+        // Gỡ bỏ sự kiện mousedown khỏi document
+        document.removeEventListener("mousedown", hidePopupOutside);
+      }
+
+      // Ẩn popup khi người dùng nhấp chuột ra ngoài
+      function hidePopupOutside(event) {
+        var popup = document.getElementById("popup");
+        if (!popup.contains(event.target)) {
+          hidePopup();
+        }
+      }
+
+
+
+
+
+      function viewEmployeeDetail(employeeId) {
+        // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+        $.ajax({
+          url: '/staff/detail/' + employeeId,
+          type: 'GET',
+          dataType: 'html',
+          success: function (response) {
+            // Hiển thị nội dung trang chi tiết trong cửa sổ popup
+            showPopup();
+            $('#popup').html(response);
+          },
+          error: function (xhr, status, error) {
+            // Xử lý lỗi nếu có
+            window.location.href = '/staff/listStaff';
+            console.log(error);
+          }
+        });
+      }
+
+
+
+      function inActiveEmployee(employeeId, event) {
+        event.stopPropagation();
+        $.ajax({
+          url: '/staff/inActive/' + employeeId,
+          type: 'PUT',
+          success: function (response) {
+            // Xử lý thành công
+            console.log('Đã vô hiệu hoá nhân viên:', employeeId);
+            // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
+            window.location.href = '/staff/listStaff';
+          },
+          error: function (xhr, status, error) {
+            // Xử lý lỗi nếu có
+            console.log('Lỗi:', error);
+          }
+        });
+      }
+
+      function activeEmployee(employeeId, event) {
+        event.stopPropagation();
+        $.ajax({
+          url: '/staff/active/' + employeeId,
+          type: 'PUT',
+          success: function (response) {
+            // Xử lý thành công
+            console.log('Đã kích hoạt nhân viên:', employeeId);
+            // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+            window.location.href = '/staff/listStaff';
+          },
+          error: function (xhr, status, error) {
+            // Xử lý lỗi nếu có
+            console.log('Lỗi:', error);
+          }
+        });
+      }
+      function deleteEmployee(employeeId, event) {
+        event.stopPropagation();
+        $.ajax({
+          url: '/staff/delete/' + employeeId,
+          type: 'DELETE',
+          success: function (response) {
+            // Xử lý thành công
+            alert('Đã xoá nhân viên có id: '+ employeeId);
+            // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+            window.location.href = '/staff/listStaff';
+          },
+          error: function (xhr, status, error) {
+            // Xử lý lỗi nếu có
+            console.log('Lỗi:', error);
+          }
+        });
+      }
+      
+
+
+    </script>
+
+
+</body>
+
+</html>

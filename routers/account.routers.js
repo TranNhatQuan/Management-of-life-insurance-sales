@@ -1,7 +1,7 @@
 const express = require("express");
-const {Account} = require("../models")
-const {login, logout, createAccountForCustomer, changePassword, forgotPassword, loginAdmin, verify, accessForgotPassword,
-        getLogin, getLoginAdmin} = require("../controllers/account.controllers");
+
+const {login, loginAdmin, 
+        getLogin, getLoginAdmin, logoutAdmin} = require("../controllers/account.controllers");
 const { checkExistAccount, checkNotExistAcount } = require("../middlewares/validates/checkExist");
 const { authorize } = require("../middlewares/auth/authorize.js")
 const { checkCreateAccount } = require("../middlewares/validates/checkCreate");
@@ -12,12 +12,9 @@ accountRouter.post("/login", checkExistAccount(), login);
 accountRouter.post("/admin/login", checkExistAccount(), loginAdmin);
 accountRouter.get("/login", getLogin);
 accountRouter.get("/admin/login", getLoginAdmin);
-//accountRouter.get("/logout", authenticate, logout);
-accountRouter.post("/create", checkNotExistAcount(), createAccountForCustomer);
-//accountRouter.post("/forgotpassword", checkExistAccount(Account), forgotPassword);
-//accountRouter.post("/forgotpassword/verify", checkExistAccount(Account), verify);
-//accountRouter.post("/forgotpassword/verify/success", checkExistAccount(Account), accessForgotPassword);
-//accountRouter.put("/changepassword", authenticate, changePassword);
+accountRouter.get("/logout", logoutAdmin);
+//accountRouter.post("/create", checkNotExistAcount(), createAccountForCustomer);
+
 
 module.exports = {
     accountRouter,
