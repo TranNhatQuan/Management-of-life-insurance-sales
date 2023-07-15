@@ -8,8 +8,9 @@ const port = 3007;
 const app = express();
 const cors = require("cors");
 const ejsMate = require('ejs-mate');
-
+app.use(flash());
 app.engine('ejs', ejsMate);
+
 app.set('view engine', 'ejs');
 app.use(session({
   secret: 'your-secret-key',
@@ -18,7 +19,7 @@ app.use(session({
 }));
 
 // Cấu hình flash message
-app.use(flash());
+
 // Định dạng tệp view EJS sẽ được lưu trữ trong thư mục "views"
 app.set('views', './public/views');
 app.use(cookieParser());

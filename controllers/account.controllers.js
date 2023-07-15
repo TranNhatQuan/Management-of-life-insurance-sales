@@ -94,7 +94,7 @@ const loginAdmin = async (req, res) => {
                 expiresIn: 30 * 60 * 60 * 60,
             });
             req.session.token = token;
-            res.redirect('/staff/listStaff');
+            res.redirect('/staff/home');
         } else {
             req.flash('error', 'Sai tên tài khoản hoặc mật khẩu');
             return res.redirect('/account/admin/login');
