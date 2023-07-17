@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <style>
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+  </style>
+
+</head>
+
+<body>
+
+
+
+  <h2>Form nhập thông tin nhân viên</h2>
+  <form action="/staff/add?url=/staff/listStaff" method="post">
+    <div class="form-group">
+      <label for="name">Tên:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+      <label for="phone">Số điện thoại:</label>
+      <input type="tel" id="phone" name="phone" required>
+    </div>
+    <div class="form-group">
+      <label for="address">Địa chỉ:</label>
+      <input type="text" id="address" name="address" required>
+    </div>
+    <div class="form-group">
+      <label for="username">Tên tài khoản:</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Mật khẩu:</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <p><strong>Tình trạng phân quyền:</strong></p>
+    <table>
+      <tr>
+        <th>Quyền</th>
+        <th>Thêm-</th>
+        <th>Xoá--</th>
+        <th>Sửa--</th>
+        <th>Đọc</th>
+      </tr>
+      <tr>
+        <td>QL Nhân viên</td>
+        <td><input type="checkbox" name="permission" value="addStaff"></td>
+        <td><input type="checkbox" name="permission" value="deleteStaff"></td>
+        <td><input type="checkbox" name="permission" value="editStaff"></td>
+        <td><input type="checkbox" name="permission" value="readStaff"></td>
+      </tr>
+      <tr>
+        <td>QL Khách</td>
+        <td><input type="checkbox" name="permission" value="addUser"></td>
+        <td><input type="checkbox" name="permission" value="deleteUser"></td>
+        <td><input type="checkbox" name="permission" value="editUser"></td>
+        <td><input type="checkbox" name="permission" value="readUser"></td>
+      </tr>
+      <tr>
+        <td>QL Hợp đồng</td>
+        <td><input type="checkbox" name="permission" value="addContract"></td>
+        <td><input type="checkbox" name="permission" value="deleteContract"></td>
+        <td><input type="checkbox" name="permission" value="editContract"></td>
+        <td><input type="checkbox" name="permission" value="readContract"></td>
+      </tr>
+      <tr>
+        <td>QL Bảo hiểm</td>
+        <td><input type="checkbox" name="permission" value="addInsurance"></td>
+        <td><input type="checkbox" name="permission" value="deleteInsurance"></td>
+        <td><input type="checkbox" name="permission" value="editInsurance"></td>
+        <td><input type="checkbox" name="permission" value="readInsurance"></td>
+      </tr>
+      <tr>
+        <td>QL Bài đăng</td>
+        <td><input type="checkbox" name="permission" value="addPost"></td>
+        <td><input type="checkbox" name="permission" value="deletePost"></td>
+        <td><input type="checkbox" name="permission" value="editPost"></td>
+        <td><input type="checkbox" name="permission" value="readPost"></td>
+      </tr>
+      <tr>
+        <td>QL Lịch thanh toán</td>
+        <td><input type="checkbox" name="permission" value="addPayment"></td>
+        <td><input type="checkbox" name="permission" value="deletePayment"></td>
+        <td><input type="checkbox" name="permission" value="editPayment"></td>
+        <td><input type="checkbox" name="permission" value="readPayment"></td>
+      </tr>
+      <tr>
+        <td>QL Lợi ích khách hàng</td>
+        <td><input type="checkbox" name="permission" value="addBenefit"></td>
+        <td><input type="checkbox" name="permission" value="deleteBenefit"></td>
+        <td><input type="checkbox" name="permission" value="editBenefit"></td>
+        <td><input type="checkbox" name="permission" value="readBenefit"></td>
+      </tr>
+    </table>
+    <div class="form-group">
+      <button type="submit">Lưu</button>
+    </div>
+  </form>
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+</body>
+
+</html>

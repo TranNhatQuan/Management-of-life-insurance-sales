@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 
-const createCustomerWithTransaction = async (phone, password, name) => {
+const createCustomerWithTransaction = async (name, email, phone, address, permission, username, password) => {
     //console.log('test1')
     const t = await db.sequelize.transaction(); // Bắt đầu transaction
 
@@ -18,21 +18,22 @@ const createCustomerWithTransaction = async (phone, password, name) => {
         const hashPassword = bcrypt.hashSync(password, salt);
         //console.log('test3')
         const newAccount = await Account.create({
-            phone,
-            role: 0,
+            username,
+          
             password: hashPassword,
 
         }, { transaction: t });
         //console.log('test4')
-        const newCustomer = await User.create({
-            idAcc: newAccount.idAcc,
+        const newCustomer = await Staff.create({
+            idAccount: newAccount.idAccount,
             name,
-            isShare: 1,
+            mail:email,
+            phone,
+            address,
+            isActive:1
 
         }, { transaction: t });
 
-        //console.log('test5')
-        //console.log('test3')
 
 
         await t.commit(); // Lưu thay đổi và kết thúc transaction
@@ -334,5 +335,5 @@ const accessForgotPassword = async (req, res, next) => {
 module.exports = {
     // getDetailTaiKhoan,
     login, logout, createAccountForCustomer, changePassword, forgotPassword, loginAdmin, verify, accessForgotPassword,
-    getLogin, getLoginAdmin, logoutAdmin
+    getLogin, getLoginAdmin, logoutAdmin, createCustomerWithTransaction
 };

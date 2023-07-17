@@ -1,41 +1,31 @@
+const { splitPermission } = require("../../controllers/staff.controllers");
 const { Account, User, Staff } = require("../../models");
 const { QueryTypes } = require("sequelize");
 
 const authorize = (role) => async (req, res, next) => {
     try {
-        //console.log(1)
-        const account = req.account;
-        if(role==0){
-            
-            if (account.dataValues.role === role) {
-                const user = await User.findOne({
-                    where:{idAcc:account.idAcc}
-                })
-                req.user=user
-                next();
-            } 
-            else {
-                return res.status(403).json({ message: "Bạn không có quyền sử dụng chức năng này!" });
-            }
-        }
-        else{
-            
-            if (account.dataValues.role >= role) {
-                const staff = await Staff.findOne({
-                    where:{idAcc:account.idAcc}
-                })
-                req.staff= staff 
-                //console.log('2')
-                next();
-            } 
-            else {
-                return res.status(403).json({ message: "Bạn không có quyền sử dụng chức năng này!" });
-            }
+        
+        const staff = req.staff
+        const idStaff = staff.idStaff
+        const check = await splitPermission(role, idStaff, 0)
+        
+        if (check) {
+          
+            next()
         }
         
-        
+        else {
+            req.flash('error', 'Bạn không có quyền truy cập chức năng này!');
+            return res.redirect(req.query.url);
+            
+        }
+
+
+
+
     } catch (error) {
-        return res.status(500).json({ error,message: "autho" });
+        req.flash('error', 'Có lỗi đã xảy ra.');
+        return res.redirect('/account/admin/login');
     }
 
 };

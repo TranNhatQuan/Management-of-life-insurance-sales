@@ -136,7 +136,7 @@
                 <div class="col-md-6">
                     <h2>Thông tin cá nhân</h2>
                     <h3>Ấn lưu để thay đổi thông tin cá nhân của bạn</h3>
-                    <form action="/staff/selfEdit" method="post">
+                    <form action="/staff/selfEdit?url=/staff/home" method="post">
                         <div class="form-group">
                             <label for="idStaff">ID Nhân viên:</label>
                             <input type="text" id="idStaff" name="idStaff" value="<%= staff.idStaff %>" readonly>
@@ -168,7 +168,7 @@
                 <div id="password-form" class="col-md-6" style="border-left: 1px solid #ccc;">
                     <h2>Đổi mật khẩu</h2>
                     <h3>Ấn lưu đổi mật khẩu để thay đổi mật khẩu của bạn</h3>
-                    <form action="/staff/changePassword/<%= staff.idStaff %>" method="post">
+                    <form action="/staff/changePassword/<%= staff.idStaff %>?url=/staff/home" method="post">
                         <div class="form-group">
                             <label for="oldPassword">Mật khẩu cũ:</label>
                             <input type="password" id="oldPassword" name="oldPassword" required>

@@ -13,7 +13,7 @@
       margin: 10px;
     }
 
-    #idStaff {
+    #idUser {
       outline: none;
       border: none;
 
@@ -26,124 +26,39 @@
   
   
   
-  <h2>Thông tin nhân viên</h2>
-  <form action="/staff/edit/<%= staff.idStaff %>" method="post">
+  <h2>Thông tin khách hàng</h2>
+  <form action="/user/edit/<%= user.idUser %>?url=/user/listUser" method="post">
     <div class="form-group">
-      <label for="idStaff">ID Nhân viên:</label>
-      <input type="text" id="idStaff" name="idStaff" value="<%= staff.idStaff %>" readonly>
+      <label for="idUser">ID:</label>
+      <input type="text" id="idUser" name="iduser" value="<%= user.idUser %>" readonly>
     </div>
     <div class="form-group">
       <label for="name">Tên:</label>
-      <input type="text" id="name" name="name" value="<%= staff.name %>" required>
+      <input type="text" id="name" name="name" value="<%= user.name %>" required>
     </div>
     <div class="form-group">
       <label for="email">Email:</label>
-      <input type="email" id="email" name="email" value="<%= staff.mail %>" required>
+      <input type="email" id="email" name="email" value="<%= user.mail %>" required>
     </div>
     <div class="form-group">
       <label for="phone">Số điện thoại:</label>
-      <input type="tel" id="phone" name="phone" value="<%= staff.phone %>" required>
+      <input type="tel" id="phone" name="phone" value="<%= user.phone %>" required>
     </div>
     <div class="form-group">
       <label for="address">Địa chỉ:</label>
-      <input type="text" id="address" name="address" value="<%= staff.address %>" required>
+      <input type="text" id="address" name="address" value="<%= user.address %>" required>
+    </div>
+    <div class="form-group">
+      <label for="idCard">CCCD:</label>
+      <input type="text" id="idCard" name="idCard" value="<%= user.idCard %>" required>
     </div>
     <p><strong>ID tài khoản:</strong>
-      <%= staff.idAccount %>
+      <%= user.idAccount %>
     </p>
-    <p><strong>Trạng thái hoạt động:</strong>
-      <%= staff.isActive %>
-    </p>
-    <p><strong>Tình trạng phân quyền:</strong></p>
-    <table>
-      <tr>
-        <th>Quyền</th>
-        <th>Thêm-</th>
-        <th>Xoá--</th>
-        <th>Sửa--</th>
-        <th>Đọc</th>
-      </tr>
-      <tr>
-        <td>QL Nhân viên</td>
-        <td><input type="checkbox" name="permission" value="addStaff" <% if (staff.addStaff===true) { %>checked<% } %>>
-        </td>
-        <td><input type="checkbox" name="permission" value="deleteStaff" <% if (staff.deleteStaff===true) { %>checked<%
-            } %>></td>
-        <td><input type="checkbox" name="permission" value="editStaff" <% if (staff.editStaff===true) { %>checked<% } %>
-            ></td>
-        <td><input type="checkbox" name="permission" value="readStaff" <% if (staff.readStaff===true) { %>checked<% } %>
-            ></td>
-      </tr>
-      <tr>
-        <td>QL Khách</td>
-        <td><input type="checkbox" name="permission" value="addUser" <% if (staff.addUser===true) { %>checked<% } %>>
-        </td>
-        <td><input type="checkbox" name="permission" value="deleteUser" <% if (staff.deleteUser===true) { %>checked<% }
-            %>></td>
-        <td><input type="checkbox" name="permission" value="editUser" <% if (staff.editUser===true) { %>checked<% } %>>
-        </td>
-        <td><input type="checkbox" name="permission" value="readUser" <% if (staff.readUser===true) { %>checked<% } %>>
-        </td>
-      </tr>
-      <tr>
-        <td>QL Hợp đồng</td>
-        <td><input type="checkbox" name="permission" value="addContract" <% if (staff.addContract===true) { %>checked<%
-            } %>></td>
-        <td><input type="checkbox" name="permission" value="deleteContract" <% if (staff.deleteContract===true) {
-            %>checked<% } %>></td>
-        <td><input type="checkbox" name="permission" value="editContract" <% if (staff.editContract===true) { %>checked
-          <% } %>>
-        </td>
-        <td><input type="checkbox" name="permission" value="readContract" <% if (staff.readContract===true) { %>checked
-          <% } %>>
-        </td>
-      </tr>
-      <tr>
-        <td>QL Bảo hiểm</td>
-        <td><input type="checkbox" name="permission" value="addInsurance" <% if (staff.addInsurance===true) { %>checked
-          <% } %>>
-        </td>
-        <td><input type="checkbox" name="permission" value="deleteInsurance" <% if (staff.deleteInsurance===true) {
-            %>checked<% } %>></td>
-        <td><input type="checkbox" name="permission" value="editInsurance" <% if (staff.editInsurance===true) {
-            %>checked<% } %>></td>
-        <td><input type="checkbox" name="permission" value="readInsurance" <% if (staff.readInsurance===true) {
-            %>checked<% } %>></td>
-      </tr>
-      <tr>
-        <td>QL Bài đăng</td>
-        <td><input type="checkbox" name="permission" value="addPost" <% if (staff.addPost===true) { %>checked<% } %>>
-        </td>
-        <td><input type="checkbox" name="permission" value="deletePost" <% if (staff.deletePost===true) { %>checked<% }
-            %>></td>
-        <td><input type="checkbox" name="permission" value="editPost" <% if (staff.editPost===true) { %>checked<% } %>>
-        </td>
-        <td><input type="checkbox" name="permission" value="readPost" <% if (staff.readPost===true) { %>checked<% } %>>
-        </td>
-      </tr>
-      <tr>
-        <td>QL Lịch thanh toán</td>
-        <td><input type="checkbox" name="permission" value="addPayment" <% if (staff.addPayment===true) { %>checked<% }
-            %>></td>
-        <td><input type="checkbox" name="permission" value="deletePayment" <% if (staff.deletePayment===true) {
-            %>checked<% } %>></td>
-        <td><input type="checkbox" name="permission" value="editPayment" <% if (staff.editPayment===true) { %>checked<%
-            } %>></td>
-        <td><input type="checkbox" name="permission" value="readPayment" <% if (staff.readPayment===true) { %>checked<%
-            } %>></td>
-      </tr>
-      <tr>
-        <td>QL Lợi ích khách hàng</td>
-        <td><input type="checkbox" name="permission" value="addBenefit" <% if (staff.addBenefit===true) { %>checked<% }
-            %>></td>
-        <td><input type="checkbox" name="permission" value="deleteBenefit" <% if (staff.deleteBenefit===true) {
-            %>checked<% } %>></td>
-        <td><input type="checkbox" name="permission" value="editBenefit" <% if (staff.editBenefit===true) { %>checked<%
-            } %>></td>
-        <td><input type="checkbox" name="permission" value="readBenefit" <% if (staff.readBenefit===true) { %>checked<%
-            } %>></td>
-      </tr>
-    </table>
+
+
+    
+   
     <div class="form-group">
       <button type="submit">Lưu</button>
     </div>
@@ -154,30 +69,14 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
-    function editStaff(staffId) {
-      window.location.href = '/staff/edit/' + staffId;
+    function editUser(userId) {
+      window.location.href = '/user/edit/' + userId+'?url=/user/listUser';
     }
 
-    function showDeleteConfirmation(staffId) {
-      var popup = document.getElementById("popup");
-      popup.style.display = "block";
-      // Lưu staffId vào thuộc tính data-staff-id của popup để sử dụng trong hàm deleteStaff
-      popup.setAttribute("data-staff-id", staffId);
-    }
 
-    function deleteStaff() {
-      var staffId = document.getElementById("popup").getAttribute("data-staff-id");
-      // Gọi API hoặc thực hiện xử lý xóa nhân viên tại đây
-      // Sau khi hoàn thành, có thể chuyển hướng người dùng đến trang danh sách nhân viên hoặc thực hiện các thao tác khác
-      console.log("Xóa nhân viên với ID:", staffId);
-      // Sau khi xóa thành công, ẩn popup
-      hidePopup();
-    }
 
-    function hidePopup() {
-      var popup = document.getElementById("popup");
-      popup.style.display = "none";
-    }
+    
+
   </script>
 
 

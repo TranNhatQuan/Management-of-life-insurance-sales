@@ -4,7 +4,48 @@ const db = require("../models/index");
 const bcrypt = require("bcryptjs");
 const moment = require('moment-timezone'); // require
 const { raw } = require("body-parser");
+const nodemailer = require("nodemailer");
+const createUserWithTransaction = async (name, email, phone, address, idCard, username, password) => {
+    //console.log('test1')
+    const t = await db.sequelize.transaction(); // Bắt đầu transaction
 
+    let isSuccess
+    try {
+        //console.log('test2')
+        const salt = bcrypt.genSaltSync(10);
+        const hashPassword = bcrypt.hashSync(password, salt);
+        //console.log('test3')
+        const newAccount = await Account.create({
+            username,
+
+            password: hashPassword,
+
+        }, { transaction: t });
+        //console.log('test4')
+        const newCustomer = await User.create({
+            idAccount: newAccount.idAccount,
+            name,
+            mail: email,
+            phone,
+            address,
+            idCard,
+            isActive: 1
+
+        }, { transaction: t });
+        
+
+
+        await t.commit(); // Lưu thay đổi và kết thúc transaction
+        isSuccess = true
+
+    } catch (error) {
+        isSuccess = false
+        await t.rollback(); // Hoàn tác các thay đổi và hủy bỏ transaction
+
+    }
+
+    return isSuccess
+}
 const getListUser = async (req, res) => {
     try {
 
@@ -18,7 +59,7 @@ const getListUser = async (req, res) => {
 
         })
         const error = req.flash('error')[0];
-        return res.render('user/listUser', { error: error, employees: employees, selectedMenuItem: 'Quản lý nhân viên', name: name });
+        return res.render('user/listUser', { error: error, users: users, name: name });
 
     } catch (error) {
         req.flash('error', 'Có lỗi xảy ra khi lấy danh sách khách hàng!');
@@ -39,11 +80,11 @@ const getDetailUser = async (req, res) => {
         })
 
 
-        return res.render('staff/detailUser', { user: user });
+        return res.render('user/detailUser', { user: user });
 
     } catch (error) {
-        req.flash('error', 'Có lỗi xảy ra khi lấy chi tiết thông tin khách hàng!');
-        return res.status(500).json({ isSuccess: false })
+
+        return res.status(500).json({ error: 'Có lỗi xảy ra khi lấy chi tiết thông tin khách hàng!' })
     }
 };
 const getFullDetailUser = async (req, res) => {
@@ -106,15 +147,13 @@ const editUser = async (req, res) => {
         await user.save()
 
         req.flash('error', 'Đổi thông tin khách hàng thành công!');
-        if (req.query.url == 'home') {
-            return res.redirect('/staff/home');
-        }
-        return res.redirect('/staff/listUser');
+
+        return res.redirect(req.query.url);
 
         //return res.status(200).json({ isSuccess: true })
     } catch (error) {
-        req.flash('error', 'Có lỗi xảy ra khi đổi thông tin nhân viên');
-        return res.redirect('/account/admin/login');
+        req.flash('error', 'Có lỗi xảy ra khi đổi thông tin khách hàng');
+        return res.redirect('/user/listUser');
     }
 };
 const selfEdit = async (req, res) => {
@@ -251,8 +290,69 @@ const deleteUser = async (req, res) => {
         return res.status(500).json({ isSuccess: false })
     }
 };
+const getFormAddUser = async (req, res) => {
+    try {
+
+        //console.log(staff)
+
+
+        return res.render('user/addUser');
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi tạo form nhập nhân viên');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const addUser = async (req, res) => {
+    try {
+
+
+
+        const { name, email, phone, address, idCard, username, password } = req.body
+        if (phone === '' || password === '' || name === '' || address === '' || email === '' || username === '' || idCard === '') {
+            req.flash('error', 'Thông tin không được để trống!');
+            return res.redirect('/user/listUser');
+        }
+        if (phone === undefined || password === undefined || name === undefined || address === undefined || email === undefined || username === undefined || isNaN(idCard)) {
+            req.flash('error', 'Có lỗi xảy ra!');
+            return res.redirect('/user/listUser');
+        }
+        //console.log(permission)
+
+        const isAdd = await createUserWithTransaction(name, email, phone, address, idCard, username, password)
+        if (!isAdd) {
+            req.flash('error', 'Tài khoản không được trùng với các tài khoản đã có!');
+            return res.redirect('/user/listUser');
+        }
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: "trannhatquan.2001@gmail.com", // generated ethereal user
+                pass: "bseuvtvsghpnrltz", // generated ethereal password
+            },
+        });
+        // send mail with defined transport object
+        await transporter.sendMail({
+            from: "trannhatquan.2001@gmail.com", // sender address
+            to: `${email}`, // list of receivers
+            subject: "Đăng ký tài khoản thành công", // Subject line
+            text: "Đăng ký tài khoản thành công", // plain text body
+            html: `Bạn đã được nhân viên đăng ký tài khoản thành công. Đây là tài khoản và mật khẩu của bạn: <br>Tài khoản: ${username}`+`<br>Mật khẩu: ${password}`, // html body
+        });
+        req.flash('error', 'Thêm mới khách hàng thành công, tài khoản và mật khẩu đã được gửi tới email người dùng!');
+
+        return res.redirect(req.query.url);
+
+        //return res.status(200).json({ isSuccess: true })
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi thêm mới nhân viên');
+        return res.redirect('/user/listUser');
+    }
+};
 module.exports = {
 
     getListUser, getDetailUser, editUser, deleteUser, activeUser, inActiveUser,
-    changePassword, selfEdit, getFullDetailUser
+    changePassword, selfEdit, getFullDetailUser, addUser, getFormAddUser
 };

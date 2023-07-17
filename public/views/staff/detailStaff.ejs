@@ -27,7 +27,7 @@
   
   
   <h2>Thông tin nhân viên</h2>
-  <form action="/staff/edit/<%= staff.idStaff %>" method="post">
+  <form action="/staff/edit/<%= staff.idStaff %>?url=/staff/listStaff" method="post">
     <div class="form-group">
       <label for="idStaff">ID Nhân viên:</label>
       <input type="text" id="idStaff" name="idStaff" value="<%= staff.idStaff %>" readonly>
@@ -155,7 +155,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
     function editStaff(staffId) {
-      window.location.href = '/staff/edit/' + staffId;
+      window.location.href = '/staff/edit/' + staffId+"?url=/staff/listStaff";
     }
 
     function showDeleteConfirmation(staffId) {
