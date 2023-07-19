@@ -13,14 +13,17 @@ module.exports = (sequelize, DataTypes) => {
       Detail_contract.belongsTo(models.Contract, {
         foreignKey: "idContract",
       });
-      Detail_contract.belongsTo(models.Staff, {
-        foreignKey: "idStaff",
+      Detail_contract.belongsTo(models.Insurance, {
+        foreignKey: "idInsurance",
       });
       Detail_contract.belongsTo(models.User, {
         foreignKey: "idBeneficiary",
         targetKey:"idUser"
       });
       Detail_contract.hasMany(models.Benefit_history,{
+        foreignKey: "idDetail_contract",
+      });
+      Detail_contract.hasMany(models.Payment_schedule,{
         foreignKey: "idDetail_contract",
       });
     }

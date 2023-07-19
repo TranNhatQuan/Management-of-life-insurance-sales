@@ -35,6 +35,17 @@ app.use(
 
 //dùng router
 app.use(rootRouter);
+const cron = require('cron');
+const { checkContractPayment } = require("./cronjob/cronJob");
+// const job = new cron.CronJob('*/30 * * * * *', async () => {
+//   await checkContractPayment()
+// });
+const job = new cron.CronJob('0 0 0 * * *', async () => {
+  // job này chạy mỗi ngày vào 00:00:00
+  await checkContractPayment()
+});
+
+job.start(); // Bắt đầu chạy CronJob
 
 //lắng nghe sự kiện kết nối
 app.listen(port, async () => {

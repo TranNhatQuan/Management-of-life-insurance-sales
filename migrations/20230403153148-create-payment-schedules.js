@@ -20,9 +20,9 @@ module.exports = {
         references: { model: "Staffs", key: "idStaff" },
         type: Sequelize.INTEGER
       },
-      idContract: {
+      idDetail_contract: {
         allowNull: false,
-        references: { model: "Contracts", key: "idContract" },
+        references: { model: "Detail_contracts", key: "idDetail_contract" },
         type: Sequelize.INTEGER,
       },
       startDate:{
@@ -45,6 +45,10 @@ module.exports = {
         allowNull:false,
         type: Sequelize.INTEGER,
       },
+      index:{
+        allowNull:false,
+        type: Sequelize.INTEGER
+      }
     });
   },
   async down(queryInterface, Sequelize) {

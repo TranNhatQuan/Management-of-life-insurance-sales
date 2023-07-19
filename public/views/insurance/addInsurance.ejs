@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <style>
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body>
+
+
+
+  <h2>Form nhập thông tin bảo hiểm</h2>
+  <form action="/insurance/addInsurance?url=/insurance/listInsurance" method="post">
+    <div class="form-group">
+      <label for="name">Tên:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label for="info">Thông tin:</label>
+      <input type="text" id="info" name="info" required>
+    </div>
+    <div class="form-group">
+      <label for="isMain">Bảo hiểm phụ:</label>
+      <input type="checkbox" id="isMainCheckbox" name="isMainCheckbox" onchange="toggleInput()">
+      <select id="isMainSelect" name="isMainSelect" required style="display: none;">
+        
+        <% insurances.forEach(function(insurance) { %>
+          <option value="<%= insurance.idInsurance %>">
+            <%= insurance.name %>
+          </option>
+          <% }); %>
+      </select>
+     
+    </div>
+    <div class="form-group">
+      <button type="submit">Lưu</button>
+    </div>
+  </form>
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+  <script>
+    function filterOptions() {
+    const input = document.getElementById('filterInput');
+    const select = document.getElementById('isMainSelect');
+    const options = select.getElementsByTagName('option');
+
+    const filterValue = input.value.trim().toLowerCase();
+
+    for (let i = 0; i < options.length; i++) {
+      const option = options[i];
+      const optionText = option.textContent.toLowerCase();
+
+      if (optionText.includes(filterValue)) {
+        option.style.display = 'block';
+      } else {
+        option.style.display = 'none';
+      }
+    }
+  }
+    function toggleInput() {
+      const checkbox = document.getElementById('isMainCheckbox');
+      const select = document.getElementById('isMainSelect');
+
+      if (checkbox.checked) {
+        select.style.display = 'block';
+        select.setAttribute('required', '');
+      } else {
+        select.style.display = 'none';
+        select.removeAttribute('required');
+      }
+    }
+  </script>
+
+</body>
+
+</html>

@@ -72,6 +72,13 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.BOOLEAN,
     },
+    idInsurance_type: {
+      allowNull: true,
+      
+
+      references: { model: "Insurance_type", key: "idInsurance_type" },
+      type: DataTypes.INTEGER
+    },
   }, {
     sequelize,
     modelName: 'Insurance',

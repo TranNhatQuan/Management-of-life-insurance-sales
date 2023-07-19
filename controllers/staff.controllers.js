@@ -1,4 +1,4 @@
-const { Staff, Account, Permission, Screen, Staff_permission, Contract, Payment_schedule, User } = require("../models");
+const { Staff, Account, Permission, Screen, Staff_permission, Contract, Detail_contract, Payment_schedule, User } = require("../models");
 const { QueryTypes, Op, where, STRING, NUMBER } = require("sequelize");
 const db = require("../models/index");
 const bcrypt = require("bcryptjs");
@@ -135,6 +135,7 @@ const getInfoHome = async (req, res) => {
         const error = req.flash('error')[0];
         const staff = req.staff
         const name = staff.name
+        console.log('test')
         let contracts = await Contract.findAll({
             where: {
                 idStaff: staff.idStaff,
@@ -142,11 +143,18 @@ const getInfoHome = async (req, res) => {
             },
             include: [
                 {
-                    model: Payment_schedule,
-                    where: {
-                        status: 0
-                    },
+                    model: Detail_contract,
+                    
                     required: true,
+                    include:[
+                        {
+                            model: Payment_schedule,
+                            where:{
+                                status:0
+                            },
+                            required: true
+                        }
+                    ]
 
                 },
                 {
@@ -156,14 +164,15 @@ const getInfoHome = async (req, res) => {
             ],
             raw: true,
         })
-
+        console.log('trss')
+        console.log(contracts)
         contracts = contracts.map(item => {
 
             return {
-                idPayment_schedule: item['Payment_schedules.idPayment_schedule'],
+                idPayment_schedule: item['Detail_contracts.Payment_schedules.idPayment_schedule'],
                 idContract: item['idContract'],
-                endDate: item['Payment_schedules.endDate'],
-                total: item['Payment_schedules.total'],
+                endDate: item['Detail_contracts.Payment_schedules.endDate'],
+                total: item['Detail_contracts.Payment_schedules.total'],
                 idUser: item['User.idUser'],
                 name: item['User.name'],
                 address: item['User.address'],

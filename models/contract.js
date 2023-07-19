@@ -20,12 +20,8 @@ module.exports = (sequelize, DataTypes) => {
       Contract.hasMany(models.Detail_contract,{
         foreignKey: "idContract",
       });
-      Contract.hasMany(models.Detail_contract,{
-        foreignKey: "idContract",
-      });
-      Contract.hasMany(models.Payment_schedule,{
-        foreignKey: "idContract",
-      });
+
+      
     }
   }
   Contract.init({

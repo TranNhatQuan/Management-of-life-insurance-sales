@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <style>
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+ 
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body>
+
+
+
+  <h2>Form nhập thông tin loại bảo hiểm</h2>
+  <form action="/insurance/addType?url=/insurance/listType" method="post">
+    <div class="form-group">
+      <label for="name">Tên:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label for="info">Thông tin:</label>
+      <input type="text" id="info" name="info" required>
+    </div>
+    <div class="form-group">
+      <button type="submit">Lưu</button>
+    </div>
+  </form>
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+</body>
+
+</html>

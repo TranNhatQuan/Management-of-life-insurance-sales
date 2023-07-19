@@ -11,8 +11,8 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Payment_schedule.belongsTo(models.Contract,{
-        foreignKey: "idContract",
+      Payment_schedule.belongsTo(models.Detail_contract,{
+        foreignKey: "idDetail_contract",
       });
       Payment_schedule.belongsTo(models.Staff, {
         foreignKey: "idStaff",
@@ -50,7 +50,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       type: DataTypes.INTEGER,
     },
-   
+    index:{
+      allowNull:false,
+      type: DataTypes.INTEGER,
+    },
     
   }, {
     sequelize,

@@ -18,6 +18,18 @@
       border: none;
 
     }
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
   </style>
 
 </head>
@@ -27,7 +39,7 @@
 
 
   <h2>Form nhập thông tin khách hàng</h2>
-  <form action="/staff/add?url=/staff/listStaff" method="post">
+  <form action="/user/add?url=/user/listUser" method="post">
     <div class="form-group">
       <label for="name">Tên:</label>
       <input type="text" id="name" name="name" required>

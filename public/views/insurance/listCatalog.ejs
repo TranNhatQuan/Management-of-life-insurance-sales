@@ -31,7 +31,10 @@
       position: relative;
       z-index: 0;
     }
-
+    #addEmployeeBtn {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
     h3 {
       font-size: smaller;
       opacity: 0.5;
@@ -55,19 +58,6 @@
       display: none;
       overflow: auto;
     }
-
-    .button-like {
-      display: inline-block;
-      padding: 5px;
-      background-color: #3f87a6;
-      border: none;
-      color: #fff;
-      font-weight: bold;
-
-      border-radius: 4px;
-      text-decoration: none;
-      cursor: pointer;
-    }
     button {
       display: inline-block;
       padding: 5px;
@@ -75,20 +65,11 @@
       border: none;
       color: #fff;
       font-weight: bold;
-      display: flex;
- 
       border-radius: 4px;
       text-decoration: none;
       cursor: pointer;
     }
-    .button-like:hover {
-      background-color: #266c84;
-    }
-
-    #addEmployeeBtn {
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
+ 
   </style>
 </head>
 
@@ -105,76 +86,34 @@
 
 
           <div class="container">
-            <h2>Danh sách khách hàng</h2>
-            <h3>Đây là danh sách khách hàng, ấn vào dòng chứa thông tin khách hàng bất kỳ để xem và sửa thông tin khách
-              hàng đó.
+            <h2>Danh mục bảo hiểm theo nhu cầu</h2>
+            <h3>Đây là danh mục bảo hiểm theo nhu cầu của khách hàng. Nhấn vào dòng chứa thông tin một danh mục bất kỳ để xem và sửa thông tin danh mục đó.
             </h3>
-            <button id="addEmployeeBtn" onclick="addStaff()" class="btn btn-primary">Thêm khách hàng</button>
-            <table id="employeeTable" class="table table-striped table-bordered" style="width:100%">
+            <button id="addEmployeeBtn" onclick="addCatalog()" class="btn btn-primary">Thêm danh mục mới</button>
+
+            <table id="insuranceTable" class="table table-striped table-bordered" style="width:100%">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Tên</th>
-                  <th>Email</th>
-                  <th>Địa chỉ</th>
-                  <th>Số điện thoại</th>
-                  <th>CCCD</th>
-                  <th>Trạng thái tài khoản</th>
-                  <th>Xem thông tin hợp đồng</th>
+                  <th>Tên danh mục</th>
+                  <th>Thông tin về danh mục</th>
                   <th>Xoá</th>
                 </tr>
               </thead>
               <tbody>
-                <% users.forEach(function(user) { %>
-                  <tr onclick="viewEmployeeDetail('<%= user.idUser %>')">
+                <% catalogs.forEach(function(insurance) { %>
+                  <tr onclick="viewCatalogDetail('<%= catalog.idCatalog %>')">
                     <td>
-                      <%= user.idUser %>
+                      <%= catalog.idCatalog %>
                     </td>
                     <td>
-                      <%= user.name %>
+                      <%= catalog.name %>
                     </td>
                     <td>
-                      <%= user.mail %>
+                      <%= catalog.info %>
                     </td>
                     <td>
-                      <%= user.address %>
-                    </td>
-                    <td>
-                      <%= user.phone %>
-                    </td>
-                    <td>
-                      <%= user.idCard %>
-                    </td>
-                    <td>
-                      <% if (user.isActive===1) { %>
-                        <button onclick="inActiveEmployee('<%= user.idUser %>', event)" class="button-like">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-toggle-on" viewBox="0 0 16 16">
-                            <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                          </svg>
-                        </button>
-                        <% } else { %>
-                          <button onclick="activeEmployee('<%= user.idUser %>', event)" class="button-like">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                              class="bi bi-toggle-off" viewBox="0 0 16 16">
-                              <path
-                                d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
-                            </svg>
-                          </button>
-                          <% } %>
-                    </td>
-                    <td>
-                      <a href="/user/fullDetail/<%= user.idUser%>?url=/staff/home" class="button-like">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                          class="bi bi-folder-fill" viewBox="0 0 16 16">
-                          <path
-                            d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z" />
-                        </svg>
-                      </a>
-                    </td>
-
-                    <td>
-                      <button onclick="deleteEmployee('<%= user.idUser %>', event)" class="button-like">
+                      <button onclick="deleteCatalog('<%= catalog.idCatalog %>', event)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                           class="bi bi-trash" viewBox="0 0 16 16">
                           <path
@@ -209,7 +148,7 @@
 
           <script>
             $(document).ready(function () {
-              var table = $('#employeeTable').DataTable({
+              var table = $('#insuranceTable').DataTable({
                 dom: 'Blfrtip',
                 buttons: ['excelHtml5', 'pdfHtml5'],
                 language: {
@@ -248,10 +187,11 @@
                 hidePopup();
               }
             }
-            function addStaff() {
+
+            function addCatalog() {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/user/add?url=/user/listUser',
+                url: '/insurance/addCatalog?url=/insurance/listCatalog',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -261,31 +201,7 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  alert('Gặp lỗi khi mở form tạo nhân viên!')
-                  window.location.href = '/user/listUser?url=user/listUser';
-
-                }
-              });
-            }
-
-
-
-
-            function viewEmployeeDetail(employeeId) {
-              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
-              $.ajax({
-                url: '/user/detail/' + employeeId,
-                type: 'GET',
-                dataType: 'html',
-                success: function (response) {
-                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
-                  showPopup();
-                  $('#popup').html(response);
-                },
-                error: function (xhr, status, error) {
-                  // Xử lý lỗi nếu có
-                  alert("Có lỗi xảy ra khi xử lý yêu cầu.");
-                  window.location.href = '/user/listUser';
+                  window.location.href = '/insurance/listCatalog?url=/staff/home';
                   console.log(error);
                 }
               });
@@ -293,68 +209,34 @@
 
 
 
-            function inActiveEmployee(employeeId, event) {
-              event.stopPropagation();
+            function viewCatalogDetail(employeeId) {
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/user/inActive/' + employeeId,
-                type: 'PUT',
+                url: '/insurance/detailCatalog/' + employeeId + '?url=/insurance/listCatalog',
+                type: 'GET',
+                dataType: 'html',
                 success: function (response) {
-                  // Xử lý thành công
-                  console.log('Đã vô hiệu hoá khách hàng:', employeeId);
-                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
-                  window.location.href = '/user/listUser';
+                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
+                  showPopup();
+                  $('#popup').html(response);
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/insurance/listCatalog?url=/staff/home';
+                  console.log(error);
                 }
               });
             }
-
-            function activeEmployee(employeeId, event) {
+            function deleteCatalog(employeeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/user/active/' + employeeId,
-                type: 'PUT',
-                success: function (response) {
-                  // Xử lý thành công
-                  console.log('Đã kích hoạt khách hàng:', employeeId);
-                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
-                  window.location.href = '/user/listUser';
-                },
-                error: function (xhr, status, error) {
-                  // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
-                }
-              });
-            }
-            function deleteEmployee(employeeId, event) {
-              event.stopPropagation();
-              $.ajax({
-                url: '/user/delete/' + employeeId,
+                url: '/insurance/deleteCatalog/' + employeeId + '?url=/insurance/listCatalog',
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá khách hàng có id: ' + employeeId);
+                  alert('Đã xoá loại bảo hiểm có id: ' + employeeId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
-                  window.location.href = '/user/listUser';
-                },
-                error: function (xhr, status, error) {
-                  // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
-                }
-              });
-            }
-            function fullDetailUser(employeeId, event) {
-              event.stopPropagation();
-              $.ajax({
-                url: '/user/fullDetail/' + employeeId,
-                type: 'GET',
-                success: function (response) {
-                  // Xử lý thành công
-                  alert('Đã xoá khách hàng có id: ' + employeeId);
-                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
-                  window.location.href = '/user/listUser';
+                  window.location.href = '/insurance/listCatalog?url=/staff/home';
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
