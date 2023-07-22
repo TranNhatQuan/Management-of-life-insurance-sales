@@ -9,6 +9,21 @@
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
     .navbar {
       /* Thiết lập vị trí */
       position: fixed;
@@ -32,7 +47,7 @@
       z-index: 0;
     }
 
-    #addEmployeeBtn {
+    #addcontractBtn {
       margin-top: 10px;
       margin-bottom: 10px;
     }
@@ -40,20 +55,6 @@
     h3 {
       font-size: smaller;
       opacity: 0.5;
-    }
-
-    input {
-
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    select {
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .container {
-      border-radius: 10px;
     }
 
     .popup {
@@ -116,65 +117,68 @@
 
 
           <div class="container">
-            <h2>Danh sách nhân viên</h2>
-            <h3>Đây là danh sách nhân viên, ấn vào dòng chứa thông tin nhân viên bất kỳ để xem và sửa thông tin nhân
-              viên đó.
+            <h2>Danh sách hợp đồng</h2>
+            <h3>Đây là danh sách hợp đồng, ấn vào dòng chứa thông tin hợp đồng bất kỳ để xem và sửa thông tin hợp đồng
+              đó.
             </h3>
-            <!-- Thêm nút "Thêm nhân viên" -->
-            <button id="addEmployeeBtn" onclick="addStaff()" class="btn btn-primary">Thêm nhân viên</button>
+            <!-- Thêm nút "Thêm hợp đồng" -->
+            <button id="addcontractBtn" onclick="addContract()" class="btn btn-primary">Thêm hợp đồng mới</button>
 
-            <table id="employeeTable" class="table table-striped table-bordered" style="width:100%">
+            <table id="contractTable" class="table table-striped table-bordered" style="width:100%">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Tên</th>
-                  <th>Email</th>
-                  <th>Địa chỉ</th>
-                  <th>Số điện thoại</th>
-
-                  <th>Trạng thái tài khoản</th>
+                  <th>Người ký</th>
+                  <th>Ngày ký</th>
+                  <th>Nhân viên phụ trách</th>
+                  <th>Trạng thái</th>
+                  <th>Huỷ</th>
                   <th>Xoá</th>
                 </tr>
               </thead>
               <tbody>
-                <% employees.forEach(function(employee) { %>
-                  <tr onclick="viewEmployeeDetail('<%= employee.idStaff %>')">
+                <% contracts.forEach(function(contract) { %>
+                  <tr onclick="viewcontractDetail('<%= contract.idStaff %>')">
                     <td>
-                      <%= employee.idStaff %>
+                      <%= contract.idContract %>
                     </td>
                     <td>
-                      <%= employee.name %>
+                      <%= contract.idUser %>
                     </td>
                     <td>
-                      <%= employee.mail %>
+                      <%= contract.signDate %>
                     </td>
                     <td>
-                      <%= employee.address %>
+                      <%= contract.idStaff %>
                     </td>
                     <td>
-                      <%= employee.phone %>
+                      <% if(contract.status===1) {%>
+                        Còn bảo hiểm, đang thu phí
+                        <% } %>
+                          <% if(contract.status===0) {%>
+                            Đã huỷ
+                            <% } %>
+                              <% if(contract.status===2) {%>
+                                Còn bảo hiểm, không thu phí
+                                <% } %>
+                                  <% if(contract.status===3) {%>
+                                    Hết bảo hiểm
+                                    <% } %>
                     </td>
 
                     <td>
-                      <% if (employee.isActive===1) { %>
-                        <button onclick="inActiveEmployee('<%= employee.idStaff %>', event)">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-toggle-on" viewBox="0 0 16 16">
-                            <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                          </svg>
-                        </button>
-                        <% } else { %>
-                          <button onclick="activeEmployee('<%= employee.idStaff %>', event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                              class="bi bi-toggle-off" viewBox="0 0 16 16">
-                              <path
-                                d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
-                            </svg>
-                          </button>
-                          <% } %>
+                      <button onclick="cancelcontract('<%= contract.idContract%>', event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                          class="bi bi-trash" viewBox="0 0 16 16">
+                          <path
+                            d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z" />
+                          <path
+                            d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z" />
+                        </svg>
+                      </button>
                     </td>
                     <td>
-                      <button onclick="deleteEmployee('<%= employee.idStaff %>', event)">
+                      <button onclick="deletecontract('<%= contract.idContract%>', event)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                           class="bi bi-trash" viewBox="0 0 16 16">
                           <path
@@ -209,7 +213,7 @@
 
           <script>
             $(document).ready(function () {
-              var table = $('#employeeTable').DataTable({
+              var table = $('#contractTable').DataTable({
                 dom: 'Blfrtip',
                 buttons: ['excelHtml5', 'pdfHtml5'],
                 language: {
@@ -249,7 +253,7 @@
               }
             }
 
-            function addStaff() {
+            function addContract() {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
                 url: '/staff/add?url=/staff/listStaff',
@@ -270,10 +274,10 @@
 
 
 
-            function viewEmployeeDetail(employeeId) {
+            function viewcontractDetail(contractId) {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/staff/detail/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/detail/' + contractId + '?url=/staff/listStaff',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -291,14 +295,14 @@
 
 
 
-            function inActiveEmployee(employeeId, event) {
+            function inActivecontract(contractId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/inActive/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/inActive/' + contractId + '?url=/staff/listStaff',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã vô hiệu hoá nhân viên:', employeeId);
+                  console.log('Đã vô hiệu hoá nhân viên:', contractId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
@@ -309,14 +313,14 @@
               });
             }
 
-            function activeEmployee(employeeId, event) {
+            function activecontract(contractId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/active/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/active/' + contractId + '?url=/staff/listStaff',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã kích hoạt nhân viên:', employeeId);
+                  console.log('Đã kích hoạt nhân viên:', contractId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
@@ -326,14 +330,14 @@
                 }
               });
             }
-            function deleteEmployee(employeeId, event) {
+            function deletecontract(contractId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/delete/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/delete/' + contractId + '?url=/staff/listStaff',
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá nhân viên có id: ' + employeeId);
+                  alert('Đã xoá nhân viên có id: ' + contractId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <style>
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1;
+      display: none;
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1;
+      display: none;
+    }
+
+    .select-item {
+      padding: 8px;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <h2>Form nhập thông tin bảo hiểm</h2>
+  <form action="/insurance/addInsurance?url=/insurance/listInsurance" method="post">
+    <div class="form-group">
+      <label for="name">Tên:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label for="info">Thông tin:</label>
+      <input type="text" id="info" name="info" required>
+    </div>
+    <div class="form-group">
+      <label for="isMain">Chọn nếu đây là bảo hiểm phụ:</label>
+      <input type="checkbox" id="isMainCheckbox" name="isMainCheckbox" onchange="toggleInput()">
+    </div>
+    <div class="form-group">
+      <label for="isMain">Loại bảo hiểm:</label>
+      <input type="checkbox" id="isMainCheckbox" name="isMainCheckbox" onchange="toggleInput()">
+      <div class="select-wrapper">
+        <select id="isMainSelect" name="isMainSelect" required style="display: none;margin: 10px;">
+
+          <% insurances.forEach(function(insurance) { %>
+            <option value="<%= insurance.idInsurance %>">
+              <%= insurance.name %>
+            </option>
+            <% }); %>
+        </select>
+        <input type="text" id="filterInput" oninput="filterOptions()" placeholder="Chọn bảo hiểm chính của bảo hiểm này"
+          style="display: none; margin: 10px;">
+        <div class="select-dropdown" id="filterOptionsList">
+
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <button type="submit">Lưu</button>
+    </div>
+  </form>
+
+  <script>
+    function toggleInput() {
+      var checkbox = document.getElementById("isMainCheckbox");
+      var select = document.getElementById("isMainSelect");
+      var filterInput = document.getElementById("filterInput");
+      var selectDropdown = document.getElementById("filterOptionsList");
+
+      if (checkbox.checked) {
+        select.style.display = "none";
+        filterInput.style.display = "inline-block";
+        selectDropdown.style.display = "block";
+      } else {
+        select.style.display = "none";
+        filterInput.style.display = "none";
+        selectDropdown.style.display = "none";
+      }
+    }
+
+    function filterOptions() {
+      var filterInput = document.getElementById("filterInput");
+      var filterValue = filterInput.value.trim().toUpperCase();
+      var select = document.getElementById("isMainSelect");
+      var options = select.getElementsByTagName("option");
+      var selectDropdown = document.getElementById("filterOptionsList");
+
+      selectDropdown.innerHTML = ''; // Clear previous filtered options
+
+      for (var i = 0; i < options.length; i++) {
+        var option = options[i];
+        var optionText = option.textContent || option.innerText;
+
+        if (filterValue == '' || optionText.toUpperCase().indexOf(filterValue) > -1) {
+          var filteredOption = document.createElement('div');
+          filteredOption.className = 'select-item';
+          filteredOption.textContent = optionText;
+          filteredOption.onclick = function () {
+            filterInput.value = this.textContent.trim();
+            select.value = this.getAttribute('data-value');
+            selectDropdown.style.display = 'none';
+          };
+          filteredOption.setAttribute('data-value', option.value);
+          selectDropdown.appendChild(filteredOption);
+        }
+      }
+
+      selectDropdown.style.display = selectDropdown.children.length > 0 ? 'block' : 'none';
+    }
+
+  </script>
+
+
+</body>
+
+</html>

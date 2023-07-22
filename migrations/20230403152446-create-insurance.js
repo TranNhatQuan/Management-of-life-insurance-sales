@@ -35,7 +35,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER,
       },
-      premiumTerm: {
+      frequency: {
         allowNull: false,
         type: Sequelize.INTEGER,
       },

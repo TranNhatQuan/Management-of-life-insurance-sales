@@ -19,6 +19,20 @@
       z-index: 2;
     }
 
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
     #info {
       /* Thiết lập vị trí */
       position: relative;
@@ -54,6 +68,19 @@
       /* Khoảng cách giữa nội dung và viền của popup */
       display: none;
       overflow: auto;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
     }
 
     .button-like {
@@ -68,19 +95,7 @@
       text-decoration: none;
       cursor: pointer;
     }
-    button {
-      display: inline-block;
-      padding: 5px;
-      background-color: #3f87a6;
-      border: none;
-      color: #fff;
-      font-weight: bold;
-      display: flex;
- 
-      border-radius: 4px;
-      text-decoration: none;
-      cursor: pointer;
-    }
+
     .button-like:hover {
       background-color: #266c84;
     }

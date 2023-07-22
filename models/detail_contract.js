@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.INTEGER,
     },
-    premiumTerm: {
+    frequency: {
       allowNull: false,
       type: DataTypes.INTEGER,
     },

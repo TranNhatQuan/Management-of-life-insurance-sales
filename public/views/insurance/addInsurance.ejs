@@ -4,6 +4,31 @@
 <head>
   <title>LIFE</title>
   <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
     h3 {
       font-size: smaller;
       opacity: 0.5;
@@ -31,36 +56,99 @@
       text-decoration: none;
       cursor: pointer;
     }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1;
+      display: none;
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1;
+      display: none;
+    }
+
+    .select-item {
+      padding: 8px;
+      cursor: pointer;
+    }
   </style>
 
 </head>
 
 <body>
 
-
-
-  <h2>Form nhập thông tin bảo hiểm</h2>
+  <h2>Tạo sản phẩm mới</h2>
   <form action="/insurance/addInsurance?url=/insurance/listInsurance" method="post">
     <div class="form-group">
       <label for="name">Tên:</label>
-      <input type="text" id="name" name="name" required>
+      <div><input type="text" id="name" name="name" required></div>
+
     </div>
     <div class="form-group">
       <label for="info">Thông tin:</label>
-      <input type="text" id="info" name="info" required>
+      <div><input type="text" id="info" name="info" required></div>
+
     </div>
     <div class="form-group">
-      <label for="isMain">Bảo hiểm phụ:</label>
-      <input type="checkbox" id="isMainCheckbox" name="isMainCheckbox" onchange="toggleInput()">
-      <select id="isMainSelect" name="isMainSelect" required style="display: none;">
-        
-        <% insurances.forEach(function(insurance) { %>
-          <option value="<%= insurance.idInsurance %>">
-            <%= insurance.name %>
+      <label for="premium">Phí bảo hiểm(nghìn đồng):</label>
+      <div><input type="number" id="premium" name="premium" required></div>
+
+    </div>
+    <div class="form-group">
+      <label for="premiumPaymentTerm">Thời gian đóng bảo hiểm(tháng):</label>
+      <input type="number" id="premiumPaymentTerm" name="premiumPaymentTerm" required>
+    </div>
+    <div class="form-group">
+      <label for="frequency">Khoảng cách giữa mỗi lần đóng bảo hiểm(tháng):</label>
+      <input type="number" id="frequency" name="frequency" required>
+    </div>
+    <div class="form-group">
+      <label for="insuranceAmount">Giá trị bảo hiểm(nghìn đồng):</label>
+      <div> <input type="number" id="insuranceAmount" name="insuranceAmount" required></div>
+
+    </div>
+    <div class="form-group">
+      <label for="contractTerm">Thời hạn bảo hiểm(tháng):</label>
+      <input type="number" id="contractTerm" name="contractTerm" required>
+    </div>
+    <div class="form-group">
+      <label for="isMain">Sản phẩm chính/phụ:</label>
+      <select id="isMain" name="isMain" required>
+        <option value="1">Sản phẩm chính</option>
+        <option value="0">Sản phẩm bổ trợ</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="type">Loại bảo hiểm:</label>
+      <select id="idType" name="idType" required>
+        <% types.forEach(function(type) { %>
+          <option value="<%= type.idInsurance_type %>">
+            <%= type.name %>
           </option>
           <% }); %>
       </select>
-     
     </div>
     <div class="form-group">
       <button type="submit">Lưu</button>
@@ -68,42 +156,8 @@
   </form>
 
 
-
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
-  <script>
-    function filterOptions() {
-    const input = document.getElementById('filterInput');
-    const select = document.getElementById('isMainSelect');
-    const options = select.getElementsByTagName('option');
-
-    const filterValue = input.value.trim().toLowerCase();
-
-    for (let i = 0; i < options.length; i++) {
-      const option = options[i];
-      const optionText = option.textContent.toLowerCase();
-
-      if (optionText.includes(filterValue)) {
-        option.style.display = 'block';
-      } else {
-        option.style.display = 'none';
-      }
-    }
-  }
-    function toggleInput() {
-      const checkbox = document.getElementById('isMainCheckbox');
-      const select = document.getElementById('isMainSelect');
-
-      if (checkbox.checked) {
-        select.style.display = 'block';
-        select.setAttribute('required', '');
-      } else {
-        select.style.display = 'none';
-        select.removeAttribute('required');
-      }
-    }
-  </script>
 
 </body>
 

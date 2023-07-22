@@ -9,6 +9,21 @@
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
     .navbar {
       /* Thiết lập vị trí */
       position: fixed;
@@ -32,7 +47,7 @@
       z-index: 0;
     }
 
-    #addEmployeeBtn {
+    #addbenefitBtn {
       margin-top: 10px;
       margin-bottom: 10px;
     }
@@ -40,20 +55,6 @@
     h3 {
       font-size: smaller;
       opacity: 0.5;
-    }
-
-    input {
-
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    select {
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .container {
-      border-radius: 10px;
     }
 
     .popup {
@@ -116,65 +117,44 @@
 
 
           <div class="container">
-            <h2>Danh sách nhân viên</h2>
-            <h3>Đây là danh sách nhân viên, ấn vào dòng chứa thông tin nhân viên bất kỳ để xem và sửa thông tin nhân
-              viên đó.
+            <h2>Danh sách thông tin chi trả</h2>
+            <h3>Đây là danh sách thông tin chi trả, ấn vào dòng chứa thông tin thông tin chi trả bất kỳ để xem và sửa thông tin thông tin chi trả
+              đó.
             </h3>
-            <!-- Thêm nút "Thêm nhân viên" -->
-            <button id="addEmployeeBtn" onclick="addStaff()" class="btn btn-primary">Thêm nhân viên</button>
+            <!-- Thêm nút "Thêm thông tin chi trả" -->
+            <button id="addbenefitBtn" onclick="addbenefit()" class="btn btn-primary">Thêm thông tin chi trả mới</button>
 
-            <table id="employeeTable" class="table table-striped table-bordered" style="width:100%">
+            <table id="benefitTable" class="table table-striped table-bordered" style="width:100%">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Tên</th>
-                  <th>Email</th>
-                  <th>Địa chỉ</th>
-                  <th>Số điện thoại</th>
-
-                  <th>Trạng thái tài khoản</th>
+                  <th>Nhân viên phụ trách</th>
+                  <th>Ngày chi trả</th>
+                  <th>Lý do</th>
+                  <th>Tổng tiền</th>
                   <th>Xoá</th>
                 </tr>
               </thead>
               <tbody>
-                <% employees.forEach(function(employee) { %>
-                  <tr onclick="viewEmployeeDetail('<%= employee.idStaff %>')">
+                <% benefits.forEach(function(benefit) { %>
+                  <tr onclick="viewbenefitDetail('<%= benefit.idBenefit_history %>')">
                     <td>
-                      <%= employee.idStaff %>
+                      <%= benefit.idBenefit_history %>
                     </td>
                     <td>
-                      <%= employee.name %>
+                      <%= benefit.idStaff %>
                     </td>
                     <td>
-                      <%= employee.mail %>
+                      <%= benefit.date %>
                     </td>
                     <td>
-                      <%= employee.address %>
+                      <%= benefit.reason %>
                     </td>
                     <td>
-                      <%= employee.phone %>
-                    </td>
-
-                    <td>
-                      <% if (employee.isActive===1) { %>
-                        <button onclick="inActiveEmployee('<%= employee.idStaff %>', event)">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-toggle-on" viewBox="0 0 16 16">
-                            <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                          </svg>
-                        </button>
-                        <% } else { %>
-                          <button onclick="activeEmployee('<%= employee.idStaff %>', event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                              class="bi bi-toggle-off" viewBox="0 0 16 16">
-                              <path
-                                d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
-                            </svg>
-                          </button>
-                          <% } %>
+                      <%= benefit.total %>
                     </td>
                     <td>
-                      <button onclick="deleteEmployee('<%= employee.idStaff %>', event)">
+                      <button onclick="deletebenefit('<%= benefit.idBenefit_history%>', event)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                           class="bi bi-trash" viewBox="0 0 16 16">
                           <path
@@ -209,7 +189,7 @@
 
           <script>
             $(document).ready(function () {
-              var table = $('#employeeTable').DataTable({
+              var table = $('#benefitTable').DataTable({
                 dom: 'Blfrtip',
                 buttons: ['excelHtml5', 'pdfHtml5'],
                 language: {
@@ -249,7 +229,7 @@
               }
             }
 
-            function addStaff() {
+            function addbenefit() {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
                 url: '/staff/add?url=/staff/listStaff',
@@ -270,10 +250,10 @@
 
 
 
-            function viewEmployeeDetail(employeeId) {
+            function viewbenefitDetail(benefitId) {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/staff/detail/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/detail/' + benefitId + '?url=/staff/listStaff',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -291,14 +271,14 @@
 
 
 
-            function inActiveEmployee(employeeId, event) {
+            function inActivebenefit(benefitId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/inActive/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/inActive/' + benefitId + '?url=/staff/listStaff',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã vô hiệu hoá nhân viên:', employeeId);
+                  console.log('Đã vô hiệu hoá nhân viên:', benefitId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
@@ -309,14 +289,14 @@
               });
             }
 
-            function activeEmployee(employeeId, event) {
+            function activebenefit(benefitId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/active/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/active/' + benefitId + '?url=/staff/listStaff',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã kích hoạt nhân viên:', employeeId);
+                  console.log('Đã kích hoạt nhân viên:', benefitId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
@@ -326,14 +306,14 @@
                 }
               });
             }
-            function deleteEmployee(employeeId, event) {
+            function deletebenefit(benefitId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/delete/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/delete/' + benefitId + '?url=/staff/listStaff',
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá nhân viên có id: ' + employeeId);
+                  alert('Đã xoá nhân viên có id: ' + benefitId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },

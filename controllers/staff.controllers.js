@@ -144,13 +144,13 @@ const getInfoHome = async (req, res) => {
             include: [
                 {
                     model: Detail_contract,
-                    
+
                     required: true,
-                    include:[
+                    include: [
                         {
                             model: Payment_schedule,
-                            where:{
-                                status:0
+                            where: {
+                                status: 0
                             },
                             required: true
                         }
@@ -171,6 +171,7 @@ const getInfoHome = async (req, res) => {
             return {
                 idPayment_schedule: item['Detail_contracts.Payment_schedules.idPayment_schedule'],
                 idContract: item['idContract'],
+                idDetail_contract: item['Detail_contracts.idDetail_contract'],
                 endDate: item['Detail_contracts.Payment_schedules.endDate'],
                 total: item['Detail_contracts.Payment_schedules.total'],
                 idUser: item['User.idUser'],
@@ -329,7 +330,7 @@ const addStaff = async (req, res) => {
             to: `${email}`, // list of receivers
             subject: "Đăng ký tài khoản thành công", // Subject line
             text: "Đăng ký tài khoản thành công", // plain text body
-            html: `Bạn đã được nhân viên đăng ký tài khoản thành công. Đây là tài khoản và mật khẩu của bạn: <br>Tài khoản: ${username}`+`<br>Mật khẩu: ${password}`, // html body
+            html: `Bạn đã được nhân viên đăng ký tài khoản thành công. Đây là tài khoản và mật khẩu của bạn: <br>Tài khoản: ${username}` + `<br>Mật khẩu: ${password}`, // html body
         });
         return res.redirect(req.query.url);
 

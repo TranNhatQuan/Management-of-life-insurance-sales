@@ -9,6 +9,28 @@
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
     .navbar {
       /* Thiết lập vị trí */
       position: fixed;
@@ -31,10 +53,12 @@
       position: relative;
       z-index: 0;
     }
+
     #addEmployeeBtn {
       margin-top: 10px;
       margin-bottom: 10px;
     }
+
     h3 {
       font-size: smaller;
       opacity: 0.5;
@@ -57,7 +81,21 @@
       /* Khoảng cách giữa nội dung và viền của popup */
       display: none;
       overflow: auto;
+      border-radius: 10px;
     }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
+    }
+
     button {
       display: inline-block;
       padding: 5px;
@@ -69,7 +107,6 @@
       text-decoration: none;
       cursor: pointer;
     }
- 
   </style>
 </head>
 
@@ -87,7 +124,8 @@
 
           <div class="container">
             <h2>Danh sách bảo hiêm</h2>
-            <h3>Đây là danh sách bảo hiểm, ấn vào dòng chứa thông tin bảo hiểm bất kỳ để xem và sửa thông tin bảo hiểm đó.
+            <h3>Đây là danh sách bảo hiểm, ấn vào dòng chứa thông tin bảo hiểm bất kỳ để xem và sửa thông tin bảo hiểm
+              đó.
             </h3>
             <!-- Thêm nút "Thêm bảo hiểm" -->
             <button id="addEmployeeBtn" onclick="addStaff()" class="btn btn-primary">Thêm bảo hiểm</button>
@@ -99,7 +137,7 @@
                   <th>Tên</th>
                   <th>Chính/phụ</th>
                   <th>Giá trị bảo hiểm</th>
-                  
+
 
                   <th>Loại bảo hiểm</th>
                   <th>Danh mục</th>
@@ -125,7 +163,7 @@
                     <td>
                       <%= insurance.dataValues.type %>
                     </td>
-                    <td >
+                    <td>
                       <%= insurance.dataValues.catalog %>
                     </td>
                     <td>

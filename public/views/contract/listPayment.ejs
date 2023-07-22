@@ -9,6 +9,21 @@
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
     .navbar {
       /* Thiết lập vị trí */
       position: fixed;
@@ -31,10 +46,12 @@
       position: relative;
       z-index: 0;
     }
-    #addEmployeeBtn {
+
+    #addpaymentBtn {
       margin-top: 10px;
       margin-bottom: 10px;
     }
+
     h3 {
       font-size: smaller;
       opacity: 0.5;
@@ -57,7 +74,21 @@
       /* Khoảng cách giữa nội dung và viền của popup */
       display: none;
       overflow: auto;
+      border-radius: 10px;
     }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
+    }
+
     button {
       display: inline-block;
       padding: 5px;
@@ -86,65 +117,56 @@
 
 
           <div class="container">
-            <h2>Danh sách nhân viên</h2>
-            <h3>Đây là danh sách nhân viên, ấn vào dòng chứa thông tin nhân viên bất kỳ để xem và sửa thông tin nhân
-              viên đó.
+            <h2>Danh sách thu phi</h2>
+            <h3>Đây là danh sách thu phi, ấn vào dòng chứa thông tin thu phí bất kỳ để xem và sửa thông tin thu phi
+              đó.
             </h3>
-            <!-- Thêm nút "Thêm nhân viên" -->
-            <button id="addEmployeeBtn" onclick="addStaff()" class="btn btn-primary">Thêm nhân viên</button>
+            <!-- Thêm nút "Thêm thu phi" -->
+            <button id="addpaymentBtn" onclick="addpayment()" class="btn btn-primary">Thêm hợp đồng mới</button>
 
-            <table id="employeeTable" class="table table-striped table-bordered" style="width:100%">
+            <table id="paymentTable" class="table table-striped table-bordered" style="width:100%">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Tên</th>
-                  <th>Email</th>
-                  <th>Địa chỉ</th>
-                  <th>Số điện thoại</th>
-
-                  <th>Trạng thái tài khoản</th>
+                  <th>Người phụ trách</th>
+                  <th>Hạn cuối</th>
+                  <th>Ngày thu</th>
+                  <th>Tổng tiền</th>
+                  <th>Trạng thái</th>
                   <th>Xoá</th>
                 </tr>
               </thead>
               <tbody>
-                <% employees.forEach(function(employee) { %>
-                  <tr onclick="viewEmployeeDetail('<%= employee.idStaff %>')">
+                <% payments.forEach(function(payment) { %>
+                  <tr onclick="viewpaymentDetail('<%= payment.idPayment_schedule %>')">
                     <td>
-                      <%= employee.idStaff %>
+                      <%= payment.idPayment_schedule %>
                     </td>
                     <td>
-                      <%= employee.name %>
+                      <%= payment.idStaff %>
                     </td>
                     <td>
-                      <%= employee.mail %>
+                      <%= payment.endDate %>
                     </td>
                     <td>
-                      <%= employee.address %>
+                      <%= payment.date %>
                     </td>
                     <td>
-                      <%= employee.phone %>
-                    </td>
-
-                    <td>
-                      <% if (employee.isActive===1) { %>
-                        <button onclick="inActiveEmployee('<%= employee.idStaff %>', event)">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-toggle-on" viewBox="0 0 16 16">
-                            <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
-                          </svg>
-                        </button>
-                        <% } else { %>
-                          <button onclick="activeEmployee('<%= employee.idStaff %>', event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                              class="bi bi-toggle-off" viewBox="0 0 16 16">
-                              <path
-                                d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
-                            </svg>
-                          </button>
-                          <% } %>
+                      <%= payment.total %>
                     </td>
                     <td>
-                      <button onclick="deleteEmployee('<%= employee.idStaff %>', event)">
+                      <% if(payment.status===1) {%>
+                        Đã thu
+                        <% } %>
+                          <% if(payment.status===0) {%>
+                            Chưa thu
+                            <% } %>
+                              <% if(payment.status===2) {%>
+                                Đã hết hạn
+                                <% } %>
+                    </td>
+                    <td>
+                      <button onclick="deletepayment('<%= payment.idPayment_schedule%>', event)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                           class="bi bi-trash" viewBox="0 0 16 16">
                           <path
@@ -179,7 +201,7 @@
 
           <script>
             $(document).ready(function () {
-              var table = $('#employeeTable').DataTable({
+              var table = $('#paymentTable').DataTable({
                 dom: 'Blfrtip',
                 buttons: ['excelHtml5', 'pdfHtml5'],
                 language: {
@@ -219,7 +241,7 @@
               }
             }
 
-            function addStaff() {
+            function addpayment() {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
                 url: '/staff/add?url=/staff/listStaff',
@@ -240,10 +262,10 @@
 
 
 
-            function viewEmployeeDetail(employeeId) {
+            function viewpaymentDetail(paymentId) {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/staff/detail/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/detail/' + paymentId + '?url=/staff/listStaff',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -261,14 +283,14 @@
 
 
 
-            function inActiveEmployee(employeeId, event) {
+            function inActivepayment(paymentId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/inActive/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/inActive/' + paymentId + '?url=/staff/listStaff',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã vô hiệu hoá nhân viên:', employeeId);
+                  console.log('Đã vô hiệu hoá nhân viên:', paymentId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
@@ -279,14 +301,14 @@
               });
             }
 
-            function activeEmployee(employeeId, event) {
+            function activepayment(paymentId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/active/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/active/' + paymentId + '?url=/staff/listStaff',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã kích hoạt nhân viên:', employeeId);
+                  console.log('Đã kích hoạt nhân viên:', paymentId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
@@ -296,14 +318,14 @@
                 }
               });
             }
-            function deleteEmployee(employeeId, event) {
+            function deletepayment(paymentId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/delete/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/delete/' + paymentId + '?url=/staff/listStaff',
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá nhân viên có id: ' + employeeId);
+                  alert('Đã xoá nhân viên có id: ' + paymentId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },

@@ -31,10 +31,26 @@
       position: relative;
       z-index: 0;
     }
-    #addEmployeeBtn {
+
+    #addtypeBtn {
       margin-top: 10px;
       margin-bottom: 10px;
     }
+
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
     h3 {
       font-size: smaller;
       opacity: 0.5;
@@ -57,7 +73,21 @@
       /* Khoảng cách giữa nội dung và viền của popup */
       display: none;
       overflow: auto;
+      border-radius: 10px;
     }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
+    }
+
     button {
       display: inline-block;
       padding: 5px;
@@ -86,55 +116,45 @@
 
 
           <div class="container">
-            <h2>Danh sách nhân viên</h2>
-            <h3>Đây là danh sách nhân viên, ấn vào dòng chứa thông tin nhân viên bất kỳ để xem và sửa thông tin nhân
-              viên đó.
+            <h2>Danh sách loại bài đăng</h2>
+            <h3>Đây là danh sách loại bài đăng, ấn vào dòng chứa thông tin loại bài đăng bất kỳ để xem và sửa thông tin loại bài đăng đó.
             </h3>
-            <!-- Thêm nút "Thêm nhân viên" -->
-            <button id="addEmployeeBtn" onclick="addStaff()" class="btn btn-primary">Thêm nhân viên</button>
+            <!-- Thêm nút "Thêm loại bài đăng" -->
+            <button id="addtypeBtn" onclick="addStaff()" class="btn btn-primary">Thêm loại bài đăng</button>
 
-            <table id="employeeTable" class="table table-striped table-bordered" style="width:100%">
+            <table id="typeTable" class="table table-striped table-bordered" style="width:100%">
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>Tên</th>
-                  <th>Email</th>
-                  <th>Địa chỉ</th>
-                  <th>Số điện thoại</th>
-
-                  <th>Trạng thái tài khoản</th>
+                  <th>Thông tin</th>
+                  <th>Trạng thái</th>
                   <th>Xoá</th>
                 </tr>
               </thead>
               <tbody>
-                <% employees.forEach(function(employee) { %>
-                  <tr onclick="viewEmployeeDetail('<%= employee.idStaff %>')">
+                <% types.forEach(function(type) { %>
+                  <tr onclick="viewtypeDetail('<%= type.idPost_type %>')">
                     <td>
-                      <%= employee.idStaff %>
+                      <%= type.idPost_type %>
                     </td>
                     <td>
-                      <%= employee.name %>
+                      <%= type.name %>
                     </td>
                     <td>
-                      <%= employee.mail %>
-                    </td>
-                    <td>
-                      <%= employee.address %>
-                    </td>
-                    <td>
-                      <%= employee.phone %>
+                      <%= type.info %>
                     </td>
 
                     <td>
-                      <% if (employee.isActive===1) { %>
-                        <button onclick="inActiveEmployee('<%= employee.idStaff %>', event)">
+                      <% if (type.isDel===0) { %>
+                        <button onclick="inActivetype('<%= type.idPost_type %>', event)">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                             class="bi bi-toggle-on" viewBox="0 0 16 16">
                             <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
                           </svg>
                         </button>
                         <% } else { %>
-                          <button onclick="activeEmployee('<%= employee.idStaff %>', event)">
+                          <button onclick="activetype('<%= type.idPost_type %>', event)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                               class="bi bi-toggle-off" viewBox="0 0 16 16">
                               <path
@@ -144,7 +164,7 @@
                           <% } %>
                     </td>
                     <td>
-                      <button onclick="deleteEmployee('<%= employee.idStaff %>', event)">
+                      <button onclick="deletetype('<%= type.idPost_type %>', event)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                           class="bi bi-trash" viewBox="0 0 16 16">
                           <path
@@ -179,7 +199,7 @@
 
           <script>
             $(document).ready(function () {
-              var table = $('#employeeTable').DataTable({
+              var table = $('#typeTable').DataTable({
                 dom: 'Blfrtip',
                 buttons: ['excelHtml5', 'pdfHtml5'],
                 language: {
@@ -220,7 +240,7 @@
             }
 
             function addStaff() {
-              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              // Sử dụng AJAX để tải nội dung trang chi tiết loại bài đăng
               $.ajax({
                 url: '/staff/add?url=/staff/listStaff',
                 type: 'GET',
@@ -240,10 +260,10 @@
 
 
 
-            function viewEmployeeDetail(employeeId) {
-              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+            function viewtypeDetail(typeId) {
+              // Sử dụng AJAX để tải nội dung trang chi tiết loại bài đăng
               $.ajax({
-                url: '/staff/detail/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/detail/' + typeId + '?url=/staff/listStaff',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -261,14 +281,14 @@
 
 
 
-            function inActiveEmployee(employeeId, event) {
+            function inActivetype(typeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/inActive/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/inActive/' + typeId + '?url=/staff/listStaff',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã vô hiệu hoá nhân viên:', employeeId);
+                  console.log('Đã vô hiệu hoá loại bài đăng:', typeId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
@@ -279,14 +299,14 @@
               });
             }
 
-            function activeEmployee(employeeId, event) {
+            function activetype(typeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/active/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/active/' + typeId + '?url=/staff/listStaff',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã kích hoạt nhân viên:', employeeId);
+                  console.log('Đã kích hoạt loại bài đăng:', typeId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
@@ -296,14 +316,14 @@
                 }
               });
             }
-            function deleteEmployee(employeeId, event) {
+            function deletetype(typeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/delete/' + employeeId + '?url=/staff/listStaff',
+                url: '/staff/delete/' + typeId + '?url=/staff/listStaff',
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá nhân viên có id: ' + employeeId);
+                  alert('Đã xoá loại bài đăng có id: ' + typeId);
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },

@@ -31,10 +31,12 @@
       position: relative;
       z-index: 0;
     }
+
     #addEmployeeBtn {
       margin-top: 10px;
       margin-bottom: 10px;
     }
+
     h3 {
       font-size: smaller;
       opacity: 0.5;
@@ -57,7 +59,21 @@
       /* Khoảng cách giữa nội dung và viền của popup */
       display: none;
       overflow: auto;
+      border-radius: 10px;
     }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
+    }
+
     button {
       display: inline-block;
       padding: 5px;
@@ -69,7 +85,26 @@
       text-decoration: none;
       cursor: pointer;
     }
- 
+
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
   </style>
 </head>
 
@@ -87,7 +122,8 @@
 
           <div class="container">
             <h2>Danh mục bảo hiểm theo nhu cầu</h2>
-            <h3>Đây là danh mục bảo hiểm theo nhu cầu của khách hàng. Nhấn vào dòng chứa thông tin một danh mục bất kỳ để xem và sửa thông tin danh mục đó.
+            <h3>Đây là danh mục bảo hiểm theo nhu cầu của khách hàng. Nhấn vào dòng chứa thông tin một danh mục bất kỳ
+              để xem và sửa thông tin danh mục đó.
             </h3>
             <button id="addEmployeeBtn" onclick="addCatalog()" class="btn btn-primary">Thêm danh mục mới</button>
 
@@ -101,7 +137,7 @@
                 </tr>
               </thead>
               <tbody>
-                <% catalogs.forEach(function(insurance) { %>
+                <% catalogs.forEach(function(catalog) { %>
                   <tr onclick="viewCatalogDetail('<%= catalog.idCatalog %>')">
                     <td>
                       <%= catalog.idCatalog %>

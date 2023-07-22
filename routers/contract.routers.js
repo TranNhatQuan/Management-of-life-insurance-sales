@@ -1,14 +1,13 @@
 const express = require("express");
 
-const {} = require("../controllers/contract.controllers");
-const { createPayment, checkContractPayment } = require("../cronjob/cronJob");
+const { getListContract, getListPayment, getListBenefit } = require("../controllers/contract.controllers");
+const { authorize } = require("../middlewares/auth/authorize.js")
+const { authenticate, authenticateStaff } = require("../middlewares/auth/authenticate.js")
 
 const contractRouter = express.Router();
-contractRouter.get("/listInsurance", checkContractPayment)
-// contractRouter.get("/listContract")
-// contractRouter.get("/detail/:idContract")
-// contractRouter.delete("/deleteContract/:idContract")
-// contractRouter.edit("/editContract/:idContract")
+contractRouter.get("/listContract", authenticateStaff, authorize('readContract'), getListContract)
+contractRouter.get("/listPayment", authenticateStaff, authorize('readContract'), getListPayment)
+contractRouter.get("/listBenefit", authenticateStaff, authorize('readContract'), getListBenefit)
 
 module.exports = {
     contractRouter,
