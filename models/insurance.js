@@ -10,20 +10,22 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      
+
       Insurance.belongsTo(models.Insurance_type, {
         foreignKey: "idInsurance_type",
       })
-      Insurance.hasMany(models.Detail_contract,{
+      Insurance.hasMany(models.Detail_contract, {
         foreignKey: "idInsurance",
       });
-      Insurance.hasMany(models.Sub_insurance,{
+      Insurance.hasMany(models.Sub_insurance, {
         foreignKey: "idMainInsurance",
+        as: 'mainInsurance'
       });
-      Insurance.hasMany(models.Sub_insurance,{
+      Insurance.hasMany(models.Sub_insurance, {
         foreignKey: "idSubInsurance",
+        as: 'subInsurance'
       });
-      Insurance.hasMany(models.Catalog_insurance,{
+      Insurance.hasMany(models.Catalog_insurance, {
         foreignKey: "idInsurance",
       });
     }
@@ -31,9 +33,9 @@ module.exports = (sequelize, DataTypes) => {
   Insurance.init({
     idInsurance: {
       allowNull: false,
-      
+
       primaryKey: true,
-      autoIncrement:true,
+      autoIncrement: true,
       type: DataTypes.INTEGER
     },
     name: {
@@ -74,7 +76,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     idInsurance_type: {
       allowNull: true,
-      
+
 
       references: { model: "Insurance_type", key: "idInsurance_type" },
       type: DataTypes.INTEGER

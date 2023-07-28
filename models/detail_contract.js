@@ -18,12 +18,12 @@ module.exports = (sequelize, DataTypes) => {
       });
       Detail_contract.belongsTo(models.User, {
         foreignKey: "idBeneficiary",
-        targetKey:"idUser"
+        targetKey: "idUser"
       });
-      Detail_contract.hasMany(models.Benefit_history,{
+      Detail_contract.hasMany(models.Benefit_history, {
         foreignKey: "idDetail_contract",
       });
-      Detail_contract.hasMany(models.Payment_schedule,{
+      Detail_contract.hasMany(models.Payment_schedule, {
         foreignKey: "idDetail_contract",
       });
     }
@@ -32,23 +32,23 @@ module.exports = (sequelize, DataTypes) => {
     idDetail_contract: {
       allowNull: false,
       primaryKey: true,
-      autoIncrement:true,
+      autoIncrement: true,
       type: DataTypes.INTEGER
     },
-    
-    isMain:{
+
+    isMain: {
       allowNull: false,
-      type: DataTypes.INTEGER
+      type: DataTypes.BOOLEAN,
     },
-    startDate:{
+    startDate: {
       allowNull: false,
       type: DataTypes.DATEONLY
     },
-    endDate:{
+    endDate: {
       allowNull: false,
       type: DataTypes.DATEONLY
     },
-    status:{
+    status: {
       allowNull: false,
       type: DataTypes.INTEGER
     },

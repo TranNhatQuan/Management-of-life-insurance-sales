@@ -338,7 +338,7 @@ const checkDateDetailContract = async () => {
             where: {
                 status: 2,
                 startDate: {
-                    [db.Sequelize.Op.eq]: db.sequelize.literal(`DATE_ADD(DATE_SUB(NOW(), INTERVAL premiumPaymentTerm MONTH), INTERVAL 1 DAY)`),
+                    [db.Sequelize.Op.eq]: db.sequelize.literal(`DATE_ADD(DATE_SUB(NOW(), INTERVAL contractTerm MONTH), INTERVAL 1 DAY)`),
                 }
 
             }

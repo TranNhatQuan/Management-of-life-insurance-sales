@@ -1,8 +1,8 @@
 const express = require("express");
 const session = require('express-session');
 const flash = require('connect-flash');
-const {sequelize} = require("./models");
-const {rootRouter} = require("./routers")
+const { sequelize } = require("./models");
+const { rootRouter } = require("./routers")
 const cookieParser = require("cookie-parser");
 const port = 3007;
 const app = express();
@@ -27,6 +27,11 @@ app.use(cors());
 //cài ứng dụng sử dụng json
 app.use(express.json());
 //cài static file
+// Trong index.js
+app.use(express.static('public'));
+const fileUpload = require('express-fileupload');
+app.use(fileUpload());
+
 app.use(
   express.urlencoded({
     extended: true,
@@ -52,11 +57,11 @@ job.start(); // Bắt đầu chạy CronJob
 
 //lắng nghe sự kiện kết nối
 app.listen(port, async () => {
-    console.log(`App listening on http://localhost:${port}`);
-    try {
-        await sequelize.authenticate();
-        console.log('Kết nối thành công!.');
-      } catch (error) {
-        console.error('Kết nối thất bại:', error);
-      }
+  console.log(`App listening on http://localhost:${port}`);
+  try {
+    await sequelize.authenticate();
+    console.log('Kết nối thành công!.');
+  } catch (error) {
+    console.error('Kết nối thất bại:', error);
+  }
 })

@@ -1,0 +1,42 @@
+<!-- views/show-pdf.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer</title>
+</head>
+
+<body>
+    <canvas id="pdfViewer"></canvas>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script>
+        async function renderPdf() {
+            const pdfUrl = '<%= pdfUrl %>';
+            const pdfContainer = document.getElementById('pdfViewer');
+
+            // Load the PDF document
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            const pdfDocument = await loadingTask.promise;
+
+            // Get the first page
+            const pageNumber = 1;
+            const pdfPage = await pdfDocument.getPage(pageNumber);
+
+            // Set canvas dimensions based on the page's viewport
+            const viewport = pdfPage.getViewport({ scale: 1.5 });
+            pdfContainer.width = viewport.width;
+            pdfContainer.height = viewport.height;
+
+            // Render the page on the canvas
+            const canvasContext = pdfContainer.getContext('2d');
+            await pdfPage.render({ canvasContext, viewport }).promise;
+        }
+
+        renderPdf().catch(console.error);
+    </script>
+</body>
+
+</html>

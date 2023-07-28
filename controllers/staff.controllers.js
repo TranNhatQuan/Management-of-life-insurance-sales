@@ -6,22 +6,22 @@ const moment = require('moment-timezone'); // require
 const { raw } = require("body-parser");
 const nodemailer = require("nodemailer");
 const createStaffWithTransaction = async (name, email, phone, address, permission, username, password) => {
-    //console.log('test1')
+    
     const t = await db.sequelize.transaction(); // Bắt đầu transaction
 
     let isSuccess
     try {
-        //console.log('test2')
+     
         const salt = bcrypt.genSaltSync(10);
         const hashPassword = bcrypt.hashSync(password, salt);
-        //console.log('test3')
+
         const newAccount = await Account.create({
             username,
 
             password: hashPassword,
 
         }, { transaction: t });
-        //console.log('test4')
+
         const newCustomer = await Staff.create({
             idAccount: newAccount.idAccount,
             name,
@@ -71,7 +71,7 @@ const getListStaff = async (req, res) => {
 const getFormAddStaff = async (req, res) => {
     try {
 
-        //console.log(staff)
+
 
 
         return res.render('staff/addStaff');
@@ -119,7 +119,7 @@ const getDetailStaff = async (req, res) => {
             staff[concatenatedName] = true;
 
         });
-        //console.log(staff)
+
 
 
         return res.render('staff/detailStaff', { staff: staff });
@@ -135,7 +135,7 @@ const getInfoHome = async (req, res) => {
         const error = req.flash('error')[0];
         const staff = req.staff
         const name = staff.name
-        console.log('test')
+
         let contracts = await Contract.findAll({
             where: {
                 idStaff: staff.idStaff,
@@ -164,8 +164,7 @@ const getInfoHome = async (req, res) => {
             ],
             raw: true,
         })
-        console.log('trss')
-        console.log(contracts)
+   
         contracts = contracts.map(item => {
 
             return {
@@ -280,7 +279,7 @@ const editPermission = async (arr, idStaff) => {
                 name: part2,
             }
         })
-        //console.log(screen)
+        
         let [currentCart, created] = await Staff_permission.findOrCreate({
             where: {
                 idStaff,
@@ -306,7 +305,7 @@ const addStaff = async (req, res) => {
             req.flash('error', 'Có lỗi xảy ra!');
             return res.redirect('/staff/listStaff');
         }
-        //console.log(permission)
+   
 
         const isAdd = await createStaffWithTransaction(name, email, phone, address, permission, username, password)
         if (!isAdd) {
@@ -346,7 +345,7 @@ const editStaff = async (req, res) => {
 
         const { idStaff } = req.params
         const { name, email, phone, address, permission } = req.body
-        //console.log(permission)
+   
         let staff = await Staff.findOne({
             where: {
                 idStaff
@@ -385,7 +384,7 @@ const selfEdit = async (req, res) => {
 
 
         const { name, email, phone, address } = req.body
-        //console.log(permission)
+     
 
         staff.name = name
         staff.mail = email
@@ -394,10 +393,10 @@ const selfEdit = async (req, res) => {
         await staff.save()
 
         req.flash('error', 'Đổi thông tin cá nhân thành công!');
-        //console.log(error)
+   
         return res.redirect('/staff/home');
 
-        //return res.status(200).json({ isSuccess: true })
+  
     } catch (error) {
         req.flash('error', 'Có lỗi xảy ra khi lấy danh sách nhân viên');
         return res.redirect('/account/admin/login');
@@ -413,7 +412,7 @@ const changePassword = async (req, res) => {
             req.flash('error', 'Mật khẩu không được để trống!');
             return res.redirect('/staff/home');
         }
-        //console.log(permission)
+  
         let account = await Account.findOne({
             where: {
                 idAccount: staff.idAccount

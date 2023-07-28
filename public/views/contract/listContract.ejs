@@ -255,21 +255,7 @@
 
             function addContract() {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
-              $.ajax({
-                url: '/staff/add?url=/staff/listStaff',
-                type: 'GET',
-                dataType: 'html',
-                success: function (response) {
-                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
-                  showPopup();
-                  $('#popup').html(response);
-                },
-                error: function (xhr, status, error) {
-                  // Xử lý lỗi nếu có
-                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
-                  console.log(error);
-                }
-              });
+              window.location.href = '/contract/addContract?url=/staff/listStaff';
             }
 
 

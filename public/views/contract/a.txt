@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    input {
+      width: 400px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1;
+      display: none;
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1;
+      display: none;
+    }
+
+    .select-item {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .navbar {
+      /* Thiết lập vị trí */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+
+      z-index: 2;
+    }
+
+    #form {
+      margin-top: 100px;
+      margin-left: 50px;
+      margin-right: 50px;
+      margin-bottom: 50px;
+      /* Thiết lập vị trí */
+      position: relative;
+      z-index: 0;
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+  </style>
+
+</head>
+
+<body>
+  <%- include('../../layout/sidebar.ejs') %>
+    <div id="form">
+      <h2>Tạo sản phẩm mới</h2>
+      <h3>Tạo hợp đồng mới, mỗi hợp đồng đều phải kèm theo file pdf.</h3>
+      <form id="yourFormId" action="/insurance/addInsurance?url=/insurance/listInsurance" method="post">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="searchUser">Chọn KH:</label>
+              <div class="select-wrapper">
+                <input type="text" id="searchUser" name="searchUser" placeholder="Tìm kiếm khách hàng..." required>
+                <div class="select-dropdown" id="userDropdown">
+                  <% users.forEach((user)=> { %>
+                    <div class="select-item" data-id="<%= user.idUser %>">
+                      <%= user.name %>(Mã khách hàng: <%= user.idUser %>)
+                    </div>
+                    <% }); %>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="idUser">Mã KH được chọn:</label>
+              <div>
+                <input id="idUser" name="idUser" required readonly>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="signDate">Ngày ký:</label>
+              <div><input type="date" id="signDate" name="signDate" required max="<%= now %>" value="<%= now %>"></div>
+            </div>
+            <div class="form-group">
+              <label for="searchInsurance">Chọn SP chính:</label>
+              <div class="select-wrapper">
+                <input type="text" id="searchInsurance" name="searchInsurance" placeholder="Tìm kiếm sản phẩm..."
+                  required>
+                <div class="select-dropdown" id="insuranceDropdown">
+                  <% insurances.forEach((product)=> { %>
+                    <div class="select-item" data-id="<%= product.idInsurance %>">
+                      <%= product.name %>(Mã bảo hiểm: <%= product.idInsurance %>)
+                    </div>
+                    <% }); %>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="idInsurance">Mã SP chính được chọn:</label>
+              <div>
+                <input  id="idInsurance" name="idInsurance" required readonly>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="premium">Phí bảo hiểm(nghìn đồng):</label>
+              <div><input type="number" id="premium" name="premium" required></div>
+
+            </div>
+            <div class="form-group">
+              <label for="premiumPaymentTerm">Thời gian đóng bảo hiểm(tháng):</label>
+              <div> <input type="number" id="premiumPaymentTerm" name="premiumPaymentTerm" required></div>
+
+            </div>
+            <div class="form-group">
+              <label for="frequency">Khoảng cách giữa mỗi lần đóng bảo hiểm(tháng):</label>
+              <div><input type="number" id="frequency" name="frequency" required></div>
+
+            </div>
+            <div class="form-group">
+              <label for="insuranceAmount">Giá trị bảo hiểm(nghìn đồng):</label>
+              <div> <input type="number" id="insuranceAmount" name="insuranceAmount" required></div>
+
+            </div>
+            <div class="form-group">
+              <label for="contractTerm">Thời hạn bảo hiểm(tháng):</label>
+              <div><input type="number" id="contractTerm" name="contractTerm" required></div>
+
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="isMain">Sản phẩm chính/phụ:</label>
+              <div>
+                <select id="isMain" name="isMain" required>
+                  <option value="1">Sản phẩm chính</option>
+                  <option value="0">Sản phẩm bổ trợ</option>
+                </select>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="form-group">
+          <button type="submit">Lưu</button>
+        </div>
+      </form>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+    <script src="https://cdn.datatables.net/searchbuilder/1.2.1/js/dataTables.searchBuilder.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+      // Function for handling insurance search and selection
+      const searchInputInsurance = document.getElementById('searchInsurance');
+      const dropdownInsurance = document.getElementById('insuranceDropdown');
+      const idInsuranceInput = document.getElementById('idInsurance');
+      const premium = document.getElementById('premium')
+      const premiumPaymentTerm= document.getElementById('premiumPaymentTerm)
+      const frequency = document.getElementById('frequency')
+      const insuranceAmount = document.getElementById('insuranceAmount')
+      const contractTerm = document.getElementById('contractTerm')
+      searchInputInsurance.addEventListener('input', () => {
+        const searchValue = searchInputInsurance.value.trim().toLowerCase();
+
+        // Show/hide items based on the search value
+        Array.from(dropdownInsurance.children).forEach((item) => {
+          const itemName = item.textContent.trim().toLowerCase();
+          if (itemName.includes(searchValue)) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+
+      dropdownInsurance.addEventListener('click', (event) => {
+        const selectedId = event.target.dataset.id;
+        const selectedName = event.target.textContent.trim();
+        idInsuranceInput.value = selectedId;
+        searchInputInsurance.value = selectedName;
+        dropdownInsurance.style.display = 'none';
+      });
+
+      // Close the dropdown if clicked outside
+      window.addEventListener('click', (event) => {
+        if (!event.target.matches('#searchInsurance')) {
+          dropdownInsurance.style.display = 'none';
+        }
+      });
+
+      // Open the dropdown when the search input is focused
+      searchInputInsurance.addEventListener('focus', () => {
+        dropdownInsurance.style.display = 'block';
+      });
+
+      // Function for handling user search and selection
+      const searchInputUser = document.getElementById('searchUser');
+      const dropdownUser = document.getElementById('userDropdown');
+      const idUserInput = document.getElementById('idUser');
+
+
+      searchInputUser.addEventListener('input', () => {
+        const searchValue = searchInputUser.value.trim().toLowerCase();
+
+        // Show/hide items based on the search value
+        Array.from(dropdownUser.children).forEach((item) => {
+          const itemName = item.textContent.trim().toLowerCase();
+          if (itemName.includes(searchValue)) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+
+      dropdownUser.addEventListener('click', (event) => {
+        const selectedId = event.target.dataset.id;
+        const selectedName = event.target.textContent.trim();
+        idUserInput.value = selectedId;
+        searchInputUser.value = selectedName;
+        dropdownUser.style.display = 'none';
+      });
+
+      // Close the dropdown if clicked outside
+      window.addEventListener('click', (event) => {
+        if (!event.target.matches('#searchUser')) {
+          dropdownUser.style.display = 'none';
+        }
+      });
+
+      // Open the dropdown when the search input is focused
+      searchInputUser.addEventListener('focus', () => {
+        dropdownUser.style.display = 'block';
+      });
+      const form = document.getElementById('yourFormId'); // Replace 'yourFormId' with the actual form ID
+  form.addEventListener('submit', (event) => {
+    if (!idUserInput.value) {
+      // Prevent form submission and display an error message
+      event.preventDefault();
+      alert('Vui lòng chọn khách hàng.');
+      return;
+    }
+    if (!idInsuranceInput.value) {
+      // Prevent form submission and display an error message
+      event.preventDefault();
+      alert('Vui lòng chọn sản phẩm chính.');
+      return;
+    }
+
+    // If the idUser input has a value, the form will be submitted normally.
+    // You can also perform additional validation checks here if needed.
+  });
+    </script>
+
+</body>
+
+</html>

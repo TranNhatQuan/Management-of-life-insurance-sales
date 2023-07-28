@@ -13,25 +13,27 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Sub_insurance.belongsTo(models.Insurance, {
         foreignKey: "idMainInsurance",
-        targetKey: "idInsurance"
+        targetKey: "idInsurance",
+        as: 'mainInsurance'
       })
       Sub_insurance.belongsTo(models.Insurance, {
         foreignKey: "idSubInsurance",
-        targetKey: "idInsurance"
+        targetKey: "idInsurance",
+        as: 'subInsurance'
       })
     }
   }
   Sub_insurance.init({
-    idInsurance: {
+    idMainInsurance: {
       allowNull: false,
-      
+
       primaryKey: true,
       references: { model: "Insurance", key: "idInsurance" },
       type: DataTypes.INTEGER
     },
     idSubInsurance: {
       allowNull: false,
-      
+
       primaryKey: true,
       references: { model: "Insurance", key: "idInsurance" },
       type: DataTypes.INTEGER

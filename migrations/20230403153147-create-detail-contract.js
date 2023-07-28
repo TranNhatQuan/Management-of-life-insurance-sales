@@ -27,7 +27,7 @@ module.exports = {
       },
       isMain:{
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.BOOLEAN,
       },
       startDate:{
         allowNull: false,
