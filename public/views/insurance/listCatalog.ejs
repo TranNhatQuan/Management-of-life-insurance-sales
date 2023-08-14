@@ -4,6 +4,7 @@
 <head>
 
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
@@ -140,7 +141,7 @@
                 <% catalogs.forEach(function(catalog) { %>
                   <tr onclick="viewCatalogDetail('<%= catalog.idCatalog %>')">
                     <td>
-                      <%= catalog.idCatalog %>
+                      DM-<%= catalog.idCatalog %>
                     </td>
                     <td>
                       <%= catalog.name %>
@@ -227,7 +228,7 @@
             function addCatalog() {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/insurance/addCatalog?url=/insurance/listCatalog',
+                url: '/insurance/addCatalog?url=/insurance/catalog',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -237,7 +238,7 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  window.location.href = '/insurance/listCatalog?url=/staff/home';
+                  window.location.href = '/insurance/catalog?url=/staff/home';
                   console.log(error);
                 }
               });
@@ -248,7 +249,7 @@
             function viewCatalogDetail(employeeId) {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/insurance/detailCatalog/' + employeeId + '?url=/insurance/listCatalog',
+                url: '/insurance/editCatalog/' + employeeId + '?url=/insurance/catalog',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -258,25 +259,26 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  window.location.href = '/insurance/listCatalog?url=/staff/home';
-                  console.log(error);
+                  console.log(error)
+                  window.location.href = '/insurance/catalog?url=/staff/home';
+
                 }
               });
             }
             function deleteCatalog(employeeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/insurance/deleteCatalog/' + employeeId + '?url=/insurance/listCatalog',
+                url: '/insurance/deleteCatalog/' + employeeId + '?url=/insurance/catalog',
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá loại bảo hiểm có id: ' + employeeId);
+                  
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
-                  window.location.href = '/insurance/listCatalog?url=/staff/home';
+                  window.location.href = '/insurance/catalog?url=/staff/home';
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/insurance/catalog?url=/staff/home';
                 }
               });
             }

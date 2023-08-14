@@ -3,6 +3,7 @@
 
 <head>
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
@@ -63,6 +64,19 @@
       outline: none;
       border: none;
 
+    }
+
+    input::file-selector-button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
     }
 
     button {
@@ -181,16 +195,31 @@
               enctype="multipart/form-data">
               <div class="row">
                 <div class="col-md-6">
-
                   <div class="form-group">
-                    <label for="idUser">Mã KH:</label>
-                    <div>
-                      <input type="number" id="idUser" name="idUser" min=1 required>
+                    <label for="searchUser">Chọn khách hàng:</label>
+                    <div class="select-wrapper">
+                      <input type="text" id="searchUser" name="searchUser" placeholder="Tìm kiếm người dùng..."
+                        required>
+                      <div class="select-dropdown" id="userDropdown">
+                        <% users.forEach((product)=> { %>
+                          <div class="select-item" data-id="<%= product.idUser %>">
+                            <%= product.name %>(Mã KH: <%= product.idUser %>)
+                          </div>
+                          <% }); %>
+                      </div>
                     </div>
                   </div>
                   <div class="form-group">
-                    <label for="signDate">Ngày ký:</label>
-                    <div><input type="date" id="signDate" name="signDate" required max="<%= now %>" value="<%= now %>">
+                    <label for="idUser">Mã KH được chọn:</label>
+                    <div>
+                      <input id="idUser" name="idUser" required readonly>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="startDate">Ngày bắt đầu:</label>
+                    <div><input type="date" id="startDate" name="startDate" required max="<%= now %>"
+                        value="<%= now %>">
                     </div>
                   </div>
                   <div class="form-group">
@@ -261,7 +290,47 @@
           <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
           <script>
-            // Function for handling insurance search and selection
+            //TK User
+            // Function for handling user search and selection
+            const searchInputUser = document.getElementById('searchUser');
+            const dropdownUser = document.getElementById('userDropdown');
+            const selectedUserIdInput = document.getElementById('idUser');
+
+            searchInputUser.addEventListener('input', () => {
+              const searchValue = searchInputUser.value.trim().toLowerCase();
+
+              // Show/hide items based on the search value
+              Array.from(dropdownUser.children).forEach((item) => {
+                const itemName = item.textContent.trim().toLowerCase();
+                if (itemName.includes(searchValue)) {
+                  item.style.display = 'block';
+                } else {
+                  item.style.display = 'none';
+                }
+              });
+            });
+
+            dropdownUser.addEventListener('click', (event) => {
+              const selectedId = event.target.dataset.id;
+              const selectedName = event.target.textContent.trim();
+              selectedUserIdInput.value = selectedId;
+              searchInputUser.value = selectedName;
+              dropdownUser.style.display = 'none';
+            });
+
+            // Close the dropdown if clicked outside
+            window.addEventListener('click', (event) => {
+              if (!event.target.matches('#searchUser')) {
+                dropdownUser.style.display = 'none';
+              }
+            });
+
+            // Open the dropdown when the search input is focused
+            searchInputUser.addEventListener('focus', () => {
+              dropdownUser.style.display = 'block';
+            });
+
+            // TK Insurance
             const searchInputInsurance = document.getElementById('searchInsurance');
             const dropdownInsurance = document.getElementById('insuranceDropdown');
             const idInsuranceInput = document.getElementById('idInsurance');
@@ -323,43 +392,8 @@
               // If the idUser input has a value, the form will be submitted normally.
               // You can also perform additional validation checks here if needed.
             });
-            function handleSubInsuranceQuantityChange(subInsuranceId, name, type, quantity) {
-              const input = document.getElementById(`subInsuranceQuantity_${subInsuranceId}`);
-              const beneficiaryInputContainer = document.getElementById(`beneficiaryInputContainer_${subInsuranceId}`);
-              if (quantity >= 1) {
-                selectedSubInsuranceIds.add(subInsuranceId);
-              } else {
-                selectedSubInsuranceIds.delete(subInsuranceId);
-              }
-              updateSelectedSubInsuranceIdsInput();
-              if (type) {
-                // If a quantity is entered, create and append the beneficiary input container
-                const inputContainer = document.createElement('div');
-                inputContainer.classList.add('beneficiary-input-container');
-                inputContainer.id = `beneficiaryInputContainer_${subInsuranceId}`;
 
-                const label = document.createElement('label');
-                label.textContent = `Khách hàng thụ hưởng (${name}):`;
 
-                const beneficiaryInput = document.createElement('input');
-                beneficiaryInput.type = 'text';
-                beneficiaryInput.name = `beneficiary_${subInsuranceId}`;
-                beneficiaryInput.required = true;
-
-                // Set a unique ID for each beneficiary input
-                beneficiaryInput.id = `beneficiary_${subInsuranceId}`;
-
-                inputContainer.appendChild(label);
-                inputContainer.appendChild(beneficiaryInput);
-
-                subInsurancesCheckboxesDiv.appendChild(inputContainer);
-              } else {
-                // If no quantity is entered, remove the entire beneficiary input container
-                if (beneficiaryInputContainer) {
-                  beneficiaryInputContainer.remove();
-                }
-              }
-            }
             async function fetchDataByIdInsurance(idInsurance) {
               // Replace 'your-api-endpoint' with the actual URL of your server's API endpoint
               const url = `/contract/detailAndSub/${idInsurance}`;
@@ -377,55 +411,40 @@
                 data.subInsurance.forEach((subInsurance) => {
                   // Create a div to hold the input field and label
                   const quantityInputDiv = document.createElement('div');
-                  const quantityLabelDiv = document.createElement('div');
+
                   quantityInputDiv.classList.add('quantity-input-container');
 
                   // Create a label for the quantity input
                   const label = document.createElement('label');
-                  label.htmlFor = `subInsuranceQuantity_${subInsurance.idInsurance}`;
-                  label.textContent = `${subInsurance.name} (Số lượng):`;
+                  label.htmlFor = `${subInsurance.idInsurance}`;
+                  label.textContent = `${subInsurance.name}`;
 
                   // Append the label to the quantityInputDiv first
-                  quantityLabelDiv.appendChild(label);
-                  subInsurancesCheckboxesDiv.appendChild(quantityLabelDiv);
+
+
 
                   // Create an input field for each sub-insurance quantity
                   const quantityInput = document.createElement('input');
-                  quantityInput.type = 'number';
+                  quantityInput.type = 'checkbox';
                   quantityInput.style.width = '50px'
-                  quantityInput.readOnly = true
-                  quantityInput.name = `subInsuranceQuantity_${subInsurance.idInsurance}`;
-                  quantityInput.min = '0';
-                  quantityInput.step = '1'; // Allow increments and decrements by one
-                  quantityInput.id = `subInsuranceQuantity_${subInsurance.idInsurance}`;
 
+                  quantityInput.name = `${subInsurance.idInsurance}`;
+
+                  quantityInput.id = `${subInsurance.idInsurance}`;
+                  quantityInput.addEventListener('change', (event) => {
+                    const subInsuranceName = subInsurance.idInsurance;
+                    if (event.target.checked) {
+                      selectedSubInsuranceIds.add(subInsuranceName);
+                      updateSelectedSubInsuranceIdsInput()
+                    } else {
+                      selectedSubInsuranceIds.delete(subInsuranceName);
+                      updateSelectedSubInsuranceIdsInput()
+                    }
+                  });
 
                   // Append the quantity input to the quantityInputDiv after the label
                   quantityInputDiv.appendChild(quantityInput);
-                  const incrementButton = document.createElement('button');
-                  incrementButton.style.width = '25px'
-                  incrementButton.style.margin = '2px'
-                  incrementButton.textContent = '+';
-                  incrementButton.type = 'button';
-                  incrementButton.addEventListener('click', () => {
-                    quantityInput.stepUp(); // Increment the value by one
-                    handleSubInsuranceQuantityChange(subInsurance.idInsurance, subInsurance.name, true, parseInt(quantityInput.value))
-                  });
-
-                  const decrementButton = document.createElement('button');
-                  decrementButton.style.width = '25px'
-                  decrementButton.style.margin = '2px'
-                  decrementButton.textContent = '-';
-                  decrementButton.type = 'button';
-                  decrementButton.addEventListener('click', () => {
-                    quantityInput.stepDown(); // Decrement the value by one
-                    handleSubInsuranceQuantityChange(subInsurance.idInsurance, subInsurance.name, false, parseInt(quantityInput.value))
-                  });
-
-                  // Append the buttons to the quantityInputContainer
-                  quantityInputDiv.appendChild(incrementButton);
-                  quantityInputDiv.appendChild(decrementButton);
-                  // Append the quantityInputDiv to the subInsuranceCheckboxes div
+                  quantityInputDiv.appendChild(label);
                   subInsurancesCheckboxesDiv.appendChild(quantityInputDiv);
                 });
 

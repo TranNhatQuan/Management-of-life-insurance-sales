@@ -1,39 +1,45 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+
   <style>
     body {
       background-color: #f1f3f6;
       font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    
+
     .container {
-      max-width: 400px;
-      margin: 0 auto;
+      width: 400px;
       padding: 40px;
       background-color: #fff;
       border-radius: 4px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    
+
     .form-group {
       margin-bottom: 20px;
     }
-    
+
     .form-group label {
       display: block;
       font-weight: bold;
       margin-bottom: 5px;
     }
-    
+
     .form-group input {
-      width: 100%;
+      width: 378px;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    
+
     .form-group button {
       display: block;
       width: 100%;
@@ -45,31 +51,40 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    
+
     .form-group button:hover {
       background-color: #266c84;
     }
   </style>
 </head>
+
 <body>
+
   <div class="container">
-    <h2>Đăng nhập</h2>
+    <h2>Đăng nhập cho khách hàng</h2>
     <% if (error) { %>
-        <p style="color: red;"><%= errorMessage %></p>
+      <p style="color: red;">
+        <%= error %>
+      </p>
       <% } %>
-    <form  action="/account/login" method="post">
-      <div class="form-group">
-        <label for="username">Tên người dùng:</label>
-        <input type="text" id="username" name="username" required>
-      </div>
-      <div class="form-group">
-        <label for="password">Mật khẩu:</label>
-        <input type="password" id="password" name="password" required>
-      </div>
-      <div class="form-group">
-        <button type="submit">Đăng nhập</button>
-      </div>
-    </form>
+        <form action="/account/login" method="post">
+          <div class="form-group">
+            <label for="username">Tên người dùng:</label>
+            <input type="text" id="username" name="username" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Mật khẩu:</label>
+            <input type="password" id="password" name="password" required>
+          </div>
+          <div class="form-group" style="text-align: right;">
+            <a href="/account/formForgotUser">Quên mật khẩu?</a>
+          </div>
+          <div class="form-group">
+
+            <button type="submit">Đăng nhập</button>
+          </div>
+        </form>
   </div>
 </body>
+
 </html>

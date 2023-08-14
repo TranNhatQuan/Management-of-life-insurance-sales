@@ -4,6 +4,7 @@
 <head>
 
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
@@ -47,6 +48,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
     select {
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -140,7 +142,7 @@
                 <% employees.forEach(function(employee) { %>
                   <tr onclick="viewEmployeeDetail('<%= employee.idStaff %>')">
                     <td>
-                      <%= employee.idStaff %>
+                      NV-<%= employee.idStaff %>
                     </td>
                     <td>
                       <%= employee.name %>
@@ -263,7 +265,7 @@
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
-                  console.log(error);
+                  
                 }
               });
             }
@@ -284,7 +286,7 @@
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
-                  console.log(error);
+
                 }
               });
             }
@@ -304,7 +306,7 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 }
               });
             }
@@ -316,13 +318,13 @@
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
-                  console.log('Đã kích hoạt nhân viên:', employeeId);
+                 
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 }
               });
             }
@@ -333,13 +335,14 @@
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá nhân viên có id: ' + employeeId);
+               
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 },
                 error: function (xhr, status, error) {
-                  // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
                 }
               });
             }

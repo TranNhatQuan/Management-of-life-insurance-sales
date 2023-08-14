@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      
+
       Benefit_history.belongsTo(models.Detail_contract, {
         foreignKey: "idDetail_contract",
       })
@@ -25,31 +25,28 @@ module.exports = (sequelize, DataTypes) => {
   Benefit_history.init({
     idBenefit_history: {
       allowNull: false,
-      
+
       primaryKey: true,
       autoIncrement: true,
       type: DataTypes.INTEGER
     },
-    date:{
+    date: {
       allowNull: false,
       type: DataTypes.DATEONLY
     },
-    info:{
+    info: {
       allowNull: false,
       type: DataTypes.TEXT
     },
-    reason:{
+    reason: {
       allowNull: false,
       type: DataTypes.TEXT
     },
-    total:{
+    total: {
       allowNull: false,
       type: DataTypes.INTEGER
     },
-    status:{
-      allowNull: false,
-      type: DataTypes.INTEGER
-    },
+
 
   }, {
     sequelize,

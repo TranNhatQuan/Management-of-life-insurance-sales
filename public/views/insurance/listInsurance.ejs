@@ -4,6 +4,7 @@
 <head>
 
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
@@ -14,14 +15,17 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
     select {
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
     select {
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
     select {
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -123,7 +127,7 @@
 
 
           <div class="container">
-            <h2>Danh sách bảo hiêm</h2>
+            <h2>Danh sách bảo hiểm</h2>
             <h3>Đây là danh sách bảo hiểm, ấn vào dòng chứa thông tin bảo hiểm bất kỳ để xem và sửa thông tin bảo hiểm
               đó.
             </h3>
@@ -137,51 +141,80 @@
                   <th>Tên</th>
                   <th>Chính/phụ</th>
                   <th>Giá trị bảo hiểm</th>
-
-
+                  <th>Người thêm</th>
+                  <th>Ngày thêm</th>
                   <th>Loại bảo hiểm</th>
                   <th>Danh mục</th>
+                  <th>Sửa danh mục</th>
+                  <th>Thêm sản phẩm bổ trợ</th>
                   <th>Trạng thái</th>
                   <th>Xoá</th>
                 </tr>
               </thead>
               <tbody>
                 <% insurances.forEach(function(insurance) { %>
-                  <tr onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
-                    <td>
-                      <%= insurance.idInsurance %>
+                  <tr>
+                    <td onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
+                      BH-<%= insurance.idInsurance %>
                     </td>
-                    <td>
+                    <td onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
                       <%= insurance.name %>
                     </td>
-                    <td>
-                      <%= insurance.isMain ? "Chính" : "Phụ" %>
+                    <td onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
+                      <%= insurance.isMain %>
                     </td>
-                    <td>
-                      <%= insurance.insuranceAmount %>
+                    <td onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
+                      <%= (insurance.insuranceAmount*1000).toLocaleString() %>
+                    <td onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
+                      NV-<%= insurance.dataValues.idStaff %>
                     </td>
-                    <td>
+                    <td onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
+                      <%= insurance.dataValues.date %>
+                    </td>
+                    </td onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
+                    <td onclick="viewInsuranceDetail('<%= insurance.idInsurance %>')">
                       <%= insurance.dataValues.type %>
                     </td>
                     <td>
                       <%= insurance.dataValues.catalog %>
                     </td>
+                    <td><button onclick="addInsuranceIntoCatalog('<%= insurance.idInsurance %>', event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                          class="bi bi-plus-square-fill" viewBox="0 0 16 16">
+                          <path
+                            d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z" />
+                        </svg>
+                      </button></td>
+                    <td>
+                      <% if(insurance.isMain=='Sản phẩm chính' ){ %>
+                        <button onclick="addSub('<%= insurance.idInsurance %>', event)">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-plus-square-fill" viewBox="0 0 16 16">
+                            <path
+                              d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z" />
+                          </svg>
+                        </button>
+                        <%}else{%>
+
+                          <%}%>
+                    </td>
                     <td>
                       <% if (insurance.isDel) { %>
-                        <button onclick="inActiveInsurance('<%= insurance.idInsurance %>', event)">
+                        <button onclick="activeInsurance('<%= insurance.idInsurance %>', event)">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-toggle-on" viewBox="0 0 16 16">
-                            <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                            class="bi bi-toggle-off" viewBox="0 0 16 16">
+                            <path
+                              d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
                           </svg>
                         </button>
                         <% } else { %>
-                          <button onclick="activeInsurance('<%= insurance.idInsurance %>', event)">
+                          <button onclick="inActiveInsurance('<%= insurance.idInsurance %>', event)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                              class="bi bi-toggle-off" viewBox="0 0 16 16">
-                              <path
-                                d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
+                              class="bi bi-toggle-on" viewBox="0 0 16 16">
+                              <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
                             </svg>
                           </button>
+
                           <% } %>
                     </td>
                     <td>
@@ -259,7 +292,60 @@
                 hidePopup();
               }
             }
-
+            function addMain(employeeId) {
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              $.ajax({
+                url: '/insurance/addMain/' + employeeId + '?url=/insurance/listInsurance',
+                type: 'GET',
+                dataType: 'html',
+                success: function (response) {
+                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
+                  showPopup();
+                  $('#popup').html(response);
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  window.location.href = '/insurance/listInsurance?url=/staff/home';
+                  console.log(error);
+                }
+              });
+            }
+            function addSub(employeeId) {
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              $.ajax({
+                url: '/insurance/addSub/' + employeeId + '?url=/insurance/listInsurance',
+                type: 'GET',
+                dataType: 'html',
+                success: function (response) {
+                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
+                  showPopup();
+                  $('#popup').html(response);
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  window.location.href = '/insurance/listInsurance?url=/staff/home';
+                  console.log(error);
+                }
+              });
+            }
+            function addInsuranceIntoCatalog(employeeId) {
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              $.ajax({
+                url: '/insurance/addInsuranceIntoCatalog/' + employeeId + '?url=/insurance/listInsurance',
+                type: 'GET',
+                dataType: 'html',
+                success: function (response) {
+                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
+                  showPopup();
+                  $('#popup').html(response);
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  window.location.href = '/insurance/listInsurance?url=/staff/home';
+                  console.log(error);
+                }
+              });
+            }
             function addStaff() {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
@@ -284,7 +370,7 @@
             function viewInsuranceDetail(employeeId) {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/staff/detail/' + employeeId + '?url=/staff/listStaff',
+                url: '/insurance/editInsurance/' + employeeId + '?url=/insurance/listInsurance',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -305,7 +391,7 @@
             function inActiveInsurance(employeeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/inActive/' + employeeId + '?url=/staff/listStaff',
+                url: '/insurance/deleteInsurance/' + employeeId + '?url=/insurance/listInsurance&isDel=true',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
@@ -315,7 +401,7 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/insurance/listInsurance?url=/staff/home';
                 }
               });
             }
@@ -323,7 +409,7 @@
             function activeInsurance(employeeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/active/' + employeeId + '?url=/staff/listStaff',
+                url: '/insurance/deleteInsurance/' + employeeId + '?url=/insurance/listInsurance&isDel=false',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
@@ -333,24 +419,24 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/insurance/listInsurance?url=/staff/home';
                 }
               });
             }
             function deleteInsurance(employeeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/delete/' + employeeId + '?url=/staff/listStaff',
+                url: '/insurance/deleteInsurance/' + employeeId + '?url=/insurance/listInsurance',
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá nhân viên có id: ' + employeeId);
+
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/insurance/listInsurance?url=/staff/home';
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/insurance/listInsurance?url=/staff/home';
                 }
               });
             }

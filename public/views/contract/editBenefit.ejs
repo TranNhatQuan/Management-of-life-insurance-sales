@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body>
+
+
+
+  <h2>Form sửa thông tin chi trả</h2>
+  <form action="/contract/editBenefit/<%=benefit_history.idBenefit_history%>?url=/contract/listBenefit" method="post">
+    <p><strong>ID Thông tin chi trả:</strong>
+      <%=benefit_history.idBenefit_history%>
+    </p>
+    <p><strong>ID Khách hàng nhận:</strong>
+      <%=benefit_history.idUser%>
+    </p>
+    <p><strong>ID Nhân viên ghi:</strong>
+      <%=benefit_history.idStaff%>
+    </p>
+    <p><strong>ID Chi tiết hợp đồng:</strong>
+      <%=benefit_history.idDetail_contract%>
+    </p>
+    <div class="form-group">
+      <label for="date">Ngày:</label>
+      <div><input type="date" id="date" name="date" required max="<%= now %>" value="<%= benefit_history.date %>">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="total">Số tiền:</label>
+      <input type="number" id="total" name="total" required value="<%=benefit_history.total%>" min="100">
+    </div>
+    <div class="form-group">
+      <label for="reason">Lý do:</label>
+      <input type="text" id="reason" name="reason" required value="<%=benefit_history.reason%>" pattern="^\S.{4,}\S$"
+        title="Lý do phải có ít nhất 6 ký tự!">
+    </div>
+    <div class="form-group">
+      <label for="info">Thông tin:</label>
+      <input type="text" id="info" name="info" required value="<%=benefit_history.info%>" pattern="^\S.{4,}\S$"
+        title="Thông tin phải có ít nhất 6 ký tự!">
+    </div>
+    <div class="form-group">
+      <button type="submit">Lưu</button>
+      <button type="button" onclick="restoreValues()">Phục hồi</button>
+    </div>
+  </form>
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    function restoreValues() {
+
+      var date = document.getElementById("date");
+      var info = document.getElementById("info");
+
+      date.value = "<%= benefit_history.date %>";
+      info.value = "<%= benefit_history.info %>";
+      var total = document.getElementById("total");
+      var reason = document.getElementById("reason");
+
+      total.value = "<%= benefit_history.total %>";
+      reason.value = "<%= benefit_history.reason %>";
+
+    }
+  </script>
+
+
+</body>
+
+</html>

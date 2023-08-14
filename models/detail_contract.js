@@ -16,14 +16,11 @@ module.exports = (sequelize, DataTypes) => {
       Detail_contract.belongsTo(models.Insurance, {
         foreignKey: "idInsurance",
       });
-      Detail_contract.belongsTo(models.User, {
-        foreignKey: "idBeneficiary",
-        targetKey: "idUser"
-      });
+
       Detail_contract.hasMany(models.Benefit_history, {
         foreignKey: "idDetail_contract",
       });
-      Detail_contract.hasMany(models.Payment_schedule, {
+      Detail_contract.hasMany(models.Payment_schedule,{
         foreignKey: "idDetail_contract",
       });
     }
@@ -40,10 +37,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.BOOLEAN,
     },
-    startDate: {
-      allowNull: false,
-      type: DataTypes.DATEONLY
-    },
+
     endDate: {
       allowNull: false,
       type: DataTypes.DATEONLY
@@ -56,22 +50,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.INTEGER,
     },
-    premiumPaymentTerm: {
-      allowNull: false,
-      type: DataTypes.INTEGER,
-    },
-    frequency: {
-      allowNull: false,
-      type: DataTypes.INTEGER,
-    },
     insuranceAmount: {
       allowNull: false,
       type: DataTypes.INTEGER,
     },
-    contractTerm: {
-      allowNull: false,
-      type: DataTypes.INTEGER,
-    },
+
   }, {
     sequelize,
     modelName: 'Detail_contract',

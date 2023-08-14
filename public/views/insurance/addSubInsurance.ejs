@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1;
+      display: none;
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      max-height: 150px;
+      overflow-y: auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      z-index: 1;
+      display: none;
+    }
+
+    .select-item {
+      padding: 8px;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <h2>Tạo sản phẩm bổ trợ mới</h2>
+  <form action="/insurance/addSubInsurance/<%=insurance.idInsurance%>?url=/insurance/listInsurance" method="post">
+    <p>Sản phẩm bổ trợ của: <%=insurance.idInsurance%>-<%=insurance.name%>
+    </p>
+    <div class="form-group">
+      <label for="name">Tên:</label>
+      <div><input type="text" id="name" name="name" required pattern="^\S.{4,253}\S$"
+          title="Tên phải có độ dài từ 6 đến 255 ký tự!"></div>
+
+    </div>
+    <div class="form-group">
+      <label for="info">Thông tin:</label>
+      <div><input type="text" id="info" name="info" required pattern="^\S.{4,}\S$"
+          title="Thông tin phải có ít nhất 6 ký tự!"></div>
+    </div>
+    <div class="form-group">
+      <label for="premium">Phí bảo hiểm(nghìn đồng):</label>
+      <div><input type="number" id="premium" name="premium" required min="50"></div>
+
+    </div>
+
+
+    <div class="form-group">
+      <label for="insuranceAmount">Giá trị bảo hiểm(nghìn đồng):</label>
+      <div> <input type="number" id="insuranceAmount" name="insuranceAmount" required min="1000"></div>
+
+    </div>
+
+
+
+    <div class="form-group">
+      <label for="type">Loại bảo hiểm:</label>
+      <select id="idType" name="idType" required>
+        <% types.forEach(function(type) { %>
+          <option value="<%= type.idInsurance_type %>">
+            <%= type.name %>
+          </option>
+          <% }); %>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="image">Thêm ảnh:</label>
+      <div> <input type="file" id="image1" name="image1" required></div>
+    </div>
+    <div class="form-group">
+      <label for="image">Thêm ảnh quyền lợi:</label>
+      <div> <input type="file" id="image2" name="image2" required></div>
+    </div>
+    <div class="form-group">
+      <button type="submit">Lưu</button>
+    </div>
+  </form>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+</body>
+
+</html>

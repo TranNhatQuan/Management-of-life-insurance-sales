@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body onload="restoreValues()">
+
+
+
+  <h2>Form sửa thông tin bảo hiểm</h2>
+  <form action="/insurance/editInsurance/<%=insurance.idInsurance%>?url=/insurance/listInsurance" method="post">
+    <div class="form-group">
+      <label for="idInsurance">Mã bảo hiểm:</label>
+      <input type="text" id="idInsurance" name="idInsurance" required readonly value="<%=insurance.idInsurance%>">
+    </div>
+    <div class="form-group">
+      <label for="name">Tên:</label>
+      <div><input type="text" id="name" name="name" required value="<%=insurance.name%>" pattern="^\S.{4,253}\S$"
+          title="Tên phải có độ dài từ 6 đến 255 ký tự!"></div>
+
+    </div>
+    <div class="form-group">
+      <label for="info">Thông tin:</label>
+      <div><input type="text" id="info" name="info" required value="<%=insurance.info%>" pattern="^\S.{4,}\S$"
+          title="Thông tin phải có ít nhất 6 ký tự!"></div>
+    </div>
+    <div class="form-group">
+      <label for="premium">Phí bảo hiểm(nghìn đồng):</label>
+      <div><input type="number" id="premium" name="premium" required value="<%=insurance.premium%>" min="50"></div>
+
+    </div>
+    <div class="form-group">
+      <label for="insuranceAmount">Giá trị bảo hiểm(nghìn đồng):</label>
+      <div> <input type="number" id="insuranceAmount" name="insuranceAmount" required
+          value="<%=insurance.insuranceAmount%>" min="1000"></div>
+
+    </div>
+    <div class="form-group">
+      <label for="isMain">Sản phẩm chính/phụ:</label>
+      <input type="text" id="isMain" name="isMain" required value="<%=insurance.isMain==1 ? " Sản phẩm chính"
+        : "Sản phẩm phụ" %>" readonly>
+    </div>
+    <% if(insurance.isMain==1){%>
+      <div class="form-group">
+        <label for="premiumPaymentTerm">Thời gian đóng bảo hiểm(tháng):</label>
+        <input type="number" id="premiumPaymentTerm" name="premiumPaymentTerm" required
+          value="<%=insurance.premiumPaymentTerm%>" min="0">
+      </div>
+      <div class="form-group">
+        <label for="frequency">Khoảng cách giữa mỗi lần đóng bảo hiểm(tháng):</label>
+        <input type="number" id="frequency" name="frequency" required value="<%=insurance.frequency%>" min="0">
+      </div>
+
+      <div class="form-group">
+        <label for="contractTerm">Thời hạn bảo hiểm(tháng):</label>
+        <input type="number" id="contractTerm" name="contractTerm" required value="<%=insurance.contractTerm%>" min="1">
+      </div>
+      <%}else{%>
+        <div class="form-group">
+          <label for="premiumPaymentTerm">Thời gian đóng bảo hiểm(tháng):</label>
+          <input type="number" id="premiumPaymentTerm" name="premiumPaymentTerm" required readonly
+            value="<%=insurance.premiumPaymentTerm%>" min="0">
+        </div>
+        <div class="form-group">
+          <label for="frequency">Khoảng cách giữa mỗi lần đóng bảo hiểm(tháng):</label>
+          <input type="number" id="frequency" name="frequency" required value="<%=insurance.frequency%>" min="0" readonly>
+        </div>
+    
+        <div class="form-group">
+          <label for="contractTerm">Thời hạn bảo hiểm(tháng):</label>
+          <input type="number" id="contractTerm" name="contractTerm" required value="<%=insurance.contractTerm%>" min="1" readonly>
+        </div>
+        <%}%>
+
+
+          <div class="form-group">
+            <label for="type">Loại bảo hiểm:</label>
+            <select id="idInsurance_type" name="idInsurance_type" required>
+              <% types.forEach(function(type) { %>
+                <option value="<%= type.idInsurance_type %>" <%=insurance.idInsurance_type==type.idInsurance_type
+                  ? "selected" : "" %>>
+                  <%= type.name %>
+                </option>
+                <% }); %>
+            </select>
+          </div>
+          <div class="form-group">
+            <div>Ảnh bìa cũ:</div>
+            <div><img src="/uploads/imageInsurance/<%=insurance.idInsurance%>.jpg" alt="Ảnh bảo hiểm" width="160px"
+                height="100px" /></div>
+            <label for="image">Sửa ảnh:</label>
+            <div> <input type="file" id="image1" name="image1"></div>
+          </div>
+          <div class="form-group">
+            <div>Ảnh minh hoạ quyền lợi cũ:</div>
+            <div><img src="/uploads/infoInsurance/<%=insurance.idInsurance%>.jpg" alt="Ảnh bảo hiểm" width="160px"
+                height="100px" /></div>
+            <label for="image">Sửa ảnh:</label>
+            <div> <input type="file" id="image2" name="image2"></div>
+          </div>
+          <div class="form-group">
+            <button type="submit">Lưu</button>
+            <button type="button" onclick="restoreValues()">Phục hồi</button>
+          </div>
+  </form>
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+
+    function restoreValues() {
+      console.log('load')
+      var name = document.getElementById("name");
+      var info = document.getElementById("info");
+      var premium = document.getElementById("premium");
+      var premiumPaymentTerm = document.getElementById("premiumPaymentTerm");
+      var contractTerm = document.getElementById("contractTerm");
+      var insuranceAmount = document.getElementById("insuranceAmount");
+      var frequency = document.getElementById("frequency");
+      var isMain = document.getElementById("isMain");
+      var idInsurance_type = document.getElementById("idInsurance_type");
+      // Khôi phục giá trị ban đầu
+
+      name.value = "<%= insurance.name %>";
+      info.value = "<%= insurance.info %>";
+      premium.value = "<%= insurance.premium %>";
+      premiumPaymentTerm.value = "<%= insurance.premiumPaymentTerm %>";
+      contractTerm.value = "<%= insurance.contractTerm %>";
+      insuranceAmount.value = "<%= insurance.insuranceAmount %>";
+      frequency.value = "<%= insurance.frequency %>";
+
+      idInsurance_type.value = "<%= insurance.idInsurance_type %>";
+
+    }
+
+  </script>
+
+
+</body>
+
+</html>

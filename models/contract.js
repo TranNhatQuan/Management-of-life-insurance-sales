@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       Contract.hasMany(models.Detail_contract,{
         foreignKey: "idContract",
       });
-
+      
       
     }
   }
@@ -39,11 +39,22 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.INTEGER,
     },
-    signDate: {
+    startDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-   
+    endDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    premiumPaymentTerm: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+    },
+    frequency: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+    },
     
   }, {
     sequelize,

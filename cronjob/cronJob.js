@@ -7,16 +7,29 @@ const createPayment = async (users) => {
     try {
 
         users.forEach(async (user) => {
-            const startDate = new Date(user['Contracts.Detail_contracts.startDate'])
-            const endDate = new Date(startDate.getTime() + (20 * 24 * 60 * 60 * 1000));
-            const timePassed = Date.now() - startDate
-            const daysPassed = Math.floor(timePassed / (24 * 60 * 60 * 1000))
-            const roundedMonthsPassed = Math.round(daysPassed / (30 * user['Contracts.Detail_contracts.premiumTerm']));
+            let startDate = new Date(user['Contracts.Detail_contracts.startDate']);
+            let currentDate = new Date();
 
-            if (roundedMonthsPassed <= user['Contracts.Detail_contracts.premiumPaymentTerm']) {
+            const yearDiff = currentDate.getFullYear() - startDate.getFullYear();
+            const monthDiff = currentDate.getMonth() - startDate.getMonth();
+
+            const monthsPassed = yearDiff * 12 + monthDiff;
+
+            const roundedMonthsPassed = (monthsPassed / user['Contracts.Detail_contracts.frequency']) + 1;
+            const isInteger = roundedMonthsPassed % 1 === 0;
+            const endDate = new Date(currentDate.getTime() + (20 * 24 * 60 * 60 * 1000));
+            let maxIndex
+            if (user['Contracts.Detail_contracts.premiumPaymentTerm'] == 0) {
+                maxIndex = 1
+            }
+            else {
+                maxIndex = Math.floor(user['Contracts.Detail_contracts.premiumPaymentTerm'] / user['Contracts.Detail_contracts.frequency']);
+            }
+
+            if (roundedMonthsPassed <= maxIndex && isInteger) {
                 const checkPay = await Payment_schedule.findOne({
                     where: {
-                        idUser: user['idUser'],
+
                         idDetail_contract: user['Contracts.Detail_contracts.idDetail_contract'],
                         index: roundedMonthsPassed,
                     }
@@ -27,7 +40,7 @@ const createPayment = async (users) => {
 
                         idUser: user['idUser'],
                         idDetail_contract: user['Contracts.Detail_contracts.idDetail_contract'],
-                        startDate: user['Contracts.Detail_contracts.startDate'],
+                        startDate: currentDate,
                         endDate: endDate,
                         status: 0,
                         total: user['Contracts.Detail_contracts.premium'],
@@ -37,7 +50,7 @@ const createPayment = async (users) => {
                     const mail = await sendMailPay(
                         pay.idPayment_schedule,
                         user['Contracts.idContract'], user['Contracts.Detail_contracts.Insurance.name'],
-                        user['name'], startDate, endDate, user['Contracts.Detail_contracts.premium'], user['mail']
+                        user['name'], currentDate, endDate, user['Contracts.Detail_contracts.premium'], user['mail']
                     )
                 }
             }
@@ -101,29 +114,37 @@ const changeContractToStatus2 = async (contracts) => {
     try {
 
         contracts.forEach(async (contract) => {
-            let check = await Detail_contract.findAll({
+
+
+            let detail = await Contract.findOne({
                 where: {
-                    status: 1
+                    idContract: contract.idContract,
+                    status: 1,
                 }
+
             })
-            if (check.length === 0) {
-                let detail = await Contract.findOne({
+            const [numAffectedRows, affectedRows] = await Detail_contract.update(
+                { status: 2 },
+                {
                     where: {
                         idContract: contract.idContract,
                         status: 1,
-                    }
+                    },
+                }
+                
+               
 
-                })
-                detail.status = 2
-                await detail.save()
-            }
+            )
+        detail.status = 2
+        await detail.save()
 
 
-        });
-        return true
-    } catch (error) {
-        return false
-    }
+
+    });
+    return true
+} catch (error) {
+    return false
+}
 
 
 }
@@ -131,16 +152,8 @@ const changeContractToStatus3 = async (contracts) => {
     try {
 
         contracts.forEach(async (contract) => {
-            let check = await Detail_contract.findAll({
-                where: {
-                    [Op.or]: [
-                        { status: 1 },
-                        { status: 2 }
-                    ]
-
-                }
-            })
-            if (check.length === 0) {
+           
+            
                 let detail = await Contract.findOne({
                     where: {
                         idContract: contract.idContract,
@@ -148,9 +161,21 @@ const changeContractToStatus3 = async (contracts) => {
                     }
 
                 })
+                const [numAffectedRows, affectedRows] = await Detail_contract.update(
+                    { status: 3 },
+                    {
+                        where: {
+                            idContract: contract.idContract,
+                            status: 2,
+                        },
+                    }
+                    
+                   
+    
+                )
                 detail.status = 3
                 await detail.save()
-            }
+            
         });
         return true
     } catch (error) {
@@ -163,30 +188,44 @@ const cancelContractDueToUnpaid = async (payments) => {
     try {
 
         payments.forEach(async (payment) => {
-            const detail_contract = await Detail_contract.findOne({
-                where: {
-                    idDetail_contract: payment.idDetail_contract
-                }
 
+
+            let pay = await Payment_schedule.findOne({
+                idPayment_schedule: payment.idPayment_schedule
             })
-            let contract = await Contract.findOne({
-                where: {
-                    idContract: detail_contract.idContract
-                }
+            let user = await Payment_schedule.findOne({
+                include: [{
+                    model: Contract,
+                    where: {
+                        idContract: payment.idContract
+                    },
+                    required: true,
+                }]
             })
-            if (contract.status != 0) {
-                let details = await Detail_contract.update(
-                    { status: 0 },
-                    {
-                        where: {
-                            idContract: contract.idContract
-                        }
+            if (pay.status == 7) {
+                let contract = await Contract.findOne({
+                    where: {
+                        idContract: payment.idContract
                     }
-                );
+                })
                 contract.status = 0
                 await contract.save()
-                let mail = await sendMailCancelContract(contract.idContract, contract.signDate, payment.endDate)
+                let mail = await sendMailCancelContract(contract.idContract, contract.startDate, payment.endDate, user.mail)
             }
+            else if (pay.status == 2) {
+                pay.status = 3
+            }
+            else {
+                currentStatus = Number(pay.status)
+                currentStatus = currentStatus + 1
+                currentTotal = Number(pay.status)
+                currentTotal = Math.floor(currentTotal * 1.5)
+                pay.status = Number(currentStatus)
+                pay.total = Number(currentTotal)
+            }
+            let mail = sendMailPay(payment.idPayment_schedule, payment.idContract, user.name, payment.startDate, payment.endDate, total, user.mail)
+            await pay.save()
+
 
         });
         return true
@@ -196,7 +235,7 @@ const cancelContractDueToUnpaid = async (payments) => {
 
 
 }
-const sendMailCancelContract = async (idContract, signDate, endDate) => {
+const sendMailPayment = async (idContract, signDate, endDate) => {
     try {
         let transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
@@ -225,7 +264,7 @@ const sendMailCancelContract = async (idContract, signDate, endDate) => {
         return false
     }
 }
-const sendMailPay = async (idPayment_schedule, idContract, nameInsurance, nameUser, startDate, endDate, total, email) => {
+const sendMailCancelContract = async (idContract, startDate, endDate, email) => {
     try {
         let transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
@@ -240,9 +279,67 @@ const sendMailPay = async (idPayment_schedule, idContract, nameInsurance, nameUs
         await transporter.sendMail({
             from: "trannhatquan.2001@gmail.com", // sender address
             to: `${email}`, // list of receivers
-            subject: `Đơn thu phí - ${nameInsurance}`, // Subject line
-            text: `Đơn thu phí - ${nameInsurance}`, // plain text body
-            html: `Kính gửi ${nameUser},<br>Chúng tôi xin gửi đến bạn đơn thu phí bảo hiểm của chúng tôi. Đây là thông báo về việc thanh toán phí bảo hiểm theo hợp đồng đã ký kết.<br>Mã thu phí: ${idPayment_schedule}.<br>Mã hợp đồng: ${idContract}.<br>Tên bảo hiểm: ${nameInsurance}<br>Ngày tạo: ${startDate}.<br>Ngày hết hạn thu phí: ${endDate}.<br>Tổng số tiền phải thanh toán: ${total}.000 đồng.<br>Vui lòng thanh toán đúng số tiền trong vòng 20 ngày kể từ ngày nhận email này.Nếu bạn đã thanh toán hoặc có bất kỳ câu hỏi nào liên quan đến đơn thu phí này, xin vui lòng liên hệ với chúng tôi theo thông tin dưới đây:<br>Email:trannhatquan.2001@gmail.com<br>Xin cảm ơn sự hợp tác của bạn và chúng tôi mong nhận được thanh toán đúng hạn.<br>Trân trọng,<br> LIFE`, // html body
+            subject: `Huỷ hợp đồng - ${idContract}`, // Subject line
+            text: `Huỷ hợp đồng - ${idContract}`, // plain text body
+            html: `Kính gửi quý khách,<br>Chúng tôi xin thông báo với bạn hợp đồng số: ${idContract}(ký vào ngày: ${startDate}) đã bị huỷ do quá hạn đóng phí bảo hiểm(hạn vào ngày: ${endDate}). Chúng tôi rất lấy làm tiếc về việc này, mọi thắc mắc xin liên hệ theo thông tin dưới đây:<br>Email:trannhatquan.2001@gmail.com<br>Xin cảm ơn sự hợp tác của bạn.<br>Trân trọng,<br> LIFE`, // html body
+        });
+
+
+
+
+
+        return true
+    } catch (error) {
+        return false
+    }
+}
+const sendMailPayPlus = async (idPayment_schedule, idContract, nameInsurance, nameUser, startDate, endDate, total, email) => {
+    try {
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: "trannhatquan.2001@gmail.com", // generated ethereal user
+                pass: "bseuvtvsghpnrltz", // generated ethereal password
+            },
+        });
+
+        await transporter.sendMail({
+            from: "trannhatquan.2001@gmail.com", // sender address
+            to: `${email}`, // list of receivers
+            subject: `Đơn thu phí - Hợp đồng ${idContract}`, // Subject line
+            text: `Đơn thu phí - Hợp đồng ${idContract}`, // plain text body
+            html: `Kính gửi ${nameUser},<br>Chúng tôi xin gửi đến bạn đơn thu phí bảo hiểm của chúng tôi. Đây là thông báo về việc thanh toán phí bảo hiểm theo hợp đồng đã ký kết.<br>Mã thu phí: ${idPayment_schedule}.<br>Mã hợp đồng: ${idContract}.<br>Ngày tạo: ${startDate}.<br>Ngày hết hạn thu phí: ${endDate}.<br>Tổng số tiền phải thanh toán: ${total} đồng.<br>Vui lòng thanh toán đúng số tiền trước khi hết tháng này này.Nếu bạn đã thanh toán hoặc có bất kỳ câu hỏi nào liên quan đến đơn thu phí này, xin vui lòng liên hệ với chúng tôi theo thông tin dưới đây:<br>Email:trannhatquan.2001@gmail.com<br>Xin cảm ơn sự hợp tác của bạn và chúng tôi mong nhận được thanh toán đúng hạn.<br>Trân trọng,<br> LIFE`, // html body
+        });
+
+
+
+
+
+        return true
+    } catch (error) {
+        return false
+    }
+}
+const sendMailPay = async (idPayment_schedule, idContract, nameUser, startDate, endDate, total, email) => {
+    try {
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: "trannhatquan.2001@gmail.com", // generated ethereal user
+                pass: "bseuvtvsghpnrltz", // generated ethereal password
+            },
+        });
+
+        await transporter.sendMail({
+            from: "trannhatquan.2001@gmail.com", // sender address
+            to: `${email}`, // list of receivers
+            subject: `Đơn thu phí - Hợp đồng ${idContract}`, // Subject line
+            text: `Đơn thu phí - Hợp đồng ${idContract}`, // plain text body
+            html: `Kính gửi ${nameUser},<br>Chúng tôi xin gửi đến bạn đơn thu phí bảo hiểm của chúng tôi. Đây là thông báo về việc thanh toán phí bảo hiểm theo hợp đồng đã ký kết.<br>Mã thu phí: ${idPayment_schedule}.<br>Mã hợp đồng: ${idContract}.<br>Ngày tạo: ${startDate}.<br>Ngày hết hạn thu phí: ${endDate}.<br>Tổng số tiền phải thanh toán: ${total} đồng.<br>Vui lòng thanh toán đúng số tiền trước khi hết tháng này này.Nếu bạn đã thanh toán hoặc có bất kỳ câu hỏi nào liên quan đến đơn thu phí này, xin vui lòng liên hệ với chúng tôi theo thông tin dưới đây:<br>Email:trannhatquan.2001@gmail.com<br>Xin cảm ơn sự hợp tác của bạn và chúng tôi mong nhận được thanh toán đúng hạn.<br>Trân trọng,<br> LIFE`, // html body
         });
 
 
@@ -298,15 +395,20 @@ const checkPayment = async () => {
     try {
 
         const now = moment();
-        const oneDayBefore = now.clone().subtract(1, 'day');
+
 
         let payments = await Payment_schedule.findAll({
             raw: true,
             where: {
-                status: 0,
-                endDate: oneDayBefore
+                status: {
+                    [db.Sequelize.Op.gte]: 2 // Sử dụng Op.gte để lọc status lớn hơn hoặc bằng 2
+                },
+                startDate: {
+                    [db.Sequelize.Op.lte]: now
+                },
             }
         })
+        console.log('checKpay2')
         if (payments.length !== 0) {
             let cancel = await cancelContractDueToUnpaid(payments)
 
@@ -329,10 +431,10 @@ const checkDateDetailContract = async () => {
 
             }
         })
-        if(detail_contractStatus2.length!==0){
+        if (detail_contractStatus2.length !== 0) {
             let changeToStatus2 = await changeDetailContractToStatus2(detail_contractStatus2)
         }
-        
+
         let detail_contractStatus3 = await Detail_contract.findAll({
             raw: true,
             where: {
@@ -343,7 +445,7 @@ const checkDateDetailContract = async () => {
 
             }
         })
-        if(detail_contractStatus3.length!==0){
+        if (detail_contractStatus3.length !== 0) {
             let changeToStatus3 = await changeDetailContractToStatus3(detail_contractStatus3)
         }
         return true
@@ -353,26 +455,31 @@ const checkDateDetailContract = async () => {
 }
 const checkContract = async () => {
     try {
-
+        const now = moment();
 
         let contractStatus2 = await Contract.findAll({
             raw: true,
             where: {
                 status: 1,
+                startDate: {
+                    [db.Sequelize.Op.lte]: db.sequelize.literal(`DATE_ADD(DATE_SUB(NOW(), INTERVAL premiumPaymentTerm MONTH), INTERVAL 1 DAY)`),
+                }
             }
         })
-        if(contractStatus2.length!==0){
+        if (contractStatus2.length !== 0) {
             let changeToStatus2 = await changeContractToStatus2(contractStatus2)
         }
         let contractStatus3 = await Contract.findAll({
             raw: true,
             where: {
                 status: 2,
-
+                endDate: {
+                    [db.Sequelize.Op.lte]: now
+                }
 
             }
         })
-        if(contractStatus3.length!==0){
+        if (contractStatus3.length !== 0) {
             let changeToStatus3 = await changeContractToStatus3(contractStatus3)
         }
         return true
@@ -412,14 +519,7 @@ const checkContractPayment = async () => {
                             where: {
                                 status: 1,
                                 startDate: {
-                                    [db.Sequelize.Op.and]: [
-                                        {
-                                            [db.Sequelize.Op.gt]: db.sequelize.literal('DATE_SUB(NOW(), INTERVAL premiumPaymentTerm MONTH)'),
-                                        },
-
-                                        db.sequelize.literal(`(DATEDIFF(NOW(), startDate) / 30) % frequency = 0`),
-
-                                    ]
+                                    [db.Sequelize.Op.gt]: db.sequelize.literal('DATE_SUB(NOW(), INTERVAL premiumPaymentTerm MONTH)'),
                                 }
 
                             },
@@ -442,5 +542,5 @@ const checkContractPayment = async () => {
 }
 
 module.exports = {
-    checkContractPayment, sendMailPayStaff, checkPayment, checkDateDetailContract, checkContract
+    sendMailPayStaff, checkPayment, checkDateDetailContract, checkContract
 };

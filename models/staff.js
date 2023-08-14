@@ -11,26 +11,29 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Staff.belongsTo(models.Account,{
+      Staff.belongsTo(models.Account, {
         foreignKey: "idAccount",
-       
+
       });
-      Staff.hasMany(models.Staff_permission,{
+      Staff.hasMany(models.Staff_permission, {
         foreignKey: "idStaff",
       });
-      Staff.hasMany(models.Payment_schedule,{
+      Staff.hasMany(models.Insurance, {
         foreignKey: "idStaff",
       });
-      Staff.hasMany(models.Contract,{
+      Staff.hasMany(models.Payment_schedule, {
         foreignKey: "idStaff",
       });
-      Staff.hasMany(models.Benefit_history,{
+      Staff.hasMany(models.Contract, {
         foreignKey: "idStaff",
       });
-      Staff.hasMany(models.Post,{
+      Staff.hasMany(models.Benefit_history, {
         foreignKey: "idStaff",
       });
-     
+      Staff.hasMany(models.Post, {
+        foreignKey: "idStaff",
+      });
+
     }
   }
   Staff.init({
@@ -47,6 +50,7 @@ module.exports = (sequelize, DataTypes) => {
     mail: {
       type: DataTypes.STRING(255),
       allowNull: false,
+      unique: true,
     },
     address: {
       type: DataTypes.STRING(255),
@@ -55,16 +59,17 @@ module.exports = (sequelize, DataTypes) => {
     phone: {
       type: DataTypes.STRING(13),
       allowNull: false,
+      unique: true,
     },
     isActive: {
       allowNull: false,
       type: DataTypes.BOOLEAN,
     },
   },
-  {
-    sequelize,
-    modelName: 'Staff',
-    timestamps: false,
-  });
+    {
+      sequelize,
+      modelName: 'Staff',
+      timestamps: false,
+    });
   return Staff;
 };

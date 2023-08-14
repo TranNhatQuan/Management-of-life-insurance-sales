@@ -1,28 +1,32 @@
 <nav class="navbar bg-primary fixed-top"> <!-- Thay đổi lớp CSS thành bg-primary -->
   <div class="container-fluid">
-    <span class="navbar-brand me-auto text-light"> <!-- Thay đổi lớp CSS thành text-light -->
-      <h1>
-        LIFE 
-      </h1>
-    
+    <span class="navbar-brand me-auto"> <!-- Thay đổi lớp CSS thành text-light -->
+      <a href="/staff/home" class="text-light"
+        style="font-size: 36px; font-weight: bold;text-decoration: none;">LIFE</a>
+
     </span>
-    <span class="navbar-text text-light" style="font-size: larger;">Xin chào, <%= name %></span> <!-- Thay đổi lớp CSS thành text-light -->
+    <span class="navbar-text text-light" style="font-size: larger;">Xin chào, <%= name %></span>
+    <!-- Thay đổi lớp CSS thành text-light -->
     <a class="btn btn-link text-light" href="/account/logout"> <!-- Thay đổi lớp CSS thành text-light -->
       <!-- Biểu tượng logout -->
-      <svg xmlns="http://www.w3.org/2000/svg" width="22.4" height="22.4" fill="currentColor" class="bi bi-box-arrow-right bi-1.4x" viewBox="0 0 16 16">
-        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
-        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+      <svg xmlns="http://www.w3.org/2000/svg" width="22.4" height="22.4" fill="currentColor"
+        class="bi bi-box-arrow-right bi-1.4x" viewBox="0 0 16 16">
+        <path fill-rule="evenodd"
+          d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z" />
+        <path fill-rule="evenodd"
+          d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z" />
       </svg>
-      
+
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
       aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel" style="border-radius: 10px;">
-      <div class="offcanvas-header" >
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel"
+      style="border-radius: 10px;">
+      <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasNavbarLabel" style="font-size: xx-large">Danh mục</h5>
-      
+
       </div>
       <div class="offcanvas-body">
         <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
@@ -35,14 +39,15 @@
           <li class="nav-item">
             <a class="nav-link" href="/user/listUser?url=/staff/home">Quản lý khách hàng</a>
           </li>
-        
+
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Quản lý bảo hiểm
             </a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="/insurance/listInsurance?url=/staff/home">Danh sách bảo hiểm</a></li>
-              <li><a class="dropdown-item" href="/insurance/listInsuranceType?url=/staff/home">Danh sách loại bảo hiểm</a></li>
+              <li><a class="dropdown-item" href="/insurance/listType?url=/staff/home">Danh sách loại bảo
+                  hiểm</a></li>
               <li><a class="dropdown-item" href="/insurance/catalog?url=/staff/home">Danh mục bảo hiểm</a></li>
             </ul>
           </li>
@@ -52,27 +57,46 @@
             </a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="/contract/listContract?url=/staff/home">Danh sách hợp đồng</a></li>
-              <li><a class="dropdown-item" href="/contract/listPayment?url=/staff/home">Lịch thanh toán cho khách</a></li>
-              <li><a class="dropdown-item" href="/contract/listBenefit?url=/staff/home">Chi phí đã trả cho khách</a></li>
+              <li><a class="dropdown-item" href="/contract/listDetail?url=/staff/home">Danh sách chi tiết hợp đồng</a>
+              </li>
+              <li><a class="dropdown-item" href="/contract/listPayment?url=/staff/home">Lịch thanh toán cho khách</a>
+              </li>
+              <li><a class="dropdown-item" href="/contract/listBenefit?url=/staff/home">Chi phí đã trả cho khách</a>
+              </li>
             </ul>
           </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Quản lý bài đăng
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/post/listPost?url=/staff/home">Danh sách bài đăng</a></li>
-              <li><a class="dropdown-item" href="/post/listType?url=/staff/home">Danh mục bài đăng</a></li>
-            
-            </ul>
-            <li class="nav-item">
-              <a class="nav-link" href="/user/listUser?url=/staff/home">Báo cáo thống kê</a>
-            </li>
+       
+          <li class="nav-item">
+            <a class="nav-link" href="/staff/info?url=/staff/home">Thay đổi thông tin cá nhân</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="reportLink">Báo cáo thống kê</a>
+          </li>
           </li>
 
         </ul>
-        
+
       </div>
     </div>
   </div>
 </nav>
+<script>
+  // Hàm lấy ngày hiện tại dưới dạng chuỗi YYYY-MM-DD
+  function getCurrentDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Hàm thêm ngày hiện tại vào href của thẻ a
+  function addCurrentDateToLink() {
+    const reportLink = document.getElementById('reportLink');
+    const currentDate = getCurrentDate();
+    reportLink.href = `/report/insurance?url=/staff/home&type=day&date=${currentDate}`;
+  }
+
+  // Gọi hàm để thêm ngày hiện tại vào href khi trang đã tải xong
+  document.addEventListener('DOMContentLoaded', addCurrentDateToLink);
+</script>

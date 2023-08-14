@@ -6,12 +6,12 @@ const moment = require('moment-timezone'); // require
 const { raw } = require("body-parser");
 const nodemailer = require("nodemailer");
 const createStaffWithTransaction = async (name, email, phone, address, permission, username, password) => {
-    
+
     const t = await db.sequelize.transaction(); // Bắt đầu transaction
 
     let isSuccess
     try {
-     
+
         const salt = bcrypt.genSaltSync(10);
         const hashPassword = bcrypt.hashSync(password, salt);
 
@@ -129,6 +129,25 @@ const getDetailStaff = async (req, res) => {
         return res.status(500).json({ isSuccess: false })
     }
 };
+const getInfo = async (req, res) => {
+    try {
+
+        const error = req.flash('error')[0];
+        const staff = req.staff
+        const name = staff.name
+
+
+
+
+
+
+        return res.render('staff/info', { staff: staff, error: error, selectedMenuItem: 'Trang chủ', name: name });
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi vào trang thay đổi thông tin cá nhân!');
+        return res.redirect('/staff/home');
+    }
+};
 const getInfoHome = async (req, res) => {
     try {
 
@@ -143,18 +162,18 @@ const getInfoHome = async (req, res) => {
             },
             include: [
                 {
-                    model: Detail_contract,
 
-                    required: true,
-                    include: [
-                        {
-                            model: Payment_schedule,
-                            where: {
-                                status: 0
-                            },
-                            required: true
-                        }
-                    ]
+
+                    model: Payment_schedule,
+                    where: {
+                        status: {
+                            [db.Sequelize.Op.gte]: 3 // Sử dụng Op.gte để lọc status lớn hơn hoặc bằng 2
+                        },
+
+                    },
+                    required: true
+
+
 
                 },
                 {
@@ -164,15 +183,15 @@ const getInfoHome = async (req, res) => {
             ],
             raw: true,
         })
-   
+
         contracts = contracts.map(item => {
 
+
             return {
-                idPayment_schedule: item['Detail_contracts.Payment_schedules.idPayment_schedule'],
+                idPayment_schedule: item['Payment_schedules.idPayment_schedule'],
                 idContract: item['idContract'],
-                idDetail_contract: item['Detail_contracts.idDetail_contract'],
-                endDate: item['Detail_contracts.Payment_schedules.endDate'],
-                total: item['Detail_contracts.Payment_schedules.total'],
+                endDate: item['Payment_schedules.endDate'],
+                total: item['Payment_schedules.total'],
                 idUser: item['User.idUser'],
                 name: item['User.name'],
                 address: item['User.address'],
@@ -279,7 +298,7 @@ const editPermission = async (arr, idStaff) => {
                 name: part2,
             }
         })
-        
+
         let [currentCart, created] = await Staff_permission.findOrCreate({
             where: {
                 idStaff,
@@ -305,7 +324,17 @@ const addStaff = async (req, res) => {
             req.flash('error', 'Có lỗi xảy ra!');
             return res.redirect('/staff/listStaff');
         }
-   
+
+        const existingUserByPhone = await Staff.findOne({ where: { phone } });
+        if (existingUserByPhone) {
+            req.flash('error', 'Số điện thoại không được trùng với các Số điện thoại đã có!');
+            return res.redirect('/staff/listStaff');
+        }
+        const existingUserByEmail = await Staff.findOne({ where: { mail: email } });
+        if (existingUserByEmail) {
+            req.flash('error', 'Email không được trùng với các Email đã có!');
+            return res.redirect('/staff/listUser');
+        }
 
         const isAdd = await createStaffWithTransaction(name, email, phone, address, permission, username, password)
         if (!isAdd) {
@@ -345,7 +374,7 @@ const editStaff = async (req, res) => {
 
         const { idStaff } = req.params
         const { name, email, phone, address, permission } = req.body
-   
+
         let staff = await Staff.findOne({
             where: {
                 idStaff
@@ -354,8 +383,24 @@ const editStaff = async (req, res) => {
 
         })
         staff.name = name
-        staff.mail = email
-        staff.phone = phone
+        if (staff.mail != email) {
+            const existingUserByCard = await Staff.findOne({ where: { mail: email } });
+            if (existingUserByCard) {
+                req.flash('error', 'Email không được trùng với các Email đã có!');
+                return res.redirect('/staff/listStaff');
+            }
+            staff.mail = email
+        }
+
+        if (staff.phone != phone) {
+            const existingUserByCard = await Staff.findOne({ where: { phone: phone } });
+            if (existingUserByCard) {
+                req.flash('error', 'SĐT không được trùng với các SĐT đã có!');
+                return res.redirect('/staff/listStaff');
+            }
+            staff.phone = phone
+        }
+
         staff.address = address
         await staff.save()
         let staff_permission = await Staff_permission.destroy({
@@ -375,7 +420,38 @@ const editStaff = async (req, res) => {
         //return res.status(200).json({ isSuccess: true })
     } catch (error) {
         req.flash('error', 'Có lỗi xảy ra khi đổi thông tin nhân viên');
-        return res.redirect('/account/admin/login');
+        return res.redirect(req.query.url);
+    }
+};
+const checkPay = async (req, res) => {
+    try {
+        let staff = req.staff
+        let name = staff.name
+
+        const { idPayment_schedule } = req.params
+        let pay = await Payment_schedule.findOne({
+            where: {
+                idPayment_schedule,
+                status: {
+                    [db.Sequelize.Op.gte]: 3 // Sử dụng Op.gte để lọc status lớn hơn hoặc bằng 2
+                },
+            }
+        })
+        if (pay) {
+            pay.status = 1
+            await pay.save()
+            req.flash('error', 'Thanh toán thành công!');
+            return res.redirect('/staff/home');
+        }
+        else {
+            req.flash('error', 'Không tìm thấy thông tin trả phí!');
+            return res.redirect('/staff/home');
+        }
+
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi thanh toán!');
+        return res.redirect('/staff/home');
     }
 };
 const selfEdit = async (req, res) => {
@@ -384,22 +460,37 @@ const selfEdit = async (req, res) => {
 
 
         const { name, email, phone, address } = req.body
-     
+
 
         staff.name = name
-        staff.mail = email
-        staff.phone = phone
+        if (staff.mail != email) {
+            const existingUserByCard = await Staff.findOne({ where: { mail: email } });
+            if (existingUserByCard) {
+                req.flash('error', 'Email không được trùng với các Email đã có!');
+                return res.redirect('/staff/info');
+            }
+            staff.mail = email
+        }
+
+        if (staff.phone != phone) {
+            const existingUserByCard = await Staff.findOne({ where: { phone: phone } });
+            if (existingUserByCard) {
+                req.flash('error', 'SĐT không được trùng với các SĐT đã có!');
+                return res.redirect('/staff/info');
+            }
+            staff.phone = phone
+        }
         staff.address = address
         await staff.save()
 
         req.flash('error', 'Đổi thông tin cá nhân thành công!');
-   
-        return res.redirect('/staff/home');
 
-  
+        return res.redirect('/staff/info');
+
+
     } catch (error) {
-        req.flash('error', 'Có lỗi xảy ra khi lấy danh sách nhân viên');
-        return res.redirect('/account/admin/login');
+        req.flash('error', 'Có lỗi xảy ra khi sửa thông tin cá nhân');
+        return res.redirect('/staff/info');
     }
 };
 const changePassword = async (req, res) => {
@@ -407,12 +498,12 @@ const changePassword = async (req, res) => {
 
 
         let staff = req.staff
-        const { oldPassword, newPassword } = req.body
-        if (oldPassword.trim() == '' || newPassword == '') {
+        const { oldPassword, password } = req.body
+        if (oldPassword.trim() == '' || password == '') {
             req.flash('error', 'Mật khẩu không được để trống!');
             return res.redirect('/staff/home');
         }
-  
+
         let account = await Account.findOne({
             where: {
                 idAccount: staff.idAccount
@@ -424,7 +515,7 @@ const changePassword = async (req, res) => {
             const salt = bcrypt.genSaltSync(10);
             //mã hoá salt + password
 
-            const hashPassword = bcrypt.hashSync(newPassword, salt);
+            const hashPassword = bcrypt.hashSync(password, salt);
 
             account.password = hashPassword;
             await account.save()
@@ -501,19 +592,21 @@ const deleteStaff = async (req, res) => {
             where: { idAccount: staff.idAccount }
         })
 
-
+        console.log(1)
         await staff.destroy()
+        console.log(2)
         await account.destroy()
-        //req.flash('error', 'Đổi trạng thái tài khoản thành công!');
+        req.flash('error', 'Xoá nhân viên có mã: ' + idStaff + ' thành công!');
         return res.status(200).json({ isSuccess: true });
 
     } catch (error) {
         //req.flash('error', 'Có lỗi xảy ra khi lấy danh sách nhân viên');
+        req.flash('error', 'Xoá nhân viên thất bại, không thể xoá khi nhân viên đã tham gia 1 hợp đồng bảo hiểm nào đó!');
         return res.status(500).json({ isSuccess: false })
     }
 };
 module.exports = {
 
     getListStaff, getDetailStaff, editStaff, deleteStaff, activeStaff, inActiveStaff, getInfoHome,
-    changePassword, selfEdit, splitPermission, addStaff, getFormAddStaff
+    changePassword, selfEdit, splitPermission, addStaff, getFormAddStaff, getInfo, checkPay
 };

@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Payment_schedule.belongsTo(models.Detail_contract,{
+      Payment_schedule.belongsTo(models.Detail_contract, {
         foreignKey: "idDetail_contract",
       });
       Payment_schedule.belongsTo(models.Staff, {
@@ -25,36 +25,39 @@ module.exports = (sequelize, DataTypes) => {
   Payment_schedule.init({
     idPayment_schedule: {
       allowNull: false,
-      
+
       primaryKey: true,
       autoIncrement: true,
       type: DataTypes.INTEGER
     },
-    startDate:{
+    startDate: {
       allowNull: false,
       type: DataTypes.DATEONLY
     },
-    endDate:{
+    endDate: {
       allowNull: false,
       type: DataTypes.DATEONLY
     },
-    date:{
+    date: {
       allowNull: true,
       type: DataTypes.DATEONLY
     },
-    status:{
-      allowNull:false,
+    status: {
+      allowNull: false,
       type: DataTypes.INTEGER,
     },
-    total:{
-      allowNull:false,
+    total: {
+      allowNull: false,
       type: DataTypes.INTEGER,
     },
-    index:{
-      allowNull:false,
+    index: {
+      allowNull: false,
       type: DataTypes.INTEGER,
     },
-    
+    info: {
+      allowNull: true,
+      type: DataTypes.TEXT
+    },
   }, {
     sequelize,
     modelName: 'Payment_schedule',

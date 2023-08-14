@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar {
+      /* Thiết lập vị trí */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+
+      z-index: 2;
+    }
+
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    .info {
+      /* Thiết lập vị trí */
+      margin-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+
+      /* Thiết lập vị trí */
+      margin-top: 30px;
+      position: relative;
+      z-index: 0;
+
+    }
+
+    h3 {
+      font-size: large;
+      font-weight: lighter;
+      opacity: 0.7;
+      text-align: center;
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      /* Định dạng chiều rộng của popup */
+      height: 400px;
+      /* Định dạng chiều cao của popup */
+      background: #fff;
+      /* Màu nền của popup */
+      border: 1px solid #ccc;
+      /* Viền của popup */
+      padding: 20px;
+      /* Khoảng cách giữa nội dung và viền của popup */
+      display: none;
+      overflow: auto;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
+    }
+
+    .button-like {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #4CAF50;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button-like:hover {
+      background-color: #266c84;
+    }
+
+    #addEmployeeBtn {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .blockInfo {
+      -webkit-text-fill-color: #f5f5f5;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+
+      grid-gap: 20px;
+    }
+
+    .blockContract {
+
+      background-color: #4CAF50;
+      width: 350px;
+      /* Set the width of each contract container */
+      margin: 10px;
+      /* Add some margin between contract containers */
+    }
+
+    .contarct {
+      margin: 10px;
+    }
+
+    .blockProduct {
+
+      margin-top: 10px;
+    }
+
+    .blockDetail {
+      display: none;
+    }
+
+    #image {
+      position: relative;
+      /* Đặt phần tử này làm đối tượng có vị trí tương đối */
+    }
+
+    /* CSS cho phần tử văn bản */
+    #text {
+      position: absolute;
+      width: 20%;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      /* Đặt phần tử này làm đối tượng có vị trí tuyệt đối */
+      top: 110px;
+      /* Đặt phần tử văn bản ở giữa theo chiều dọc */
+      left: 10%;
+      /* Đặt phần tử văn bản ở giữa theo chiều ngang */
+
+      background-color: #4CAF50;
+      /* Đặt màu nền cho phần tử văn bản */
+
+      z-index: 2;
+      /* Đặt độ ưu tiên hiển thị lớn hơn hình ảnh */
+    }
+
+    #text2 {
+      font-size: smaller;
+      opacity: 0.5;
+      position: absolute;
+      width: 100%;
+      height: 30px;
+      /* Đặt phần tử này làm đối tượng có vị trí tuyệt đối */
+      top: 43%+120px;
+      /* Đặt phần tử văn bản ở giữa theo chiều dọc */
+      left: 10%;
+      /* Đặt phần tử văn bản ở giữa theo chiều ngang */
+
+      background-color: #f5f5ff;
+      /* Đặt màu nền cho phần tử văn bản */
+
+      z-index: 1;
+      /* Đặt độ ưu tiên hiển thị lớn hơn hình ảnh */
+    }
+
+    .detail {
+      margin: 10px;
+    }
+  </style>
+</head>
+
+<body style="background-color: #f5f5f5">
+  <%- include('../../layout/sidebar2.ejs') %>
+    <% if (typeof error !=='undefined' ) { %>
+      <script>
+        alert("<%= error %>");
+
+      </script>
+      <% delete error; %>
+        <% } %>
+
+          <section class="info">
+            <div id="image">
+              <img src="../../icon/a1.jpg" alt="" height="260px" width="100%">
+            </div>
+            <div>
+
+
+
+            </div>
+
+          </section>
+          <section class="container">
+            <div>
+              <h2 style="text-align: center;font-weight: bold;">Sản phầm dành cho bạn</h2>
+              <h3>Cùng gieo mầm hôm nay - Cho tương lai phồn thịnh</h3>
+              <div class="blockInfo">
+                <% listType.forEach(function(insurance) { %>
+                  <div class="blockContract" onclick="detailInsurance('<%=insurance.idInsurance_type%>')">
+
+
+                    <div class="contract" style="display: flex;"><img
+                        src="../../uploads/imageInsurance/<%=insurance.idInsurance_type%>.jpg" alt="" height="200"
+                        width="350">
+                    </div>
+                    <div class="contract" style=" margin: 10px;font-weight: bold;">
+                      <%=insurance.name%>
+                    </div>
+                    <div class="contract" style="display: flex; margin: 10px;">
+                      <%=insurance.info%>
+                    </div>
+                  </div>
+                  <% }); %>
+              </div>
+
+
+
+            </div>
+            <div>
+              <h2 style="text-align: center;font-weight: bold;">Nhu cầu dành cho bạn</h2>
+              <h3>Chúng tôi cung cấp đa dạng các sản phẩm theo Nhu cầu tài chính của Quý khách hàng.</h3>
+              <div class="blockInfo">
+                <% listCatalog.forEach(function(insurance) { %>
+                  <div class="blockContract" onclick="detailInsurance('<%=insurance.idCatalog%>')">
+
+
+                    <div class="contract" style="display: flex;"><img
+                        src="../../uploads/imageInsurance/<%=insurance.idCatalog%>.jpg" alt="" height="200" width="350">
+                    </div>
+                    <div class="contract" style=" margin: 10px;font-weight: bold;">
+                      <%=insurance.name%>
+                    </div>
+                    <div class="contract" style="display: flex; margin: 10px;">
+                      <%=insurance.info%>
+                    </div>
+                  </div>
+                  <% }); %>
+              </div>
+
+
+
+            </div>
+            <div>
+              <h2 style="text-align: center;font-weight: bold;">Giới thiệu LIFE Việt Nam</h2>
+              <h3>Luôn tôn trọng khách hàng, hướng tới một dịch vụ hoàn hảo</h3>
+              <div class="blockInfo">
+                <div class="contract" style="display: flex;"><img src="../../icon/intro2.png" alt="" height="250"
+                    width="400">
+                </div>
+                <div class="contract" style="display: flex;-webkit-text-fill-color: #191b1b; font-weight: bold; padding-top: 50px;">
+                  
+                    Kế thừa lịch sử hơn 50 năm hoạt động thành công cùng quan niệm kinh doanh thực tế, nhiệt thành phục
+                    vụ theo phương châm "Luôn tôn trọng khách hàng, hướng tới một dịch vụ hoàn hảo", công ty LIFE ngày
+                    càng khẳng định được vị thế của mình tại thị trường trong và ngoài nước, tự tin đưa dịch vụ của công
+                    ty tới thị trường Việt Nam.
+
+
+                
+                </div>
+              </div>
+
+
+
+            </div>
+          </section>
+
+          <div id="popup" class="popup"></div>
+
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+          <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+          <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+          <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+          <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
+          <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+          <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.bootstrap5.min.js"></script>
+          <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+          <script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+          <script src="https://cdn.datatables.net/searchbuilder/1.2.1/js/dataTables.searchBuilder.min.js"></script>
+          <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+
+          <script>
+
+
+            var popupVisible = false;
+            var varblockDetail = false;
+            function showPopup() {
+              var popup = document.getElementById("popup");
+              popup.style.display = "block";
+              popupVisible = true;
+              // Thêm sự kiện mousedown cho document để ẩn popup khi người dùng nhấp chuột ra ngoài
+              document.addEventListener("mousedown", hidePopupOutside);
+            }
+
+            function hidePopup() {
+              var popup = document.getElementById("popup");
+              popup.style.display = "none";
+              popupVisible = false;
+              // Gỡ bỏ sự kiện mousedown khỏi document
+              document.removeEventListener("mousedown", hidePopupOutside);
+            }
+
+            // Ẩn popup khi người dùng nhấp chuột ra ngoài
+            function hidePopupOutside(event) {
+              var popup = document.getElementById("popup");
+              if (!popup.contains(event.target)) {
+                hidePopup();
+              }
+            }
+            function dropDetail(idContract) {
+
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              var popup = document.getElementById(idContract);
+              if (varblockDetail == true) {
+                popup.style.display = "none";
+                varblockDetail = false
+              }
+              else {
+                popup.style.display = "block";
+                varblockDetail = true
+              }
+
+
+
+
+
+            }
+
+
+
+
+            function viewEmployeeDetail(employeeId) {
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              $.ajax({
+                url: '/user/detail/' + employeeId,
+                type: 'GET',
+                dataType: 'html',
+                success: function (response) {
+                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
+                  showPopup();
+                  $('#popup').html(response);
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  alert("Có lỗi xảy ra khi xử lý yêu cầu.");
+                  window.location.href = '/user/listUser';
+                  console.log(error);
+                }
+              });
+            }
+
+
+
+            function inActiveEmployee(employeeId, event) {
+              event.stopPropagation();
+              $.ajax({
+                url: '/user/inActive/' + employeeId,
+                type: 'PUT',
+                success: function (response) {
+                  // Xử lý thành công
+                  console.log('Đã vô hiệu hoá khách hàng:', employeeId);
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
+                  window.location.href = '/user/listUser';
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  console.log('Lỗi:', error);
+                }
+              });
+            }
+
+            function activeEmployee(employeeId, event) {
+              event.stopPropagation();
+              $.ajax({
+                url: '/user/active/' + employeeId,
+                type: 'PUT',
+                success: function (response) {
+                  // Xử lý thành công
+                  console.log('Đã kích hoạt khách hàng:', employeeId);
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+                  window.location.href = '/user/listUser';
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  console.log('Lỗi:', error);
+                }
+              });
+            }
+            function deleteEmployee(employeeId, event) {
+              event.stopPropagation();
+              $.ajax({
+                url: '/user/delete/' + employeeId,
+                type: 'DELETE',
+                success: function (response) {
+                  // Xử lý thành công
+                  alert('Đã xoá khách hàng có id: ' + employeeId);
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+                  window.location.href = '/user/listUser';
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  console.log('Lỗi:', error);
+                }
+              });
+            }
+            function fullDetailUser(employeeId, event) {
+              event.stopPropagation();
+              $.ajax({
+                url: '/user/fullDetail/' + employeeId,
+                type: 'GET',
+                success: function (response) {
+                  // Xử lý thành công
+                  alert('Đã xoá khách hàng có id: ' + employeeId);
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+                  window.location.href = '/user/listUser';
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  console.log('Lỗi:', error);
+                }
+              });
+            }
+
+
+
+          </script>
+
+
+</body>
+
+</html>

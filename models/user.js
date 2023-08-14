@@ -11,22 +11,20 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      User.belongsTo(models.Account,{
+      User.belongsTo(models.Account, {
         foreignKey: "idAccount",
-        
+
       });
-      
-    
-      User.hasMany(models.Contract,{
+
+
+      User.hasMany(models.Contract, {
         foreignKey: "idUser",
       });
-      User.hasMany(models.Detail_contract,{
-        foreignKey: "idBeneficiary",
-      });
-      User.hasMany(models.Benefit_history,{
+
+      User.hasMany(models.Benefit_history, {
         foreignKey: "idUser",
       });
-      User.hasMany(models.Payment_schedule,{
+      User.hasMany(models.Payment_schedule, {
         foreignKey: "idUser",
       });
     }
@@ -54,22 +52,22 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(13),
       allowNull: false,
     },
-    idCard:{
+    idCard: {
       type: DataTypes.STRING(15),
-      allowNull:false,
+      allowNull: false,
       unique: true,
     },
     isActive: {
       allowNull: false,
       type: DataTypes.BOOLEAN,
     },
-    
-   
+
+
   },
-  {
-    sequelize,
-    modelName: 'User',
-    timestamps: false,
-  });
+    {
+      sequelize,
+      modelName: 'User',
+      timestamps: false,
+    });
   return User;
 };

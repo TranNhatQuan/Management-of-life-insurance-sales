@@ -4,6 +4,7 @@
 <head>
 
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
@@ -141,7 +142,7 @@
                 <% types.forEach(function(type) { %>
                   <tr onclick="viewInsuranceType('<%= type.idInsurance_type %>')">
                     <td>
-                      <%= type.idInsurance_type %>
+                      LBH-<%= type.idInsurance_type %>
                     </td>
                     <td>
                       <%= type.name %>
@@ -151,20 +152,21 @@
                     </td>
                     <td>
                       <% if (type.isDel) { %>
-                        <button onclick="inActiveInsuranceType('<%= type.idInsurance_type %>', event)">
+                        <button onclick="activeInsuranceType('<%= type.idInsurance_type %>', event)">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-toggle-on" viewBox="0 0 16 16">
-                            <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                            class="bi bi-toggle-off" viewBox="0 0 16 16">
+                            <path
+                              d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
                           </svg>
                         </button>
                         <% } else { %>
-                          <button onclick="activeInsuranceType('<%= type.idInsurance_type %>', event)">
+                          <button onclick="inActiveInsuranceType('<%= type.idInsurance_type %>', event)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                              class="bi bi-toggle-off" viewBox="0 0 16 16">
-                              <path
-                                d="M11 4a4 4 0 0 1 0 8H8a4.992 4.992 0 0 0 2-4 4.992 4.992 0 0 0-2-4h3zm-6 8a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM0 8a5 5 0 0 0 5 5h6a5 5 0 0 0 0-10H5a5 5 0 0 0-5 5z" />
+                              class="bi bi-toggle-on" viewBox="0 0 16 16">
+                              <path d="M5 3a5 5 0 0 0 0 10h6a5 5 0 0 0 0-10H5zm6 9a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
                             </svg>
                           </button>
+
                           <% } %>
                     </td>
                     <td>
@@ -267,7 +269,7 @@
             function viewInsuranceType(employeeId) {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/insurance/detailType/' + employeeId + '?url=/insurance/listType',
+                url: '/insurance/editType/' + employeeId + '?url=/insurance/listType',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -288,7 +290,7 @@
             function inActiveInsuranceType(employeeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/insurance/inActiveType/' + employeeId + '?url=/insurance/listType',
+                url: '/insurance/deleteType/' + employeeId + '?url=/insurance/listType&isDel=true',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
@@ -298,7 +300,7 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/insurance/listType?url=/staff/home';
                 }
               });
             }
@@ -306,7 +308,7 @@
             function activeInsuranceType(employeeId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/insurance/activeType/' + employeeId + '?url=/insurance/listType',
+                url: '/insurance/deleteType/' + employeeId + '?url=/insurance/listType&isDel=false',
                 type: 'PUT',
                 success: function (response) {
                   // Xử lý thành công
@@ -316,7 +318,7 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/insurance/listType?url=/staff/home';
                 }
               });
             }
@@ -327,13 +329,12 @@
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá loại bảo hiểm có id: ' + employeeId);
-                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
                   window.location.href = '/insurance/listType?url=/staff/home';
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+
+                  window.location.href = '/insurance/listType?url=/staff/home';
                 }
               });
             }

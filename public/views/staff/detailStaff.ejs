@@ -3,6 +3,7 @@
 
 <head>
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <style>
     h3 {
       font-size: smaller;
@@ -72,7 +73,8 @@
     </div>
     <div class="form-group">
       <label for="name">Tên:</label>
-      <input type="text" id="name" name="name" value="<%= staff.name %>" required>
+      <input type="text" id="name" name="name" value="<%= staff.name %>" required pattern="^\S.{4,48}\S$"
+        title="Tên phải có độ dài từ 6 đến 50 ký tự.">
     </div>
     <div class="form-group">
       <label for="email">Email:</label>
@@ -80,11 +82,13 @@
     </div>
     <div class="form-group">
       <label for="phone">Số điện thoại:</label>
-      <input type="tel" id="phone" name="phone" value="<%= staff.phone %>" required>
+      <input type="tel" id="phone" name="phone" value="<%= staff.phone %>" required pattern="0\d{9,10}"
+        title="Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam có độ dài 10 hoặc 11 số và bắt đầu bằng số 0.">
     </div>
     <div class="form-group">
       <label for="address">Địa chỉ:</label>
-      <input type="text" id="address" name="address" value="<%= staff.address %>" required>
+      <input type="text" id="address" name="address" value="<%= staff.address %>" required pattern="^\S.{5,253}\S$"
+        title="Địa chỉ phải có độ dài từ 7 đến 255 ký tự.">
     </div>
     <p><strong>ID tài khoản:</strong>
       <%= staff.idAccount %>
@@ -103,10 +107,12 @@
       </tr>
       <tr>
         <td>QL Nhân viên</td>
-        <td><input type="checkbox" name="permission" value="addStaff" <% if (staff.addStaff===true) { %>checked<% } %>>
+        <td><input type="checkbox" name="permission" value="addStaff" <% if (staff.addStaff===true) { %>checked<% } %>
+            >
         </td>
-        <td><input type="checkbox" name="permission" value="deleteStaff" <% if (staff.deleteStaff===true) { %>checked<%
-            } %>></td>
+        <td><input type="checkbox" name="permission" value="deleteStaff" <% if (staff.deleteStaff===true) { %>checked
+          <% } %>>
+        </td>
         <td><input type="checkbox" name="permission" value="editStaff" <% if (staff.editStaff===true) { %>checked<% } %>
             ></td>
         <td><input type="checkbox" name="permission" value="readStaff" <% if (staff.readStaff===true) { %>checked<% } %>
@@ -118,15 +124,18 @@
         </td>
         <td><input type="checkbox" name="permission" value="deleteUser" <% if (staff.deleteUser===true) { %>checked<% }
             %>></td>
-        <td><input type="checkbox" name="permission" value="editUser" <% if (staff.editUser===true) { %>checked<% } %>>
+        <td><input type="checkbox" name="permission" value="editUser" <% if (staff.editUser===true) { %>checked<% } %>
+            >
         </td>
-        <td><input type="checkbox" name="permission" value="readUser" <% if (staff.readUser===true) { %>checked<% } %>>
+        <td><input type="checkbox" name="permission" value="readUser" <% if (staff.readUser===true) { %>checked<% } %>
+            >
         </td>
       </tr>
       <tr>
         <td>QL Hợp đồng</td>
-        <td><input type="checkbox" name="permission" value="addContract" <% if (staff.addContract===true) { %>checked<%
-            } %>></td>
+        <td><input type="checkbox" name="permission" value="addContract" <% if (staff.addContract===true) { %>checked
+          <% } %>>
+        </td>
         <td><input type="checkbox" name="permission" value="deleteContract" <% if (staff.deleteContract===true) {
             %>checked<% } %>></td>
         <td><input type="checkbox" name="permission" value="editContract" <% if (staff.editContract===true) { %>checked
@@ -154,9 +163,11 @@
         </td>
         <td><input type="checkbox" name="permission" value="deletePost" <% if (staff.deletePost===true) { %>checked<% }
             %>></td>
-        <td><input type="checkbox" name="permission" value="editPost" <% if (staff.editPost===true) { %>checked<% } %>>
+        <td><input type="checkbox" name="permission" value="editPost" <% if (staff.editPost===true) { %>checked<% } %>
+            >
         </td>
-        <td><input type="checkbox" name="permission" value="readPost" <% if (staff.readPost===true) { %>checked<% } %>>
+        <td><input type="checkbox" name="permission" value="readPost" <% if (staff.readPost===true) { %>checked<% } %>
+            >
         </td>
       </tr>
       <tr>
@@ -165,10 +176,12 @@
             %>></td>
         <td><input type="checkbox" name="permission" value="deletePayment" <% if (staff.deletePayment===true) {
             %>checked<% } %>></td>
-        <td><input type="checkbox" name="permission" value="editPayment" <% if (staff.editPayment===true) { %>checked<%
-            } %>></td>
-        <td><input type="checkbox" name="permission" value="readPayment" <% if (staff.readPayment===true) { %>checked<%
-            } %>></td>
+        <td><input type="checkbox" name="permission" value="editPayment" <% if (staff.editPayment===true) { %>checked
+          <% } %>>
+        </td>
+        <td><input type="checkbox" name="permission" value="readPayment" <% if (staff.readPayment===true) { %>checked
+          <% } %>>
+        </td>
       </tr>
       <tr>
         <td>QL Chi trả bảo hiểm</td>
@@ -176,10 +189,21 @@
             %>></td>
         <td><input type="checkbox" name="permission" value="deleteBenefit" <% if (staff.deleteBenefit===true) {
             %>checked<% } %>></td>
-        <td><input type="checkbox" name="permission" value="editBenefit" <% if (staff.editBenefit===true) { %>checked<%
-            } %>></td>
-        <td><input type="checkbox" name="permission" value="readBenefit" <% if (staff.readBenefit===true) { %>checked<%
-            } %>></td>
+        <td><input type="checkbox" name="permission" value="editBenefit" <% if (staff.editBenefit===true) { %>checked
+          <% } %>>
+        </td>
+        <td><input type="checkbox" name="permission" value="readBenefit" <% if (staff.readBenefit===true) { %>checked
+          <% } %>>
+        </td>
+      </tr>
+      <tr>
+        <td>Báo cáo, thống kê</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><input type="checkbox" name="permission" value="readReport" <% if (staff.readReport===true) { %>checked
+          <% } %>>
+        </td>
       </tr>
     </table>
     <div class="form-group">

@@ -4,6 +4,7 @@
 <head>
 
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
@@ -118,11 +119,11 @@
 
           <div class="container">
             <h2>Danh sách thông tin chi trả</h2>
-            <h3>Đây là danh sách thông tin chi trả, ấn vào dòng chứa thông tin thông tin chi trả bất kỳ để xem và sửa thông tin thông tin chi trả
+            <h3>Đây là danh sách thông tin chi trả, ấn vào dòng chứa thông tin thông tin chi trả bất kỳ để xem và sửa
+              thông tin thông tin chi trả
               đó.
             </h3>
-            <!-- Thêm nút "Thêm thông tin chi trả" -->
-            <button id="addbenefitBtn" onclick="addbenefit()" class="btn btn-primary">Thêm thông tin chi trả mới</button>
+
 
             <table id="benefitTable" class="table table-striped table-bordered" style="width:100%">
               <thead>
@@ -229,31 +230,14 @@
               }
             }
 
-            function addbenefit() {
-              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
-              $.ajax({
-                url: '/staff/add?url=/staff/listStaff',
-                type: 'GET',
-                dataType: 'html',
-                success: function (response) {
-                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
-                  showPopup();
-                  $('#popup').html(response);
-                },
-                error: function (xhr, status, error) {
-                  // Xử lý lỗi nếu có
-                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
-                  console.log(error);
-                }
-              });
-            }
+          
 
 
 
             function viewbenefitDetail(benefitId) {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/staff/detail/' + benefitId + '?url=/staff/listStaff',
+                url: '/contract/editBenefit/' + benefitId + '?url=/contract/listBenefit',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {
@@ -263,7 +247,7 @@
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
+                  window.location.href = '/contract/listBenefit?url=/staff/home';
                   console.log(error);
                 }
               });
@@ -271,55 +255,21 @@
 
 
 
-            function inActivebenefit(benefitId, event) {
-              event.stopPropagation();
-              $.ajax({
-                url: '/staff/inActive/' + benefitId + '?url=/staff/listStaff',
-                type: 'PUT',
-                success: function (response) {
-                  // Xử lý thành công
-                  console.log('Đã vô hiệu hoá nhân viên:', benefitId);
-                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
-                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
-                },
-                error: function (xhr, status, error) {
-                  // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
-                }
-              });
-            }
-
-            function activebenefit(benefitId, event) {
-              event.stopPropagation();
-              $.ajax({
-                url: '/staff/active/' + benefitId + '?url=/staff/listStaff',
-                type: 'PUT',
-                success: function (response) {
-                  // Xử lý thành công
-                  console.log('Đã kích hoạt nhân viên:', benefitId);
-                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
-                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
-                },
-                error: function (xhr, status, error) {
-                  // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
-                }
-              });
-            }
+          
             function deletebenefit(benefitId, event) {
               event.stopPropagation();
               $.ajax({
-                url: '/staff/delete/' + benefitId + '?url=/staff/listStaff',
+                url: '/contract/deleteBenefit/' + benefitId + '?url=/contract/listDetail',
                 type: 'DELETE',
                 success: function (response) {
                   // Xử lý thành công
-                  alert('Đã xoá nhân viên có id: ' + benefitId);
+                  
                   // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
-                  window.location.href = '/staff/listStaff?url=/staff/listStaff';
+                  window.location.href = '/contract/listBenefit?url=/staff/home';
                 },
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
-                  console.log('Lỗi:', error);
+                  window.location.href = '/contract/listBenefit?url=/staff/home';
                 }
               });
             }

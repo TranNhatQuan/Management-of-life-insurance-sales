@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar {
+      /* Thiết lập vị trí */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+
+      z-index: 2;
+    }
+
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    .info {
+      /* Thiết lập vị trí */
+      margin-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+
+      /* Thiết lập vị trí */
+      margin-top: 30px;
+      position: relative;
+      z-index: 0;
+
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+      text-align: center;
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      /* Định dạng chiều rộng của popup */
+      height: 400px;
+      /* Định dạng chiều cao của popup */
+      background: #fff;
+      /* Màu nền của popup */
+      border: 1px solid #ccc;
+      /* Viền của popup */
+      padding: 20px;
+      /* Khoảng cách giữa nội dung và viền của popup */
+      display: none;
+      overflow: auto;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
+    }
+
+    .button-like {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #4CAF50;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button-like:hover {
+      background-color: #266c84;
+    }
+
+    #addEmployeeBtn {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .blockInfo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      border-radius: 10px;
+      grid-gap: 20px;
+    }
+
+    .blockContract {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #fffffff8;
+      width: 500px;
+      /* Set the width of each contract container */
+      margin: 10px;
+      /* Add some margin between contract containers */
+    }
+
+    .contarct {
+      margin: 10px;
+    }
+
+    .blockProduct {
+
+      margin-top: 10px;
+    }
+
+    .blockDetail {
+      display: none;
+    }
+
+    #image {
+      position: relative;
+      /* Đặt phần tử này làm đối tượng có vị trí tương đối */
+    }
+
+    /* CSS cho phần tử văn bản */
+    #text {
+      position: absolute;
+      width: 20%;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      /* Đặt phần tử này làm đối tượng có vị trí tuyệt đối */
+      top: 110px;
+      /* Đặt phần tử văn bản ở giữa theo chiều dọc */
+      left: 10%;
+      /* Đặt phần tử văn bản ở giữa theo chiều ngang */
+
+      background-color: #4CAF50;
+      /* Đặt màu nền cho phần tử văn bản */
+
+      z-index: 2;
+      /* Đặt độ ưu tiên hiển thị lớn hơn hình ảnh */
+    }
+
+    #text2 {
+      font-size: smaller;
+      opacity: 0.5;
+      position: absolute;
+      width: 100%;
+      height: 30px;
+      /* Đặt phần tử này làm đối tượng có vị trí tuyệt đối */
+      top: 43%+120px;
+      /* Đặt phần tử văn bản ở giữa theo chiều dọc */
+      left: 10%;
+      /* Đặt phần tử văn bản ở giữa theo chiều ngang */
+
+      background-color: #f5f5ff;
+      /* Đặt màu nền cho phần tử văn bản */
+
+      z-index: 1;
+      /* Đặt độ ưu tiên hiển thị lớn hơn hình ảnh */
+    }
+
+    .detail {
+      margin: 10px;
+    }
+  </style>
+</head>
+
+<body style="background-color: #f5f5f5">
+  <%- include('../../layout/sidebar2.ejs') %>
+    <% if (typeof error !=='undefined' ) { %>
+      <script>
+        alert("<%= error %>");
+
+      </script>
+      <% delete error; %>
+        <% } %>
+
+          <section class="info">
+            <div id="image">
+              <img src="../../icon/a1.jpg" alt="" height="260px" width="100%">
+            </div>
+            <div>
+
+              <div id="text" class="text-white" style="font-size: xx-large">
+                Danh sách hợp đồng
+              </div>
+
+            </div>
+
+          </section>
+          <section class="container">
+            <div>
+              <h2 style="text-align: center;font-weight: bold;">Danh sách tất hợp đồng</h2>
+              <h3>Ấn vào nút sổ dưới để xem chi tiết</h3>
+              <div class="blockInfo">
+                <% contracts.forEach(function(contract) { %>
+                  <div class="blockContract">
+                    <div class="contract" style=" margin: 10px;font-weight: bold;">Thông tin hợp đồng
+                    </div>
+
+                    <div class="contract" style="display: flex; margin: 10px;">Mã hợp đồng: <%= contract.idContract%>
+                    </div>
+                    <div class="contract" style="display: flex; margin: 10px;">Trạng thái: <%= contract.status%>
+                    </div>
+
+
+                    <div class="contract" style="display: flex; margin: 10px;">Ngày bắt đầu: <%= contract.startDate%>
+                    </div>
+                    <div class="contract" style="display: flex; margin: 10px;">Ngày kết thúc: <%= contract.endDate%>
+                    </div>
+                    <div class="contract" style="display: flex; margin: 10px;">Chu kỳ đóng phí: <%= contract.frequency%>
+                        tháng
+                    </div>
+
+
+
+
+
+                    <div class="contract" style="display: flex; margin: 10px;">Tải bản PDF hợp đồng: <a
+                        href="/uploads/<%= contract.idContract%>.pdf" download>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                          class="bi bi-download" viewBox="0 0 16 16">
+                          <path
+                            d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                          <path
+                            d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z" />
+                        </svg>
+                      </a>
+                    </div>
+                    <div class="contract" style="display: flex; margin: 10px;">Tình trạng thu phí hiện tại: <%=
+                        contract.dataValues.paymentStatus%>
+                    </div>
+                    <div class="contract" style="display: flex; margin: 10px;">Số kỳ đã thu: <%=
+                        contract.dataValues.index%>/<%=contract.dataValues.maxIndex%>
+                    </div>
+
+                    <div class="contract" style="display: inline-flex; margin: 10px;">
+                      <button onclick="dropDetail('<%=contract.idContract %>')">
+                        Xem chi tiết hợp đồng
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                          class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd"
+                            d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67z" />
+                        </svg>
+                      </button>
+
+                    </div>
+                    <div class="blockDetail" id="<%= contract.idContract%>">
+                      <% contract.Detail_contracts.forEach(function(detail) { %>
+                        <div class="blockProduct">
+                          <div class="detail" style="font-weight: bold;">
+                            Thông tin <%= detail.isMain%>
+                          </div>
+                          <div class="detail">Mã chi tiết hợp đồng: <%= detail.idDetail_contract%>
+                          </div>
+
+                          <div class="detail">Ngày kết thúc: <%= detail.endDate%>
+                          </div>
+                          <div class="detail">Trạng thái: <%= detail.status%>
+                          </div>
+                          <div class="detail">Phí hợp đồng: <%=detail.premium%> đồng
+                          </div>
+
+                          <div class="detail">Số tiền đã nhận: <%= detail.dataValues.total%> đồng
+                          </div>
+                        </div>
+
+
+                        <% }); %>
+                    </div>
+
+                  </div>
+                  <% }); %>
+              </div>
+
+
+
+            </div>
+          </section>
+
+          <div id="popup" class="popup"></div>
+
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+          <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+          <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+          <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+          <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
+          <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+          <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.bootstrap5.min.js"></script>
+          <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+          <script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+          <script src="https://cdn.datatables.net/searchbuilder/1.2.1/js/dataTables.searchBuilder.min.js"></script>
+          <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+
+          <script>
+
+
+            var popupVisible = false;
+            var varblockDetail = false;
+            function showPopup() {
+              var popup = document.getElementById("popup");
+              popup.style.display = "block";
+              popupVisible = true;
+              // Thêm sự kiện mousedown cho document để ẩn popup khi người dùng nhấp chuột ra ngoài
+              document.addEventListener("mousedown", hidePopupOutside);
+            }
+
+            function hidePopup() {
+              var popup = document.getElementById("popup");
+              popup.style.display = "none";
+              popupVisible = false;
+              // Gỡ bỏ sự kiện mousedown khỏi document
+              document.removeEventListener("mousedown", hidePopupOutside);
+            }
+
+            // Ẩn popup khi người dùng nhấp chuột ra ngoài
+            function hidePopupOutside(event) {
+              var popup = document.getElementById("popup");
+              if (!popup.contains(event.target)) {
+                hidePopup();
+              }
+            }
+            function dropDetail(idContract) {
+
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              var popup = document.getElementById(idContract);
+              if (varblockDetail == true) {
+                popup.style.display = "none";
+                varblockDetail = false
+              }
+              else {
+                popup.style.display = "block";
+                varblockDetail = true
+              }
+
+
+
+
+
+            }
+
+
+
+
+            function viewEmployeeDetail(employeeId) {
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              $.ajax({
+                url: '/user/detail/' + employeeId,
+                type: 'GET',
+                dataType: 'html',
+                success: function (response) {
+                  // Hiển thị nội dung trang chi tiết trong cửa sổ popup
+                  showPopup();
+                  $('#popup').html(response);
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  alert("Có lỗi xảy ra khi xử lý yêu cầu.");
+                  window.location.href = '/user/listUser';
+                  console.log(error);
+                }
+              });
+            }
+
+
+
+            function inActiveEmployee(employeeId, event) {
+              event.stopPropagation();
+              $.ajax({
+                url: '/user/inActive/' + employeeId,
+                type: 'PUT',
+                success: function (response) {
+                  // Xử lý thành công
+                  console.log('Đã vô hiệu hoá khách hàng:', employeeId);
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng inActive)
+                  window.location.href = '/user/listUser';
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  console.log('Lỗi:', error);
+                }
+              });
+            }
+
+            function activeEmployee(employeeId, event) {
+              event.stopPropagation();
+              $.ajax({
+                url: '/user/active/' + employeeId,
+                type: 'PUT',
+                success: function (response) {
+                  // Xử lý thành công
+                  console.log('Đã kích hoạt khách hàng:', employeeId);
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+                  window.location.href = '/user/listUser';
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  console.log('Lỗi:', error);
+                }
+              });
+            }
+            function deleteEmployee(employeeId, event) {
+              event.stopPropagation();
+              $.ajax({
+                url: '/user/delete/' + employeeId,
+                type: 'DELETE',
+                success: function (response) {
+                  // Xử lý thành công
+                  alert('Đã xoá khách hàng có id: ' + employeeId);
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+                  window.location.href = '/user/listUser';
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  console.log('Lỗi:', error);
+                }
+              });
+            }
+            function fullDetailUser(employeeId, event) {
+              event.stopPropagation();
+              $.ajax({
+                url: '/user/fullDetail/' + employeeId,
+                type: 'GET',
+                success: function (response) {
+                  // Xử lý thành công
+                  alert('Đã xoá khách hàng có id: ' + employeeId);
+                  // Cập nhật biểu tượng của button thành biểu tượng mới (ví dụ: biểu tượng active)
+                  window.location.href = '/user/listUser';
+                },
+                error: function (xhr, status, error) {
+                  // Xử lý lỗi nếu có
+                  console.log('Lỗi:', error);
+                }
+              });
+            }
+
+
+
+          </script>
+
+
+</body>
+
+</html>

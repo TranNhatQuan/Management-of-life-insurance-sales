@@ -3,10 +3,10 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Benefit_histories', {
-      
+
       idBenefit_history: {
         allowNull: false,
-        
+
         primaryKey: true,
         autoIncrement: true,
         type: Sequelize.INTEGER
@@ -26,26 +26,23 @@ module.exports = {
         references: { model: "Detail_contracts", key: "idDetail_contract" },
         type: Sequelize.INTEGER,
       },
-      date:{
+      date: {
         allowNull: false,
         type: Sequelize.DATEONLY
       },
-      info:{
+      info: {
         allowNull: false,
         type: Sequelize.TEXT
       },
-      reason:{
+      reason: {
         allowNull: false,
         type: Sequelize.TEXT
       },
-      total:{
+      total: {
         allowNull: false,
         type: Sequelize.INTEGER
       },
-      status:{
-        allowNull: false,
-        type: Sequelize.INTEGER
-      },
+
     });
   },
   async down(queryInterface, Sequelize) {

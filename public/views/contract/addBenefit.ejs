@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body>
+
+
+
+  <h2>Form nhập thông tin chi trả</h2>
+  <form action="/contract/addBenefit/<%= detail.idDetail_contract %>?url=/contract/listDetail" method="post">
+    <p><strong>ID Khách hàng:</strong>
+      <%= detail.idBeneficiary %>
+    </p>
+    <p><strong>ID Hợp đồng:</strong>
+      <%= detail.idContract %>
+    </p>
+    <p><strong>ID Chi tiết hợp đồng:</strong>
+      <%= detail.idDetail_contract %>
+    </p>
+    <div class="form-group">
+      <label for="total">Số tiền:</label>
+      <input type="number" id="total" name="total" required min="100">
+    </div>
+    <div class="form-group">
+      <label for="info">Thông tin:</label>
+      <input type="text" id="info" name="info" required pattern="^\S.{4,}\S$"
+        title="Thông tin phải có ít nhất 6 ký tự!">
+    </div>
+    <div class="form-group">
+      <label for="reason">Lý do:</label>
+      <input type="text" id="reason" name="reason" required pattern="^\S.{4,}\S$"
+        title="Lý do phải có ít nhất 6 ký tự!">
+    </div>
+    <div class="form-group">
+      <button type="submit">Lưu</button>
+    </div>
+  </form>
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+</body>
+
+</html>

@@ -3,6 +3,7 @@
 
 <head>
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <style>
     input {
 
@@ -60,10 +61,11 @@
 
 
   <h2>Form nhập thông tin nhân viên</h2>
-  <form action="/staff/add?url=/staff/listStaff" method="post">
+  <form id="your-form-id" action="/staff/add?url=/staff/listStaff" method="post">
     <div class="form-group">
       <label for="name">Tên:</label>
-      <input type="text" id="name" name="name" required>
+      <input type="text" id="name" name="name" required pattern="^\S.{4,48}\S$"
+        title="Tên phải có độ dài từ 6 đến 50 ký tự.">
     </div>
     <div class="form-group">
       <label for="email">Email:</label>
@@ -71,19 +73,29 @@
     </div>
     <div class="form-group">
       <label for="phone">Số điện thoại:</label>
-      <input type="tel" id="phone" name="phone" required>
+      <input type="text" id="phone" name="phone" required pattern="0\d{9,10}"
+        title="Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam có độ dài 10 hoặc 11 số và bắt đầu bằng số 0.">
     </div>
     <div class="form-group">
       <label for="address">Địa chỉ:</label>
-      <input type="text" id="address" name="address" required>
+      <input type="text" id="address" name="address" required pattern="^\S.{5,253}\S$"
+        title="Địa chỉ phải có độ dài từ 7 đến 255 ký tự.">
     </div>
     <div class="form-group">
       <label for="username">Tên tài khoản:</label>
-      <input type="text" id="username" name="username" required>
+      <input type="text" id="username" name="username" required pattern="^\S.{4,48}\S$"
+        title="Tên tài khoản có độ dài từ 6 đến 50 ký tự.">
     </div>
     <div class="form-group">
       <label for="password">Mật khẩu:</label>
-      <input type="password" id="password" name="password" required>
+      <input type="password" id="password" name="password" required pattern="^\S.{4,48}\S$"
+        title="Mật khẩu có độ dài từ 6 đến 50 ký tự.">
+    </div>
+    <div class="form-group">
+      <label for="rpPassword">Xác nhận:</label>
+      <input type="password" id="rpPassword" name="rpPassword" required pattern="^\S.{4,48}\S$"
+        title="Mật khẩu có độ dài từ 6 đến 50 ký tự.">
+      <p id="error-message" style="color: red;"></p> <!-- Thêm phần tử p để hiển thị thông báo lỗi -->
     </div>
     <p><strong>Tình trạng phân quyền:</strong></p>
     <table>
@@ -143,6 +155,13 @@
         <td><input type="checkbox" name="permission" value="editBenefit"></td>
         <td><input type="checkbox" name="permission" value="readBenefit"></td>
       </tr>
+      <tr>
+        <td>Báo cáo, thống kê</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><input type="checkbox" name="permission" value="readReport"></td>
+      </tr>
     </table>
     <div class="form-group">
       <button type="submit">Lưu</button>
@@ -153,7 +172,31 @@
 
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    const passwordField = document.getElementById('password');
+    const rpPasswordField = document.getElementById('rpPassword');
+    const form = document.getElementById('your-form-id'); // Thay 'your-form-id' bằng ID của form
+    rpPasswordField.addEventListener('input', function () {
+      const passwordValue = passwordField.value;
+      const rpPasswordValue = rpPasswordField.value;
+      const errorMessage = document.getElementById('error-message');
 
+      if (passwordValue !== rpPasswordValue) {
+        errorMessage.innerText = "Mật khẩu không trùng khớp.";
+      } else {
+        errorMessage.innerText = "";
+      }
+    });
+    form.addEventListener('submit', function (event) {
+      const passwordValue = passwordField.value;
+      const rpPasswordValue = rpPasswordField.value;
+
+      if (passwordValue !== rpPasswordValue) {
+
+        event.preventDefault(); // Ngăn chặn việc submit
+      }
+    });
+  </script>
 
 
 </body>

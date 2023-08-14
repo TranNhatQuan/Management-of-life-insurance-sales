@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+
+  <style>
+    body {
+      background-color: #f1f3f6;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 400px;
+      padding: 40px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-group input {
+      width: 378px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-group button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .form-group button:hover {
+      background-color: #266c84;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h2>Đổi mật khẩu mới</h2>
+    <% if (error) { %>
+      <p style="color: red;">
+        <%= error %>
+      </p>
+      <% } %>
+        <form id="your-form-id" action="/account/changeAfterUser" method="post">
+          <input type="text" id="idAccount" name="idAccount" required readonly hidden value="<%=idAccount%>">
+          <div class="form-group">
+            <label for="newPassword">Nhập mật khẩu mới:</label>
+            <input type="password" id="newPassword" name="newPassword" required pattern="^\S.{4,48}\S$"
+              title="Mật khẩu có độ dài từ 6 đến 50 ký tự.">
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Xác nhận lại:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required pattern="^\S.{4,48}\S$"
+              title="Mật khẩu có độ dài từ 6 đến 50 ký tự.">
+            <p id="error-message" style="color: red;"></p>
+          </div>
+          <div class="form-group">
+            <button type="submit">Xác nhận</button>
+          </div>
+        </form>
+  </div>
+  <script>
+    const passwordField = document.getElementById('newPassword');
+    const rpPasswordField = document.getElementById('confirmPassword');
+    const form = document.getElementById('your-form-id'); // Thay 'your-form-id' bằng ID của form
+    rpPasswordField.addEventListener('input', function () {
+      const passwordValue = passwordField.value;
+      const rpPasswordValue = rpPasswordField.value;
+      const errorMessage = document.getElementById('error-message');
+
+      if (passwordValue !== rpPasswordValue) {
+        errorMessage.innerText = "Mật khẩu không trùng khớp.";
+
+      } else {
+        errorMessage.innerText = "";
+      }
+    });
+    form.addEventListener('submit', function (event) {
+      const passwordValue = passwordField.value;
+      const rpPasswordValue = rpPasswordField.value;
+
+      if (passwordValue !== rpPasswordValue) {
+
+        event.preventDefault(); // Ngăn chặn việc submit
+      }
+    });
+  </script>
+</body>
+
+</html>

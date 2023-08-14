@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar {
+      /* Thiết lập vị trí */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+
+      z-index: 2;
+    }
+
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    .info {
+      /* Thiết lập vị trí */
+      margin-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+
+      /* Thiết lập vị trí */
+      margin-top: 30px;
+      position: relative;
+      z-index: 0;
+
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+      text-align: center;
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      /* Định dạng chiều rộng của popup */
+      height: 400px;
+      /* Định dạng chiều cao của popup */
+      background: #fff;
+      /* Màu nền của popup */
+      border: 1px solid #ccc;
+      /* Viền của popup */
+      padding: 20px;
+      /* Khoảng cách giữa nội dung và viền của popup */
+      display: none;
+      overflow: auto;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
+    }
+
+    .button-like {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #4CAF50;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button-like:hover {
+      background-color: #266c84;
+    }
+
+    #addEmployeeBtn {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .blockInfo {
+      display: contents;
+
+      border-radius: 10px;
+
+    }
+
+    .blockInfo1 {
+      -webkit-text-fill-color: #f5f5f5;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+
+      grid-gap: 20px;
+    }
+
+    .blockContract {
+
+      background-color: #4CAF50;
+      width: 350px;
+      /* Set the width of each contract container */
+      margin: 10px;
+      /* Add some margin between contract containers */
+    }
+
+    .contarct {
+      margin: 10px;
+    }
+
+    .blockProduct {
+
+      margin-top: 10px;
+    }
+
+    .blockDetail {
+      display: none;
+    }
+
+    #image {
+      position: relative;
+      /* Đặt phần tử này làm đối tượng có vị trí tương đối */
+    }
+
+    /* CSS cho phần tử văn bản */
+    #text {
+      position: absolute;
+      width: 20%;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      /* Đặt phần tử này làm đối tượng có vị trí tuyệt đối */
+      top: 110px;
+      /* Đặt phần tử văn bản ở giữa theo chiều dọc */
+      left: 10%;
+      /* Đặt phần tử văn bản ở giữa theo chiều ngang */
+
+      background-color: #4CAF50;
+      /* Đặt màu nền cho phần tử văn bản */
+
+      z-index: 2;
+      /* Đặt độ ưu tiên hiển thị lớn hơn hình ảnh */
+    }
+
+    #text2 {
+      font-size: smaller;
+      opacity: 0.5;
+      position: absolute;
+      width: 100%;
+      height: 30px;
+      /* Đặt phần tử này làm đối tượng có vị trí tuyệt đối */
+      top: 43%+120px;
+      /* Đặt phần tử văn bản ở giữa theo chiều dọc */
+      left: 10%;
+      /* Đặt phần tử văn bản ở giữa theo chiều ngang */
+
+      background-color: #f5f5ff;
+      /* Đặt màu nền cho phần tử văn bản */
+
+      z-index: 1;
+      /* Đặt độ ưu tiên hiển thị lớn hơn hình ảnh */
+    }
+
+    .detail {
+      margin: 10px;
+    }
+
+    p {
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body style="background-color: #f5f5f5">
+  <%- include('../../layout/sidebar2.ejs') %>
+    <% if (typeof error !=='undefined' ) { %>
+      <script>
+        alert("<%= error %>");
+
+      </script>
+      <% delete error; %>
+        <% } %>
+
+          <section class="info">
+            <div id="image">
+              <img src="../../icon/a1.jpg" alt="" height="260px" width="100%">
+            </div>
+            <div>
+
+              <div id="text" class="text-white" style="font-size: xx-large">
+                Sản phẩm
+              </div>
+
+            </div>
+
+          </section>
+          <section class="container">
+            <div>
+              <h2 style="text-align: center;font-weight: bold;">
+                <%=insurance.name%>
+              </h2>
+
+
+
+              <div class="blockInfo" style="background-color: #fffffff8;">
+                <div style="padding-bottom: 225px; border-bottom: 1px solid #ccc;
+                border-radius: 10px;">
+                  <%=insurance.info%>
+                    <img src="../../uploads/imageInsurance/<%=insurance.idInsurance%>.jpg" alt="" width="400px"
+                      height="250px" style="float: right;">
+                </div>
+                <div style="font-weight: bold;">Khái quát sản phẩm</div>
+                <div>
+                  Thời hạn hợp đồng: <%=insurance.contractTerm%> tháng
+                </div>
+                <div>
+                  Giá trị hợp đồng: <%=((insurance.insuranceAmount)*1000).toLocaleString()%> đồng
+                </div>
+                <div>
+                  Thời gian đóng tiền: <%=insurance.paymentTerm%> tháng
+                </div>
+                <div>
+                  Phí bảo hiểm: <%=((insurance.premium)*1000).toLocaleString()%> đồng
+                </div>
+                <div>
+                  Khoảng cách mỗi lần đóng tiền: <%=insurance.frequency%> tháng
+                </div>
+                <div style="font-weight: bold;">Minh hoạ quyền lợi:</div>
+                <div style="text-align: center;">
+                  <img src="../../uploads/infoInsurance/<%=insurance.idInsurance%>.jpg" alt=""
+                    style="float: inline-start;" width="700" height="600">
+                </div>
+              </div>
+              <div style="font-weight: bold; text-align: center; margin: 40px;">Sản phẩm bổ trợ</div>
+              <% sub.forEach(function(sub) { %>
+                <div class="blockInfo1"  >
+
+                  <div class="blockContract" onclick="detailInsurance('<%=sub.idInsurance%>')">
+
+
+                    <div class="contract" style="display: flex"><img
+                        src="../../uploads/imageInsurance/<%=sub.idInsurance%>.jpg" alt="" height="200" width="350">
+                    </div>
+                    <div class="contract" style=" margin: 10px;font-weight: bold;">
+                      <%=sub.name%>
+                    </div>
+                    <div class="contract" style="display: flex; margin: 10px;">
+                      <%=sub.info%>
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  </div>
+                  <% }); %>
+                </div>
+
+
+
+
+            </div>
+          </section>
+
+          <div id="popup" class="popup"></div>
+
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+          <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+          <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+          <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+          <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
+          <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+          <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.bootstrap5.min.js"></script>
+          <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+          <script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+          <script src="https://cdn.datatables.net/searchbuilder/1.2.1/js/dataTables.searchBuilder.min.js"></script>
+          <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+
+          <script>
+            function detailInsurance(employeeId) {
+              window.location.href = '/insurance/detail/' + employeeId + '?url=/intro/home';
+            }
+            function handleCheckboxChange() {
+              const cccdRadioButton = document.getElementById('cccd');
+              const accountRadioButton = document.getElementById('account');
+              const formCCCD = document.getElementById('form-cccd');
+              const formAccount = document.getElementById('form-account');
+              const showAccount = document.getElementById('accountShow');
+              const show = document.getElementById('cccdShow');
+              if (cccdRadioButton.checked) {
+                formCCCD.style.display = 'block';
+                formAccount.style.display = 'none';
+                show.style.display = 'block'
+                showAccount.style.display = 'none'
+              } else if (accountRadioButton.checked) {
+                formAccount.style.display = 'block';
+                formCCCD.style.display = 'none';
+                fetchDataByAccount()
+                show.style.display = 'none'
+                showAccount.style.display = 'block'
+              }
+            }
+            let isConfirming = false;
+
+            async function confirm(idUser) {
+              // Nếu đang trong quá trình xác nhận, không cho phép gọi hàm nữa
+              if (isConfirming) {
+                return;
+              }
+
+              const url = `/user/confirmPay/${idUser}?url=/user/prePay`;
+              try {
+                // Đang xác nhận, vô hiệu hóa việc gọi hàm trong lúc chờ API chạy
+                isConfirming = true;
+                window.alert("Thanh toán thành công!");
+                window.location.href = '/user/prePay?url=/intro/home';
+                // Make the HTTP request using fetch
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error) {
+
+                  window.alert(`${data.error}`);
+                } else {
+
+                  window.alert("Thanh toán thành công!");
+                }
+              } catch (error) {
+              } finally {
+                // Kết thúc xác nhận, kích hoạt lại việc gọi hàm
+                isConfirming = false;
+              }
+            }
+            async function fetchDataByAccount() {
+
+
+              // Kiểm tra nếu ô nhập rỗng thì không thực hiện gọi API
+
+              // Replace 'your-api-endpoint' with the actual URL of your server's API endpoint
+              const url = `/user/payWithUser?url=/user/prePay`;
+
+              try {
+                // Make the HTTP request using fetch
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                  const show = document.getElementById('accountShow');
+                  show.innerHTML = `<div>${data.error}</div>`;
+                }
+                else {
+                  const show = document.getElementById('accountShow');
+                  const qr = document.getElementById('qr-account');
+                  if (data.total != '0') {
+                    console.log('test')
+                    qr.innerHTML = `<img src="../../icon/qr-code.jpg" alt="QR Code"> `
+                    show.innerHTML = `<div>Phí hợp đồng tháng này của người dùng ${data.name} là: ${data.total} đồng.</div><div class="form-group" style="margin-top: 10px;" >   
+                    <br><button onclick="confirm(${data.idUser})" type="submit">Đóng phí bảo hiểm</button>`;
+                  }
+                  else {
+                    qr.innerHTML = ""
+                    show.innerHTML = `<div>Phí hợp đồng tháng này của người dùng ${data.name} là: ${data.total} đồng.</div><div class="form-group" style="margin-top: 10px;" >
+                    `;
+                  }
+
+                }
+
+              } catch (error) {
+
+
+              }
+            }
+            async function fetchDataByCCCD() {
+              const idCard = document.getElementById('idCard').value;
+
+              // Kiểm tra nếu ô nhập rỗng thì không thực hiện gọi API
+
+              // Replace 'your-api-endpoint' with the actual URL of your server's API endpoint
+              const url = `/user/pay?CCCD=${idCard}&url=/user/prePay`;
+
+              try {
+                // Make the HTTP request using fetch
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.error) {
+                  const show = document.getElementById('cccdShow');
+                  show.innerHTML = `<div>${data.error}</div>`;
+                }
+                else {
+                  const show = document.getElementById('cccdShow');
+                  const qr = document.getElementById('qr-show');
+
+                  if (data.total != '0') {
+
+                    qr.innerHTML = `<img src="../../icon/qr-code.jpg" alt="QR Code"> `
+                    show.innerHTML = `<div>Phí hợp đồng tháng này của người dùng ${data.name} là: ${data.total} đồng.</div><div class="form-group" style="margin-top: 10px;" >
+                     
+                     <br><button onclick="confirm(${data.idUser})" type="submit">Đóng phí bảo hiểm</button>`;
+                  } else {
+                    qr.innerHTML = ""
+                    show.innerHTML = `<div>Phí hợp đồng tháng này của người dùng ${data.name} là: ${data.total} đồng.</div><div class="form-group" style="margin-top: 10px;" >
+                     
+                     `;
+                  }
+
+
+                }
+
+              } catch (error) {
+
+
+              }
+            }
+            var popupVisible = false;
+            var varblockDetail = false;
+            function showPopup() {
+              var popup = document.getElementById("popup");
+              popup.style.display = "block";
+              popupVisible = true;
+              // Thêm sự kiện mousedown cho document để ẩn popup khi người dùng nhấp chuột ra ngoài
+              document.addEventListener("mousedown", hidePopupOutside);
+            }
+
+            function hidePopup() {
+              var popup = document.getElementById("popup");
+              popup.style.display = "none";
+              popupVisible = false;
+              // Gỡ bỏ sự kiện mousedown khỏi document
+              document.removeEventListener("mousedown", hidePopupOutside);
+            }
+
+            // Ẩn popup khi người dùng nhấp chuột ra ngoài
+            function hidePopupOutside(event) {
+              var popup = document.getElementById("popup");
+              if (!popup.contains(event.target)) {
+                hidePopup();
+              }
+            }
+
+
+
+
+
+
+
+
+
+
+          </script>
+
+
+</body>
+
+</html>

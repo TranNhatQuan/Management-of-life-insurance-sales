@@ -3,16 +3,19 @@
 
 <head>
   <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
   <style>
     input {
 
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
     select {
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
     select {
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -61,11 +64,13 @@
   <form action="/insurance/addType?url=/insurance/listType" method="post">
     <div class="form-group">
       <label for="name">Tên:</label>
-      <input type="text" id="name" name="name" required>
+      <input type="text" id="name" name="name" required pattern="^\S.{1,253}\S$"
+        title="Tên phải có độ dài từ 3 đến 255 ký tự!">
     </div>
     <div class="form-group">
       <label for="info">Thông tin:</label>
-      <input type="text" id="info" name="info" required>
+      <input type="text" id="info" name="info" required pattern="^\S.{4,}\S$"
+        title="Thông tin phải có ít nhất 6 ký tự!">
     </div>
     <div class="form-group">
       <button type="submit">Lưu</button>

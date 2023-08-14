@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>LIFE</title>
+    <link rel="icon" href="../../icon/2764.png" type="image/png">
+    <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        input {
+
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .container {
+            border-radius: 10px;
+        }
+
+        /* CSS styles here */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            /* Định dạng chiều rộng của popup */
+            height: 400px;
+            /* Định dạng chiều cao của popup */
+            background: #fff;
+            /* Màu nền của popup */
+            border: 1px solid #ccc;
+            /* Viền của popup */
+            padding: 20px;
+            /* Khoảng cách giữa nội dung và viền của popup */
+            display: none;
+            overflow: auto;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            /* Định dạng chiều rộng thanh kéo */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            /* Màu của thanh kéo */
+            border-radius: 10px;
+            /* Định dạng bo tròn cho thanh kéo */
+        }
+
+        button {
+            display: inline-block;
+            padding: 5px;
+            background-color: #3f87a6;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .navbar {
+            /* Thiết lập vị trí */
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 3;
+        }
+
+        #intro {
+            /* Thiết lập vị trí */
+
+            position: relative;
+
+            margin-top: 100px;
+            z-index: 1;
+
+        }
+
+        #noti {
+            /* Thiết lập vị trí */
+            position: relative;
+            z-index: 2;
+            border: 1px solid #ccc;
+            /* Thêm viền */
+            padding: 20px;
+            /* Khoảng cách giữa nội dung và viền */
+            margin-top: 100px;
+            margin-bottom: 20px;
+            /* Khoảng cách dưới */
+        }
+
+        .form-group {
+            margin: 10px;
+        }
+
+        #info {
+            /* Thiết lập vị trí */
+            position: relative;
+
+            z-index: 0;
+            border: 1px solid #ccc;
+            /* Thêm viền */
+            padding: 20px;
+            /* Khoảng cách giữa nội dung và viền */
+        }
+
+        h3 {
+            font-size: smaller;
+            opacity: 0.5;
+        }
+
+        #idStaff {
+            outline: none;
+            border: none;
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+    <%- include('../../layout/sidebar.ejs') %>
+
+        <% if (typeof error !=='undefined' ) { %>
+            <script>
+                alert("<%= error %>");
+            </script>
+            <% delete error; %>
+                <% } %>
+
+
+                    <div id="noti" class="container">
+                        <div>
+                            <h2 id="title" style="text-align: center;">
+                                <%=report.type%>
+                            </h2>
+                            <h3 style="text-align: center;">
+                                <% if (report.type=='Báo cáo theo ngày' ) { %>
+                                    <%=report.startDate%>
+                                        <% } %>
+                                            <% if(report.type!='Báo cáo tổng' &&report.type!='Báo cáo theo ngày' ) { %>
+                                                Từ <%=report.startDate%> đến <%=report.endDate%>
+                                                        <% } %>
+                            </h3>
+                        </div>
+                        <div style="text-align: center;">
+                            <label for="date">Chọn ngày:</label>
+                            <input type="date" id="date" required>
+
+                            <label for="type">Báo cáo theo:</label>
+                            <select id="type">
+                                <option value="day">Ngày</option>
+                                <option value="week">Tuần</option>
+                                <option value="month">Tháng</option>
+                                <option value="year">Năm</option>
+                                <option value="all">Tất cả</option>
+                                <!-- Thêm các option kiểu khác (nếu cần) -->
+                            </select>
+
+                            <button id="export" onclick="exportpdf()">Xuất báo cáo</button>
+                        </div>
+
+
+
+                        <table id="paymentTable" class="table table-striped table-bordered" style="width:100%">
+                            <caption style="display: none;">
+                                <% if (report.type=='Báo cáo theo ngày' ) { %>
+                                    <%=report.startDate%>
+                                        <% } %>
+                                            <% if(report.type!='Báo cáo tổng' &&report.type!='Báo cáo theo ngày' ) { %>
+                                                Từ <%=report.startDate%> đến <%=report.endDate%>
+                                                        <% } %>
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th>ID Bảo hiểm</th>
+                                    <th>Tên</th>
+                                    <th>Trạng thái</th>
+                                    <th>Loại</th>
+                                    <th>Thu vào</th>
+                                    <th>Đã chi</th>
+                                    <th>Hợp đồng ký mới</th>
+                                    <th>Số hợp đồng hiện tại</th>
+                                    <th>Số hợp đồng còn thu tiền</th>
+                                    <th>Số hợp đồng còn hạn hết thu tiền</th>
+
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Tổng</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>
+                                        <%=report.totalInput%>
+                                    </td>
+                                    <td>
+                                        <%=report.totalOutput%>
+                                    </td>
+                                    <td>
+                                        <%=report.totalNewContract%>
+                                    </td>
+                                    <td>
+                                        <%= report.totalQuantityContract%>
+                                    </td>
+                                    <td>
+                                        <%=report.totalQuantityContractPayInDate %>
+                                    </td>
+                                    <td>
+                                        <%= report.totalQuantityContractInDate%>
+                                    </td>
+
+                                </tr>
+                                <% insurances.forEach(function(insurance) { %>
+                                    <tr onclick="checkContract('<%= insurance.idInsurance %>')">
+                                        <td>
+                                            BH-<%= insurance.idInsurance %>
+                                        </td>
+                                        <td>
+                                            <%= insurance.name %>
+                                        </td>
+                                        <td>
+                                            <%= insurance.isDel %>
+                                        </td>
+                                        <td>
+                                            <%= insurance.dataValues.typeName %>
+                                        </td>
+                                        <td>
+                                            <%= insurance.dataValues.input %>
+                                        </td>
+                                        <td>
+                                            <%= insurance.dataValues.output %>
+                                        </td>
+                                        <td>
+                                            <%= insurance.dataValues.newContract %>
+                                        </td>
+                                        <td>
+                                            <%= insurance.dataValues.quantityContract %>
+                                        </td>
+                                        <td>
+                                            <%=insurance.dataValues.quantityContractPayInDate %>
+                                        </td>
+                                        <td>
+                                            <%=insurance.dataValues.quantityContractInDate %>
+                                        </td>
+
+                                    </tr>
+
+                                    <% }); %>
+
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+                    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+                    <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+                    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+                    <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.bootstrap5.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+                    <script
+                        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+                    <script
+                        src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+                    <script
+                        src="https://cdn.datatables.net/searchbuilder/1.2.1/js/dataTables.searchBuilder.min.js"></script>
+                    <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+
+                    <script>
+                        const currentDate = new Date();
+                        const year = currentDate.getFullYear();
+                        let month = currentDate.getMonth() + 1;
+                        let day = currentDate.getDate();
+
+                        // Đảm bảo định dạng MM và dd là 2 chữ số
+                        if (month < 10) {
+                            month = `0${month}`;
+                        }
+                        if (day < 10) {
+                            day = `0${day}`;
+                        }
+
+                        const formattedDate = `${year}-${month}-${day}`;
+                        document.getElementById("date").setAttribute("max", formattedDate);
+                        function exportpdf() {
+                            // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+                            const date = document.getElementById("date").value;
+
+
+                            const type = document.getElementById("type").value;
+                            const encodedDate = encodeURIComponent(date);
+                            const encodedType = encodeURIComponent(type);
+                            if (!date&&type!='all') {
+                                event.preventDefault();
+                                alert('Vui lòng chọn ngày!');
+                                return;
+                            }
+                            window.location.href = '/report/insurance?date=' + date + '&url=/staff/home&type=' + type;
+                        }
+                        var title1 = document.getElementById("title");
+
+
+
+                        // Khôi phục giá trị ban đầu
+
+
+                        $(document).ready(function () {
+                            var table = $('#paymentTable').DataTable({
+                                dom: 'Blfrtip',
+                                buttons: [
+                                    'copy', 'csv', {
+                                        extend: 'excelHtml5',
+                                        text: 'Export to Excel',
+                                        title: function () {
+                                            return $('#title').text(); // Lấy nội dung của div "#title" làm tiêu đề cho tệp Excel
+                                        },
+
+
+                                    }, 'pdf', 'print'
+                                ],
+                                language: {
+                                    url: 'https://cdn.datatables.net/plug-ins/1.11.3/i18n/vi.json'
+                                },
+                                paging: true,
+                                pagingType: 'full_numbers',
+                                pageLength: 5,
+                                lengthChange: false,
+                                searching: true,
+
+                            });
+                        });
+                        function checkContract(contractId) {
+
+                            window.location.href = '/contract/addContract?url=/contract/listContract';
+                        }
+                    </script>
+</body>
+
+</html>

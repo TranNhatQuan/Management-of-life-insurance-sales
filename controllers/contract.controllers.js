@@ -1,89 +1,122 @@
 const { raw, text } = require("body-parser");
 const db = require("../models/index");
-const { Contract, Payment_schedule, Benefit_history, User, Staff, Insurance, Sub_insurance, Detail_contract } = require("../models");
+const { Contract, Payment_schedule, Benefit_history, User, Staff, Insurance, Sub_insurance, Insurance_type, Detail_contract, Catalog_insurance, Catalog } = require("../models");
 const { QueryTypes, Op, where, STRING } = require("sequelize");
-const { getIngredientByIdRecipe, changeQuantityIngredientShopWithTransaction } = require("./post.controllers")
+
 const moment = require('moment-timezone'); // require
+const nodemailer = require("nodemailer");
 const { PDFDocument, rgb } = require('pdf-lib');
 const pdfParse = require('pdf-parse');
 const fs = require('fs');
-const createDetailContract = async (startDate, idStaff, idInsurance, idUser, idContract, isMain, idBeneficiary, options) => {
+const { fail } = require("assert");
+const path = require("path");
+const createPayment = async (total, premiumPaymentTerm, frequency, idDetail_contract, idUser, idStaff, startDate, options) => {
     const start = new Date(startDate)
+    let totalIndex = 1
+    if (premiumPaymentTerm == 0) {
+        totalIndex = 1
+    } else {
+        totalIndex = (Math.floor(premiumPaymentTerm / frequency) + 1)
+    }
 
 
 
-    console.log('testDetail1')
+    let failPay = ''
+    let isSuccessPay = true
+
+    try {
+
+        for (let index = 1; index <= totalIndex; index++) {
+          
+            if (index == 1) {
+                let payment = await Payment_schedule.create({
+                    idUser,
+                    idStaff,
+                    startDate: start,
+                    endDate: start,
+                    date: start,
+                    status: 1,
+                    total: total,
+                    idDetail_contract,
+                    index: index,
+                }, options);
+            }
+            else {
+                let newMonth = start.getMonth() + frequency * (index - 1);
+
+                // Tính toán năm mới nếu tháng mới là 12
+                let newYear = start.getFullYear();
+
+
+                // Tạo ngày bắt đầu mới với tháng và năm đã tính toán
+                const newStart = new Date(newYear, newMonth, 1);
+
+                // Lấy ngày cuối cùng của tháng mới tính toán và sử dụng làm newEnd
+                const newEnd = new Date(newYear, newMonth + 1, 0, 23, 59, 59, 999);
+
+                // Tạo ngày kết thúc mới dựa trên ngày cuối cùng của tháng
+
+                let payment = await Payment_schedule.create({
+                    idUser,
+                    startDate: newStart,
+                    endDate: newEnd,
+
+                    status: 2,
+                    total: total,
+                    idDetail_contract,
+                    index: index,
+                }, options);
+            }
+        }
+
+    } catch (error) {
+        isSuccessPay = false
+        failPay = error.message
+    }
+
+    return { isSuccessPay, failPay }
+}
+const createDetailContract = async (endDate,start, idStaff, idInsurance, idUser, idContract, isMain, options) => {
+
+
+
+
     let fail = ''
     let isSuccess = true
+    let total = 0
     try {
-        console.log('testDetail2')
-        const currentDetal = await Detail_contract.findOne({
-            where: {
-                idBeneficiary,
-                idInsurance,
-                status: {
-                    [db.Sequelize.Op.or]: [1, 2],
-                }
-            }
-        })
-        if (currentDetal) {
-            fail = 'Khách hàng ' + idBeneficiary + ' hiện đang có bảo hiểm mã: ' + idInsurance + ' . Không thể đăng ký bảo hiểm trùng!'
-            isSuccess = false
-        }
+
+
+
         const insurance = await Insurance.findOne({
             where: {
                 idInsurance
             }
         })
-        console.log('testDetail3')
+
         if (!insurance) {
+            const msg = 'Bảo hiểm có mã: ' + idInsurance + ' không tồn tại!'
             isSuccess = false
+            throw new Error(msg);
         }
-        const endDate = new Date(start.getTime() + 30 * insurance.contractTerm * 24 * 60 * 60 * 1000);
-        console.log('testDetail4')
-        console.log(
-            idInsurance,
-            idContract,
-            idBeneficiary,
-            isMain,
-            start,
-            endDate,
-            1,
-            insurance.premium,
-            insurance.premiumPaymentTerm,
-            insurance.frequency,
-            insurance.insuranceAmount,
-            insurance.contractTerm,)
+
         let detailContract = await Detail_contract.create({
             idInsurance,
             idContract,
-            idBeneficiary,
             isMain,
-            startDate: start,
             endDate: endDate,
             status: 1,
             premium: insurance.premium,
-            premiumPaymentTerm: insurance.premiumPaymentTerm,
-            frequency: insurance.frequency,
             insuranceAmount: insurance.insuranceAmount,
-            contractTerm: insurance.contractTerm,
         }, options);
+        total = insurance.premium
+        let { isSuccessPay, failPay } = await createPayment(total, insurance.premiumPaymentTerm, insurance.frequency,
+            detailContract.idDetail_contract, idUser, idStaff, start, options)
+        if (!isSuccessPay) {
 
-        console.log('testDetail5')
-        const pay = await Payment_schedule.create({
+            throw new Error(failPay);
+        }
 
-            idUser: idUser,
-            idStaff,
-            idDetail_contract: detailContract.idDetail_contract,
-            startDate: start,
-            endDate: start,
-            date: start,
-            status: 1,
-            total: insurance.premium,
-            index: 1,
-
-        }, options)
-        console.log('testDetail6')
 
 
 
@@ -91,9 +124,10 @@ const createDetailContract = async (startDate, idStaff, idInsurance, idUser, idC
 
     } catch (error) {
         isSuccess = false
+        fail = error.message
     }
 
-    return { isSuccess, fail }
+    return { isSuccess, fail, total }
 }
 const getListContract = async (req, res) => {
     try {
@@ -158,6 +192,41 @@ const getListBenefit = async (req, res) => {
         return res.redirect('/staff/home');
     }
 };
+const getListDetail = async (req, res) => {
+    try {
+
+
+        const staff = req.staff
+        const name = staff.name
+
+        let detailContracts = await Detail_contract.findAll({
+
+            include: [
+
+                {
+                    model: Benefit_history,
+                    attributes: ['total'],
+                }
+            ]
+        })
+        detailContracts.forEach((detail) => {
+            let total = 0
+            detail.Benefit_histories.forEach((benefit) => {
+                total += benefit.total
+            })
+            delete detail.dataValues.Benefit_histories
+            detail.dataValues.total = total
+
+        })
+
+        const error = req.flash('error')[0];
+        return res.render('contract/listDetail', { error: error, detailContracts: detailContracts, name: name });
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi lấy danh sách chi tiết hợp đồng!');
+        return res.redirect('/staff/home');
+    }
+};
 const getDetailAndSub = async (req, res) => {
     try {
 
@@ -168,35 +237,21 @@ const getDetailAndSub = async (req, res) => {
                 idInsurance
             }
         })
-        let subInsurance = await Sub_insurance.findAll({
+        let subInsurance = await Insurance.findAll({
             where: {
                 idMainInsurance: idInsurance,
+                isMain: false,
             },
-            include: [
-                {
-                    model: Insurance,
-                    as: 'subInsurance',
-                }
-            ],
+
             raw: true,
 
         })
-        subInsurance = subInsurance.map(item => {
-            return {
-                idInsurance: item['subInsurance.idInsurance'],
-                name: item['subInsurance.name'],
-                premium: item['subInsurance.premium'],
-                premiumPaymentTerm: item['subInsurance.premiumPaymentTerm'],
-                frequency: item['subInsurance.frequency'],
-                insuranceAmount: item['subInsurance.insuranceAmount'],
-                contractTerm: item['subInsurance.contractTerm'],
-            }
-        })
+
 
         res.status(200).json({ insurance, subInsurance });
 
     } catch (error) {
-        console.error(error);
+
         res.status(500).send('Đã xảy ra lỗi khi xử lý PDF.');
     }
 };
@@ -234,6 +289,548 @@ const getFormAddContract = async (req, res) => {
         return res.redirect('/staff/home');
     }
 };
+const getFormAddDetailContract = async (req, res) => {
+    try {
+        const { idContract } = req.params
+
+        return res.render('contract/addDetailContract', { idContract: idContract });
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi tạo form nhập chi tiết hợp đồng!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+
+const getFromEditContract = async (req, res) => {
+    try {
+        const staff = req.staff
+        const name = req.name
+        const { idContract } = req.params
+        const contract = await Contract.findOne({
+            where: {
+                idContract
+            }
+        })
+        const detail_contracts = await Detail_contract.findAll({
+            where: {
+                idContract
+            }
+        })
+        return res.render('contract/detailContract', { detail_contracts: detail_contracts, contract: contract, name });
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi tạo xem chi tiết hợp đồng!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const getFromEditDetail = async (req, res) => {
+    try {
+
+        const { idDetail_contract } = req.params
+
+        const detail_contract = await Detail_contract.findOne({
+            where: {
+                idDetail_contract
+            }
+        })
+        return res.render('contract/editDetail', { detail_contract: detail_contract });
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi tạo xem chi tiết hợp đồng!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const getFormAddPayment = async (req, res) => {
+    try {
+        const { idDetail_contract } = req.params
+        const detail = await Detail_contract.findOne({
+            where: {
+                idDetail_contract
+            }
+        })
+
+        return res.render('contract/addPayment', { detail: detail });
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi tạo form nhập lịch trả phí!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const addPayment = async (req, res) => {
+    try {
+        const { idDetail_contract } = req.params
+        let { index } = req.body
+
+        const detailContract = await Detail_contract.findOne({
+            where: {
+                idDetail_contract
+            },
+            include: [
+                {
+                    model: Contract,
+                }
+            ]
+        })
+
+        if (detailContract) {
+            const premiumPaymentTerm = detailContract.premiumPaymentTerm
+            const frequency = detailContract.frequency
+            let maxIndex
+            if (premiumPaymentTerm == 0) {
+                maxIndex = 1
+            }
+            else {
+                maxIndex = premiumPaymentTerm / frequency
+            }
+            if (index > maxIndex) {
+                req.flash('error', 'Khách hàng đã trả đủ số kỳ bảo hiểm!');
+                return res.redirect(req.query.url);
+            }
+            else {
+                const checkPay = await Payment_schedule.findOne({
+                    where: {
+                        idDetail_contract,
+                        index: index,
+                    }
+                })
+                if (!checkPay) {
+                    const currentDate = new Date();
+
+                    // Lấy ngày đầu tháng hiện tại
+                    const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                    const end = new Date(start.getTime() + (20 * 24 * 60 * 60 * 1000));
+                    const pay = await Payment_schedule.create({
+
+                        idUser: detailContract.Contract.idUser,
+                        idDetail_contract: idDetail_contract,
+                        startDate: start,
+                        endDate: end,
+                        status: 0,
+                        total: detailContract.premium,
+                        index: index,
+
+                    })
+                    const text = 'Tạo lịch trả phí thành công!'
+                    req.flash('error', text);
+                    return res.redirect(req.query.url);
+                }
+                else {
+                    const text = 'Đã tồn tại lịch trả phí cho kỳ thứ: ' + index + '!'
+                    req.flash('error', text);
+                    return res.redirect(req.query.url);
+                }
+            }
+
+        }
+        else {
+            req.flash('error', 'Không tìm thấy thông tin hợp đồng bạn chọn!');
+            return res.redirect(req.query.url);
+        }
+
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi thêm mới lịch trả phí!');
+        return res.redirect(req.query.url);
+    }
+};
+const getFormAddBenefit = async (req, res) => {
+    try {
+        const { idDetail_contract } = req.params
+        const detail = await Detail_contract.findOne({
+            where: {
+                idDetail_contract
+            }
+        })
+        return res.render('contract/addBenefit', { detail: detail });
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi tạo form nhập thông tin chi trả!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const addDetail_contract = async (req, res) => {
+    try {
+
+        let { idContract, idInsurance, idBeneficiary } = req.body
+        const contract = await Contract.findOne({
+            where: {
+                idContract
+            }
+        })
+
+        if (contract) {
+            const beneficiary = await User.findOne({
+                where: {
+                    idBeneficiary,
+                    isActive: true,
+                }
+            })
+            if (beneficiary) {
+                const insurance = await Insurance.findOne({
+                    where: {
+                        idInsurance,
+                        isMain: false,
+                    }
+                })
+                if (insurance) {
+                    const detail_contract = await Detail_contract.findOne({
+                        where: {
+                            idInsurance,
+                            idBeneficiary,
+                            status: {
+                                [db.Sequelize.Op.or]: [1, 2],
+                            }
+                        }
+                    })
+                    if (detail_contract) {
+                        req.flash('error', 'Khách hàng bạn chọn đang thụ hưởng sản phẩm phụ bạn chọn!');
+                        return res.redirect(req.query.url);
+                    }
+                    else {
+                        const start = new Date(contract.signDate)
+                        const t = await db.sequelize.transaction(); // Bắt đầu transaction\
+                        try {
+                            const { isSuccess, fail } = await createDetailContract(start, contract.idStaff, idInsurance, contract.idUser,
+                                idContract, false, idBeneficiary, { transaction: t })
+                            if (isSuccess) {
+                                await t.commit()
+                            }
+                            else {
+                                throw new Error(fail);
+                            }
+                        } catch (error) {
+                            await t.rollback()
+                            const failContract = error.message
+                            req.flash('error', 'Thêm mới sản phẩm phụ vào hợp đồng thất bại. ' + failContract);
+                            return res.redirect(req.query.url);
+                        }
+                        req.flash('error', 'Thêm mới sản phẩm phụ vào hợp đồng thành công!');
+                        return res.redirect(req.query.url);
+                    }
+                }
+                else {
+                    req.flash('error', 'Không tìm thấy sản phẩm phụ bạn chọn!');
+                    return res.redirect(req.query.url);
+                }
+            }
+            else {
+                req.flash('error', 'Không tìm thấy khách hàng bạn chọn!');
+                return res.redirect(req.query.url);
+            }
+
+
+        }
+        else {
+            req.flash('error', 'Không tìm thấy hợp đồng bạn chọn!');
+            return res.redirect(req.query.url);
+        }
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi thêm mới thông tin hợp đồng!');
+        return res.redirect(req.query.url);
+    }
+};
+const addBenefit = async (req, res) => {
+    try {
+        const staff = req.staff
+        const idStaff = staff.idStaff
+        const { idDetail_contract } = req.params
+        let { info, reason, total } = req.body
+        const detailContract = await Detail_contract.findOne({
+            where: {
+                idDetail_contract
+            }
+        })
+        if (detailContract) {
+            console.log(total)
+            if (total <= detailContract.insuranceAmount) {
+                const benefits = await Benefit_history.findAll({
+                    where: {
+                        idDetail_contract
+                    }
+                })
+
+                let totalSum = 0; // Khởi tạo biến để tính tổng
+
+                // Dùng vòng lặp để duyệt qua từng phần tử trong mảng benefits
+                for (const benefit of benefits) {
+                    totalSum += benefit.total; // Cộng giá trị "total" vào tổng
+                }
+                console.log(totalSum)
+                let newtotalSum = 0
+                newtotalSum = Number(total) + Number(totalSum)
+                console.log(newtotalSum)
+                if (newtotalSum <= detailContract.insuranceAmount) {
+                    console.log('test')
+                    const newBenefit = await Benefit_history.create({
+                        idStaff, idDetail_contract, date: new Date(), info, reason, total, idUser: detailContract.idBeneficiary
+                    });
+                    console.log('test2')
+                    req.flash('error', 'Thêm mới thông tin chi trả thành công!');
+                    return res.redirect(req.query.url);
+                }
+                else {
+                    const text = 'Tổng số tiền chi trả không thể lớn hơn tổng giá trị bảo hiểm là: ' + detailContract.insuranceAmount + '000 đồng! Hiện đã chi trả cho khách hàng: ' + totalSum + '000 đồng.'
+                    req.flash('error', text);
+                    return res.redirect(req.query.url);
+                }
+            }
+            else {
+                const text = 'Số tiền chi trả không thể lớn hơn tổng giá trị bảo hiểm là: ' + detailContract.insuranceAmount + '000 đồng!'
+                req.flash('error', text);
+                return res.redirect(req.query.url);
+            }
+
+        }
+        else {
+            req.flash('error', 'Không tìm thấy thông tin hợp đồng bạn chọn!');
+            return res.redirect(req.query.url);
+        }
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi thêm mới thông tin chi trả!');
+        return res.redirect(req.query.url);
+    }
+};
+const getFormEditPayment = async (req, res) => {
+    try {
+        const { idPayment_schedule } = req.params
+        let now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        now = '' + year + '-' + month + '-' + day
+        let payment_schedule = await Payment_schedule.findOne({
+            where: {
+                idPayment_schedule
+            }
+        })
+        if (!payment_schedule) {
+            req.flash('error', 'Không tìm thấy lịch trả phí bạn chọn!');
+            return res.status(500).json({ isSuccess: false })
+        }
+        return res.render('contract/editPayment', { payment_schedule: payment_schedule, now: now });
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi tạo form sửa lịch trả phí!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+
+const editPayment = async (req, res) => {
+    try {
+        const staff = req.staff
+        const idStaff = staff.idStaff
+        const { idPayment_schedule } = req.params
+        let payment_schedule = await Payment_schedule.findOne({
+            where: {
+                idPayment_schedule
+            }
+        })
+        let { status } = req.body
+        if (payment_schedule) {
+            payment_schedule.status = status
+            await payment_schedule.save()
+            const text = 'Sửa lịch trả phí thành công!'
+            req.flash('error', text);
+            return res.redirect(req.query.url);
+        }
+        else {
+            req.flash('error', 'Không tìm thấy thông tin hợp đồng bạn chọn!');
+            return res.redirect(req.query.url);
+        }
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi thêm mới lịch trả phí!');
+        return res.redirect(req.query.url);
+    }
+};
+const getFormEditBenefit = async (req, res) => {
+    try {
+        const { idBenefit_history } = req.params
+        let now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        now = '' + year + '-' + month + '-' + day
+        let benefit_history = await Benefit_history.findOne({
+            where: {
+                idBenefit_history
+            }
+        })
+        if (!benefit_history) {
+            req.flash('error', 'Không tìm thấy thông tin chi trả bạn chọn!');
+            return res.status(500).json({ isSuccess: false })
+        }
+        return res.render('contract/editBenefit', { benefit_history: benefit_history, now: now });
+
+
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi tạo form nhập thông tin chi trả!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const editDetail = async (req, res) => {
+    try {
+        const staff = req.staff
+        const idStaff = staff.idStaff
+        const { idDetail_contract } = req.params
+
+        let detail_contract = await Detail_contract.findOne({
+            where: {
+                idDetail_contract
+            }
+        })
+
+        let { status } = req.body
+
+        if (detail_contract) {
+
+
+
+
+            detail_contract.status = status
+
+            await detail_contract.save()
+
+            req.flash('error', 'Sửa thông tin chi tiết hợp đồng thành công!');
+            return res.redirect(req.query.url);
+
+
+
+        }
+        else {
+            req.flash('error', 'Không tìm thấy chi tiết hợp đồng bạn chọn!');
+            return res.redirect(req.query.url);
+        }
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra sửa chi tiết hợp đồng!');
+        return res.redirect(req.query.url);
+    }
+};
+const editContract = async (req, res) => {
+    try {
+        const staff = req.staff
+       
+        const { idContract } = req.params
+        let contract = await Contract.findOne({
+            where: {
+                idContract
+            }
+        })
+        let { status, idStaff } = req.body
+
+        if (contract) {
+            const user = await Staff.findOne({
+                where: {
+                    idStaff
+                }
+            })
+            if (user) {
+                contract.status = status
+                contract.idStaff = idStaff
+                await contract.save()
+                if (req.files && req.files.pdfFile) {
+                    console.log('test')
+
+                    const pdfFile = req.files.pdfFile;
+                    filePath = `public/uploads/${contract.idContract}.pdf`;
+
+                    // Lưu file PDF từ yêu cầu vào thư mục 'uploads' trên server
+                    await pdfFile.mv(filePath);
+                    console.log('test2')
+                }
+                
+                req.flash('error', 'Sửa thông tin hợp đồng thành công!');
+                return res.redirect(req.query.url);
+            }
+            else {
+                req.flash('error', 'Sửa thông tin hợp đồng thát bai, mã khách hàng không tồn tại!');
+                return res.redirect(req.query.url);
+            }
+
+
+        }
+        else {
+            req.flash('error', 'Không tìm thấy hợp đồng bạn chọn!');
+            return res.redirect(req.query.url);
+        }
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi thêm mới thông tin chi trả!');
+        return res.redirect(req.query.url);
+    }
+};
+const editBenefit = async (req, res) => {
+    try {
+        const staff = req.staff
+        const idStaff = staff.idStaff
+        const { idBenefit_history } = req.params
+        let benefit_history = await Benefit_history.findOne({
+            where: {
+                idBenefit_history
+            }
+        })
+        let { date, info, reason, total } = req.body
+
+        if (benefit_history) {
+            const idDetail_contract = benefit_history.idDetail_contract
+            const detailContract = await Detail_contract.findOne({
+                where: {
+                    idDetail_contract
+                }
+            })
+
+            if (total <= detailContract.insuranceAmount) {
+                const benefits = await Benefit_history.findAll({
+                    where: {
+                        idDetail_contract
+                    }
+                })
+
+                let totalSum = 0; // Khởi tạo biến để tính tổng
+
+                // Dùng vòng lặp để duyệt qua từng phần tử trong mảng benefits
+                for (const benefit of benefits) {
+                    totalSum += benefit.total; // Cộng giá trị "total" vào tổng
+                }
+                let newtotalSum = 0
+                newtotalSum = Number(total) + Number(totalSum) - Number(benefit_history.total)
+                if (newtotalSum <= detailContract.insuranceAmount) {
+                    benefit_history.idStaff = idStaff
+                    benefit_history.info = info
+                    benefit_history.total = total
+                    benefit_history.reason = reason
+                    benefit_history.date = date
+                    await benefit_history.save()
+                    req.flash('error', 'Sửa đổi thông tin chi trả thành công!');
+                    return res.redirect(req.query.url);
+                }
+                else {
+                    const text = 'Tổng số tiền chi trả không thể lớn hơn tổng giá trị bảo hiểm là: ' + detailContract.insuranceAmount + '000 đồng! Hiện đã chi trả cho khách hàng: ' + totalSum + '000 đồng.'
+                    req.flash('error', text);
+                    return res.redirect(req.query.url);
+                }
+            }
+            else {
+                const text = 'Số tiền chi trả không thể lớn hơn tổng giá trị bảo hiểm là: ' + detailContract.insuranceAmount + '000 đồng!'
+                req.flash('error', text);
+                return res.redirect(req.query.url);
+            }
+
+        }
+        else {
+            req.flash('error', 'Không tìm thấy thông tin chi trả bạn chọn!');
+            return res.redirect(req.query.url);
+        }
+
+    } catch (error) {
+        req.flash('error', 'Có lỗi xảy ra khi thêm mới thông tin chi trả!');
+        return res.redirect(req.query.url);
+    }
+};
 const addPdf = async (req, res) => {
     try {
         if (!req.files || !req.files.pdfFile) {
@@ -254,121 +851,145 @@ const addPdf = async (req, res) => {
             res.render('contract/showPdf', { pdfContent, pdfUrl: '/uploads/JD-back-end.pdf' });
         });
     } catch (error) {
-        console.error(error);
+
         res.status(500).send('Đã xảy ra lỗi khi xử lý PDF.');
     }
 };
 const addContract = async (req, res) => {
     try {
 
-        let { idUser, idInsurance, signDate, selectedSubInsuranceIds } = req.body
-        console.log('test')
+        let { idUser, idInsurance, startDate, selectedSubInsuranceIds } = req.body
+        
         const user = await User.findOne({
             where: {
                 idUser,
                 isActive: 1,
             }
         })
-        console.log('test2')
+       
         if (!user) {
             req.flash('error', 'Thêm mới hợp đồng thất bại, mã khách hàng: ' + idUser + ' không tồn tại!');
             return res.redirect(req.query.url);
         }
+        const insurance = await Insurance.findOne({
+            where: {
+                idInsurance,
+                isMain: true,
+            }
+        })
+    
+        if (!insurance) {
+            req.flash('error', 'Thêm mới hợp đồng thất bại, mã sản phẩm: ' + idInsurance + ' không tồn tại!');
+            return res.redirect(req.query.url);
+        }
+        const currentContract = await Contract.findOne({
+            where: {
+                idUser,
 
-        console.log('test3')
+                status: {
+                    [db.Sequelize.Op.or]: [1, 2],
+                }
+
+            },
+            include: [
+                {
+                    model: Detail_contract,
+                    where: {
+                        idInsurance,
+                    },
+                    required: true,
+                }
+            ]
+        })
+        
+        if (currentContract) {
+            req.flash('error', 'Thêm mới hợp đồng thất bại, mã sản phẩm: ' + idInsurance + ' đang được áp dụng với khách hàng!');
+            return res.redirect(req.query.url);
+        }
+   
         const staff = req.staff
-        const start = new Date(signDate)
-
+        const start = new Date(startDate)
+        const endDate = new Date(start.getTime() + 30 * insurance.contractTerm * 24 * 60 * 60 * 1000);
         const t = await db.sequelize.transaction(); // Bắt đầu transaction\
+        
         let failContract = ''
+        let filePath = ''
+        let totalContract = 0
         try {
-            console.log('testaddContract1')
+            
             let contract = await Contract.create({
                 idUser,
                 status: 1,
                 pdf: '/public/uploads/',
-                signDate: start,
+                startDate: start,
+                endDate: endDate,
                 idStaff: staff.idStaff,
+                frequency: insurance.frequency,
+                premiumPaymentTerm: insurance.premiumPaymentTerm,
             }, { transaction: t })
-            console.log('testaddContract2')
+
             if (!req.files || !req.files.pdfFile) {
-                failContract = 'Đã xảy ra lỗi khi gửi file pdf!'
-                await t.rollback()
+                throw new Error('Đã xảy ra lỗi khi gửi file!');
             }
-            console.log('testaddContract2.5')
+         
             const pdfFile = req.files.pdfFile;
-            const filePath = `public/uploads/${contract.idContract}.pdf`;
-            console.log('testaddContract2.6')
+            filePath = `public/uploads/${contract.idContract}.pdf`;
+
             // Lưu file PDF từ yêu cầu vào thư mục 'uploads' trên server
             await pdfFile.mv(filePath);
-            console.log('testaddContract3')
-            let { isSuccess, fail } = await createDetailContract(start, staff.idStaff, idInsurance, idUser, contract.idContract, true, idUser, { transaction: t })
+
+            let { isSuccess, fail, total } = await createDetailContract(endDate, start, staff.idStaff, idInsurance, idUser, contract.idContract, true, { transaction: t })
             if (!isSuccess) {
-                failContract = fail
-                await t.rollback()
+                throw new Error(fail);
             }
+           
+            totalContract += Number(total)
+            let id = ''
             for (const item of selectedSubInsuranceIds) {
-
-                if (item != '[' && item != ']' && item != ',') {
-                    const id = 'beneficiary_' + item
-                    const idBeneficiary = req.body[id]
-
-
-                    if (Array.isArray(idBeneficiary)) {
-
-
-                        // Lặp qua từng phần tử trong mảng idBeneficiary và in giá trị của nó
-                        for (const beneficiary of idBeneficiary) {
-                            const userSub = await User.findOne({
-                                where: {
-                                    idUser: beneficiary,
-                                    isActive: 1,
-                                }
-                            })
-                            if (!userSub) {
-                                failContract = "Mã khách hàng thụ hưởng: " + beneficiary + " không tồn tại!"
-                                await t.rollback()
-                            }
-                            let { isSuccess, fail } = await createDetailContract(start, staff.idStaff, item, idUser, contract.idContract, true, beneficiary, { transaction: t })
-                            if (!isSuccess) {
-                                failContract = fail
-                                await t.rollback()
-                            }
-                        }
-                    } else {
-                        const userSub = await User.findOne({
-                            where: {
-                                idUser: idBeneficiary,
-                                isActive: 1,
-                            }
-                        })
-                        if (!userSub) {
-                            failContract = "Mã khách hàng thụ hưởng: " + idBeneficiary + " không tồn tại!"
-                            await t.rollback()
-                        }
-                        let { isSuccess, fail } = await createDetailContract(start, staff.idStaff, item, idUser, contract.idContract, true, idBeneficiary, { transaction: t })
+            
+                if (item != '[') {
+                    console.log(item)
+                    if(item==']'||item==','){
+                        console.log('test')
+                        let { isSuccess, fail, total } = await createDetailContract(endDate,start, staff.idStaff, id, idUser, contract.idContract, false, { transaction: t })
+                        totalContract += Number(total)
+                        console.log(totalContract)
                         if (!isSuccess) {
-                            failContract = fail
-                            await t.rollback()
+    
+                            throw new Error(fail);
                         }
+                        id = ''
                     }
+                    else{
+                        id+=item
+                    }
+                    
+                    
 
                 }
 
             }
-
-
+            console.log("test9")
+            console.log(totalContract)
+            
+         
             await t.commit(); // Lưu thay đổi và kết thúc transaction
 
         } catch (error) {
 
             await t.rollback(); // Hoàn tác các thay đổi và hủy bỏ transaction
+            failContract = error.message
             req.flash('error', 'Thêm mới hợp đồng thất bại. ' + failContract);
             return res.redirect(req.query.url);
         }
 
 
         req.flash('error', 'Thêm mới hợp đồng thành công!');
+
+        const title = 'Thông báo về việc hợp đồng bảo hiểm'
+        const content = 'Kính gửi quý khách,<br>Hợp đồng bảo hiểm của bạn đã được nhân viên khi vào hệ thống, bạn có thể tra cứu thông tin và trả tiền bảo hiểm ngay trên trang web của chúng tôi: life.vn<br>Mọi thắc mắc xin vui lòng liên hệ với chúng tôi theo thông tin dưới đây:<br>Email:trannhatquan.2001@gmail.com<br>Xin cảm ơn sự hợp tác của bạn.<br>Trân trọng,<br> LIFE'
+        console.log('start')
+        const sendMailToUser = await sendMail(user.mail, content, title, filePath)
         return res.redirect(req.query.url);
     } catch (error) {
         req.flash('error', 'Đã xảy ra lỗi khi thêm hợp đồng!');
@@ -377,28 +998,138 @@ const addContract = async (req, res) => {
 };
 const fake = async (req, res) => {
     try {
-        console.log('test')
-        const detail = await Detail_contract.create({
-            idInsurance: 2,
-            idContract: 2,
-            idBeneficiary: 1,
-            isMain: true,
-            status: 1,
-            startDate: "2023-07-28T00:00:00.000Z",
-            endDate: "2023-07-29T00:00:00.000Z",
-            premium: 300,
-            premiumPaymentTerm: 3,
-            frequency: 1,
-            contractTerm: 30,
-            insuranceAmount: 10000,
+        //const { idInsurance } = req.params
+
+        let insurances = await Insurance.findAll({
+
+            include: [
+                {
+                    model: Insurance_type,
+                },
+
+                {
+                    model: Detail_contract,
+
+                    include: [
+
+                        {
+                            model: Benefit_history,
+
+                            required: false
+                        },
+                        {
+                            model: Contract,
+                            required: false,
+                            include: [
+                                {
+                                    model: Payment_schedule,
+                                    where: {
+                                        status: 1,
+
+                                    },
+                                    required: false,
+
+                                },
+                            ]
+                        },
+                    ]
+                }
+            ]
         })
-        console.log('test2')
+        let quantityInsurance = 0
+        let totalInput = 0
+        let totalOutput = 0
+        let totalQuantityContract = 0
+        let totalQuantityContractCancel = 0
+        let totalQuantityContractPayInDate = 0
+        let totalQuantityContractInDate = 0
+        let totalNewContract = 0
+        insurances.forEach((insurance) => {
+            console.log(1)
+            quantityInsurance += 1
+            insurance.dataValues.typeName = insurance.Insurance_type.dataValues.name
+            delete insurance.dataValues.Insurance_type
+            console.log(2)
+            if (insurance.isDel == 1) {
+                insurance.dataValues.isDel = 'Đã huỷ'
+            }
+            else {
+                insurance.dataValues.isDel = 'Còn hoạt động'
+            }
+            console.log(3)
+            let input = 0
+            let output = 0
+
+            let quantityContract = 0
+            let quantityContractCancel = 0
+            let quantityContractPayInDate = 0
+            let quantityContractInDate = 0
+            let newContract = 0
+            
+            console.log(4)
+            insurance.Detail_contracts.forEach((detail) => {
+
+                if (detail.Contract != null) {
+                    newContract += 1
+                }
+                quantityContract += 1
+                if (detail.status == 0) {
+                    quantityContractCancel += 1
+
+                }
+                if (detail.status == 1) {
+                    quantityContractPayInDate += 1
+                }
+                if (detail.status == 2) {
+                    quantityContractInDate += 1
+                }
+
+
+                detail.Benefit_histories.forEach((benefit) => {
+                    output += Number(benefit.total) * 1000
+                })
+                detail.Contract.Payment_schedules.forEach((payment) => {
+                    input += Number(payment.total) * 1000
+                    //console.log(input)
+                })
+                //insurance.dataValues.Contract = detail.dataValues.Contract
+            })
+            console.log(5)
+           // delete insurance.dataValues.Detail_contracts
+            insurance.dataValues.input = input.toLocaleString()
+            insurance.dataValues.output = output.toLocaleString()
+            insurance.dataValues.newContract = newContract.toLocaleString()
+            insurance.dataValues.quantityContract = quantityContract.toLocaleString()
+            insurance.dataValues.quantityContractCancel = quantityContractCancel.toLocaleString()
+            insurance.dataValues.quantityContractInDate = quantityContractInDate.toLocaleString()
+            insurance.dataValues.quantityContractPayInDate = quantityContractPayInDate.toLocaleString()
+            totalNewContract += newContract
+            totalQuantityContract += quantityContract
+            totalQuantityContractCancel += quantityContractCancel
+            totalQuantityContractInDate += quantityContractInDate
+            totalQuantityContractPayInDate += quantityContractPayInDate
+            totalInput += input
+            totalOutput += output
+        })
+        totalInput = totalInput.toLocaleString()
+        totalOutput = totalOutput.toLocaleString()
+        totalNewContract = totalNewContract.toLocaleString()
+        totalQuantityContract = totalQuantityContract.toLocaleString()
+        totalQuantityContractCancel = totalQuantityContractCancel.toLocaleString()
+        totalQuantityContractInDate = totalQuantityContractInDate.toLocaleString()
+        totalQuantityContractPayInDate = totalQuantityContractPayInDate.toLocaleString()
+        console.log(6)
+        const report = {
+            totalInput, totalOutput, totalQuantityContract, totalQuantityContractCancel,
+            totalQuantityContractInDate, totalQuantityContractPayInDate, quantityInsurance, totalNewContract
+        }
+        console.log(7)
 
 
         res
             .status(200)
             .json({
-                detail, isSuccess: true
+               report, insurances
             });
     } catch (error) {
         req.flash('error', 'Đã xảy ra lỗi khi thêm hợp đồng!');
@@ -409,7 +1140,246 @@ const fake = async (req, res) => {
             });
     }
 };
+const sendMail = async (email, content, title, pdf) => {
+    try {
+        console.log('test')
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: "trannhatquan.2001@gmail.com", // generated ethereal user
+                pass: "bseuvtvsghpnrltz", // generated ethereal password
+            },
+        });
+        console.log('startSendMail')
+        console.log(pdf)
+        if (pdf) {
+
+            const pdfAttachmentContent = fs.readFileSync(pdf);
+            await transporter.sendMail({
+                from: 'trannhatquan.2001@gmail.com', // Địa chỉ email người gửi
+                to: email, // Địa chỉ email người nhận
+                subject: title, // Tiêu đề email
+                text: title, // Nội dung văn bản của email (không hiển thị khi email được xem dưới dạng HTML)
+                html: content, // Nội dung email được viết bằng HTML
+                attachments: [
+                    {
+                        filename: 'HopDong.pdf', // Tên tệp đính kèm (có thể đặt lại tùy chọn)
+                        content: pdfAttachmentContent, // Nội dung tệp PDF đính kèm
+                        contentType: 'application/pdf', // Kiểu nội dung của tệp đính kèm (đối với PDF, kiểu này là "application/pdf")
+                    },
+                ],
+            });
+            console.log('endSendMailWithAtt')
+        }
+        else {
+            await transporter.sendMail({
+                from: 'trannhatquan.2001@gmail.com', // Địa chỉ email người gửi
+                to: email, // Địa chỉ email người nhận
+                subject: title, // Tiêu đề email
+                text: title, // Nội dung văn bản của email (không hiển thị khi email được xem dưới dạng HTML)
+                html: content, // Nội dung email được viết bằng HTML
+            });
+            console.log('endSendMailWith')
+        }
+        return true
+    } catch (error) {
+        return false
+    }
+}
+const editStatusDetail_contract = async (req, res) => {
+    try {
+        const { idDetail_contract } = req.params
+        const status = req.query.status
+        let contract = await Detail_contract.findOne({
+            where: {
+                idDetail_contract
+            }
+        })
+        if (contract) {
+            contract.status = status
+            await contract.save()
+            req.flash('error', 'Thay đổi trạng thái phần có mã: ' + idDetail_contract + ' trong hợp đồng thành công!');
+            return res.status(200).json({ isSuccess: true });
+        }
+        else {
+            req.flash('error', 'Chi tiết hợp đồng bạn chọn không tồn tại!');
+            return res.status(404).json({ isSuccess: false })
+        }
+
+
+
+    } catch (error) {
+        req.flash('error', 'Thay đổi trạng thái chi tiết hợp đồng thất bại!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const editStatusContract = async (req, res) => {
+    try {
+        const { idContract } = req.params
+        const status = req.query.status
+        let contract = await Contract.findOne({
+            where: {
+                idContract
+            }
+        })
+        if (contract) {
+            contract.status = status
+            await contract.save()
+            req.flash('error', 'Thay đổi trạng thái hợp đồng có mã: ' + idContract + ' thành công!');
+            return res.status(200).json({ isSuccess: true });
+        }
+        else {
+            req.flash('error', 'Hợp đồng bạn chọn không tồn tại!');
+            return res.status(404).json({ isSuccess: false })
+        }
+
+
+
+    } catch (error) {
+        req.flash('error', 'Thay đổi trạng thái hợp đồng thất bại!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const editStatusPayment = async (req, res) => {
+    try {
+        const { idPayment_schedule } = req.params
+        const status = req.query.status
+        let contract = await Payment_schedule.findOne({
+            where: {
+                idPayment_schedule
+            }
+        })
+        if (contract) {
+            contract.status = status
+            await contract.save()
+            req.flash('error', 'Thay đổi trạng thái lịch trả phí có mã: ' + idPayment_schedule + ' thành công!');
+            return res.status(200).json({ isSuccess: true });
+        }
+        else {
+            req.flash('error', 'Lịch trả phí bạn chọn không tồn tại!');
+            return res.status(404).json({ isSuccess: false })
+        }
+
+
+
+    } catch (error) {
+        req.flash('error', 'Thay đổi trạng thái lịch trả phí thất bại!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const deleteBenefit = async (req, res) => {
+    try {
+        const { idBenefit_history } = req.params
+
+        let insurance = await Benefit_history.findOne({
+            where: {
+                idBenefit_history
+            }
+        })
+        if (insurance) {
+            await insurance.destroy()
+        }
+        else {
+            req.flash('error', 'Thông tin chi trả bạn chọn không tồn tại!');
+            return res.status(404).json({ isSuccess: false })
+        }
+
+        req.flash('error', 'Xoá thông tin chi trả có mã: ' + idBenefit_history + ' thành công!');
+        return res.status(200).json({ isSuccess: true });
+
+    } catch (error) {
+        //req.flash('error', 'Có lỗi xảy ra khi lấy danh sách nhân viên');
+        req.flash('error', 'Xoá thông tin chi trả thất bại, thông tin chi trả đã được ghi nhận ở các bảng khác, bạn có thể ngừng hoạt động để thay cho biện pháp xoá!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const deletePayment = async (req, res) => {
+    try {
+        const { idPayment_schedule } = req.params
+
+        let insurance = await Payment_schedule.findOne({
+            where: {
+                idPayment_schedule
+            }
+        })
+        if (insurance) {
+            await insurance.destroy()
+        }
+        else {
+            req.flash('error', 'Lịch trả phí bạn chọn không tồn tại!');
+            return res.status(404).json({ isSuccess: false })
+        }
+
+        req.flash('error', 'Xoá lịch trả phí có mã: ' + idPayment_schedule + ' thành công!');
+        return res.status(200).json({ isSuccess: true });
+
+    } catch (error) {
+        //req.flash('error', 'Có lỗi xảy ra khi lấy danh sách nhân viên');
+        req.flash('error', 'Xoá lịch trả phí thất bại, lịch trả phí đã được ghi nhận ở các bảng khác, bạn có thể ngừng hoạt động để thay cho biện pháp xoá!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const deleteDetail_contract = async (req, res) => {
+    try {
+        const { idDetail_contract } = req.params
+
+        let insurance = await Detail_contract.findOne({
+            where: {
+                idDetail_contract
+            }
+        })
+        if (insurance) {
+            await insurance.destroy()
+        }
+        else {
+            req.flash('error', 'Chi tiết hợp đồng bạn chọn không tồn tại!');
+            return res.status(404).json({ isSuccess: false })
+        }
+
+        req.flash('error', 'Xoá chi tiết hợp đồng có mã: ' + idDetail_contract + ' thành công!');
+        return res.status(200).json({ isSuccess: true });
+
+    } catch (error) {
+        //req.flash('error', 'Có lỗi xảy ra khi lấy danh sách nhân viên');
+        req.flash('error', 'Xoá chi tiết hợp đồng thất bại, chi tiết hợp đồng đã được ghi nhận ở các bảng khác, bạn có thể ngừng hoạt động để thay cho biện pháp xoá!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
+const deleteContract = async (req, res) => {
+    try {
+        const { idContract } = req.params
+
+        let insurance = await Contract.findOne({
+            where: {
+                idContract
+            }
+        })
+        if (insurance) {
+            await insurance.destroy()
+        }
+        else {
+            req.flash('error', 'Hợp đồng bạn chọn không tồn tại!');
+            return res.status(404).json({ isSuccess: false })
+        }
+
+        req.flash('error', 'Xoá hợp đồng có mã: ' + idContract + ' thành công!');
+        return res.status(200).json({ isSuccess: true });
+
+    } catch (error) {
+        //req.flash('error', 'Có lỗi xảy ra khi lấy danh sách nhân viên');
+        req.flash('error', 'Xoá hợp đồng thất bại, hợp đồng đã được ghi nhận ở các bảng khác, bạn có thể ngừng hoạt động hợp đồng để thay cho biện pháp xoá!');
+        return res.status(500).json({ isSuccess: false })
+    }
+};
 module.exports = {
-    getListBenefit, getListContract, getListPayment, getFormAddContract, addContract, getDetailAndSub, fake
+    getListBenefit, getListContract, getListPayment, getFormAddContract, addContract, getDetailAndSub,
+    fake, sendMail, getFormAddBenefit, getFormAddPayment, getFormEditBenefit,
+    getFormEditPayment, addBenefit, addPayment, editBenefit, editPayment,
+    getFormAddDetailContract, getFromEditContract, addDetail_contract, editContract,
+    editStatusContract, editStatusDetail_contract, editStatusPayment,
+    deleteBenefit, deleteContract, deleteDetail_contract, deletePayment,
+    getListDetail, getFromEditDetail, editDetail
 
 };

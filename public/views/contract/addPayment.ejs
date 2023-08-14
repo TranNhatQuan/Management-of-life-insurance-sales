@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <style>
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+    }
+
+    .form-group {
+      margin: 10px;
+    }
+
+    #idStaff {
+      outline: none;
+      border: none;
+
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+
+<body>
+
+
+
+  <h2>Form nhập lịch trả phí</h2>
+  <form action="/contract/addPayment/<%= detail.idDetail_contract %>?url=/contract/listDetail" method="post">
+    <p><strong>ID Hợp đồng:</strong>
+      <%= detail.idContract %>
+    </p>
+    <p><strong>ID Chi tiết hợp đồng:</strong>
+      <%= detail.idDetail_contract %>
+    </p>
+    <p><strong>Số tiền:</strong>
+      <%= detail.premium %>
+    </p>
+   
+    <div class="form-group">
+      <label for="index">Kỳ thu thứ:</label>
+      <input type="text" id="index" name="index" required min="1">
+    </div>
+
+    <div class="form-group">
+      <button type="submit">Lưu</button>
+    </div>
+  </form>
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+</body>
+
+</html>

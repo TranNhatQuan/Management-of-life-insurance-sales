@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>LIFE</title>
+  <link rel="icon" href="../../icon/2764.png" type="image/png">
+  <link href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar {
+      /* Thiết lập vị trí */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+
+      z-index: 2;
+    }
+
+    input {
+
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    select {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .container {
+      border-radius: 10px;
+    }
+
+    .info {
+      /* Thiết lập vị trí */
+      margin-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+
+      /* Thiết lập vị trí */
+      margin-top: 30px;
+      position: relative;
+      z-index: 0;
+
+    }
+
+    h3 {
+      font-size: smaller;
+      opacity: 0.5;
+      text-align: center;
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      /* Định dạng chiều rộng của popup */
+      height: 400px;
+      /* Định dạng chiều cao của popup */
+      background: #fff;
+      /* Màu nền của popup */
+      border: 1px solid #ccc;
+      /* Viền của popup */
+      padding: 20px;
+      /* Khoảng cách giữa nội dung và viền của popup */
+      display: none;
+      overflow: auto;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      /* Định dạng chiều rộng thanh kéo */
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: #ccc;
+      /* Màu của thanh kéo */
+      border-radius: 10px;
+      /* Định dạng bo tròn cho thanh kéo */
+    }
+
+    .button-like {
+      display: inline-block;
+      padding: 5px;
+      background-color: #3f87a6;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button {
+      display: inline-block;
+      padding: 5px;
+      background-color: #4CAF50;
+      border: none;
+      color: #fff;
+      font-weight: bold;
+
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .button-like:hover {
+      background-color: #266c84;
+    }
+
+    #addEmployeeBtn {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .blockInfo {
+      display: contents;
+
+      border-radius: 10px;
+
+    }
+
+    .blockContract {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #fffffff8;
+      width: 500px;
+      /* Set the width of each contract container */
+      margin: 10px;
+      /* Add some margin between contract containers */
+    }
+
+    .contarct {
+      margin: 10px;
+    }
+
+    .blockProduct {
+
+      margin-top: 10px;
+    }
+
+    .blockDetail {
+      display: none;
+    }
+
+    #image {
+      position: relative;
+      /* Đặt phần tử này làm đối tượng có vị trí tương đối */
+    }
+
+    /* CSS cho phần tử văn bản */
+    #text {
+      position: absolute;
+      width: 20%;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      /* Đặt phần tử này làm đối tượng có vị trí tuyệt đối */
+      top: 110px;
+      /* Đặt phần tử văn bản ở giữa theo chiều dọc */
+      left: 10%;
+      /* Đặt phần tử văn bản ở giữa theo chiều ngang */
+
+      background-color: #4CAF50;
+      /* Đặt màu nền cho phần tử văn bản */
+
+      z-index: 2;
+      /* Đặt độ ưu tiên hiển thị lớn hơn hình ảnh */
+    }
+
+    #text2 {
+      font-size: smaller;
+      opacity: 0.5;
+      position: absolute;
+      width: 100%;
+      height: 30px;
+      /* Đặt phần tử này làm đối tượng có vị trí tuyệt đối */
+      top: 43%+120px;
+      /* Đặt phần tử văn bản ở giữa theo chiều dọc */
+      left: 10%;
+      /* Đặt phần tử văn bản ở giữa theo chiều ngang */
+
+      background-color: #f5f5ff;
+      /* Đặt màu nền cho phần tử văn bản */
+
+      z-index: 1;
+      /* Đặt độ ưu tiên hiển thị lớn hơn hình ảnh */
+    }
+
+    .detail {
+      margin: 10px;
+    }
+
+    p {
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body style="background-color: #f5f5f5">
+  <%- include('../../layout/sidebar2.ejs') %>
+    <% if (typeof error !=='undefined' ) { %>
+      <script>
+        alert("<%= error %>");
+
+      </script>
+      <% delete error; %>
+        <% } %>
+
+          <section class="info">
+            <div id="image">
+              <img src="../../icon/a1.jpg" alt="" height="260px" width="100%">
+            </div>
+            <div>
+
+              <div id="text" class="text-white" style="font-size: xx-large">
+                Tra cứu phí bảo hiểm
+              </div>
+
+            </div>
+
+          </section>
+          <section class="container">
+            <div>
+              <h2 style="text-align: center;font-weight: bold;">Tra cứu phí bảo hiểm</h2>
+              <h3>Khách hàng có thể tra cứu phí bảo hiểm bằng CCCD/CMND hoặc bằng tài khoản bản thân</h3>
+              <div style="text-align: center;">
+                <input type="radio" id="cccd" name="option" value="cccd" onchange="handleCheckboxChange()">
+                <label for="cd">Bằng CCCD/CMND</label>
+
+                <input type="radio" id="account" name="option" value="account" onchange="handleCheckboxChange()">
+                <label for="account">Bằng tài khoản</label>
+              </div>
+              <!-- tạo ra checkbox gồm 2 lựa chọn là bằng CCCD hoặc bằng tài khoản -->
+              <div class="blockInfo">
+
+                <div style="text-align: center;">
+                  <div id="form-cccd">
+
+                    <!-- Thêm các trường và nội dung cho form CCCD/CMND -->
+                    <p>Tra cứu phí hợp đồng theo CCCD/CMND</p>
+
+                    <div class="form-group">
+                      <label for="idCard">Nhập số CCCD/CMND: </label>
+                      <input type="text" id="idCard" name="idCard" required pattern="[0-9]{9}|[0-9]{12}"
+                        title="CCCD/CMND phải có 9 hoặc 12 chữ số.">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 10px;" onclick="fetchDataByCCCD()">
+                      <button type="submit">Tra cứu</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <div id="cccdShow">
+
+                      </div>
+                      <div id="qr-show">
+
+                      </div>
+                    </div>
+
+
+                  </div>
+
+                  <div id="form-account" style="display: none;">
+                    <!-- Thêm các trường và nội dung cho form tài khoản -->
+                    <p>Tra cứu phí hợp đồng theo tài khoản</p>
+                    <% if (typeof name==='undefined' ) { %>
+                      Vui lòng đăng nhập để tra cứu phí hợp đồng theo tài khoản! <a href="/account/login"> Đăng nhập</a>
+                      <% }else{ %>
+                        <div class="form-group" style="margin-top: 10px;" onclick="fetchDataByAccount()">
+                          <button type="submit">Tra cứu</button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                          <div id="accountShow">
+
+                          </div>
+                          <div id="qr-account">
+
+                          </div>
+                        </div>
+                        <% } %>
+
+                  </div>
+
+                  <!-- Thêm button vào giao diện -->
+
+                </div>
+              </div>
+
+
+
+            </div>
+          </section>
+
+          <div id="popup" class="popup"></div>
+
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+          <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+          <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+          <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+          <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap5.min.js"></script>
+          <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+          <script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.bootstrap5.min.js"></script>
+          <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+          <script src="https://cdn.datatables.net/searchpanes/2.2.0/js/dataTables.searchPanes.min.js"></script>
+          <script src="https://cdn.datatables.net/searchbuilder/1.2.1/js/dataTables.searchBuilder.min.js"></script>
+          <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+
+
+          <script>
+            function handleCheckboxChange() {
+              const cccdRadioButton = document.getElementById('cccd');
+              const accountRadioButton = document.getElementById('account');
+              const formCCCD = document.getElementById('form-cccd');
+              const formAccount = document.getElementById('form-account');
+              const showAccount = document.getElementById('accountShow');
+              const show = document.getElementById('cccdShow');
+              if (cccdRadioButton.checked) {
+                formCCCD.style.display = 'block';
+                formAccount.style.display = 'none';
+                show.style.display = 'block'
+                showAccount.style.display = 'none'
+              } else if (accountRadioButton.checked) {
+                formAccount.style.display = 'block';
+                formCCCD.style.display = 'none';
+                show.style.display = 'none'
+                showAccount.style.display = 'block'
+              }
+            }
+            let isConfirming = false;
+
+            async function confirm(idUser) {
+              // Nếu đang trong quá trình xác nhận, không cho phép gọi hàm nữa
+              if (isConfirming) {
+                return;
+              }
+
+              const url = `/user/confirmPay/${idUser}?url=/user/prePay`;
+              try {
+                // Đang xác nhận, vô hiệu hóa việc gọi hàm trong lúc chờ API chạy
+                isConfirming = true;
+                window.alert("Thanh toán thành công!");
+                window.location.href = '/user/prePay?url=/intro/home';
+                // Make the HTTP request using fetch
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error) {
+
+                  window.alert(`${data.error}`);
+                } else {
+
+                  window.alert("Thanh toán thành công!");
+                }
+              } catch (error) {
+              } finally {
+                // Kết thúc xác nhận, kích hoạt lại việc gọi hàm
+                isConfirming = false;
+              }
+            }
+            async function fetchDataByAccount() {
+
+              window.location.href = '/user/payWithUser?url=/user/prePay';
+              // Kiểm tra nếu ô nhập rỗng thì không thực hiện gọi API
+
+              // Replace 'your-api-endpoint' with the actual URL of your server's API endpoint
+              const url = `/user/payWithUser?url=/user/prePay`;
+
+            }
+            async function fetchDataByCCCD() {
+              const idCard = document.getElementById('idCard').value;
+
+
+
+              window.location.href = '/user/pay?CCCD=' + idCard + '&url=/user/prePay';
+
+
+
+            }
+            var popupVisible = false;
+            var varblockDetail = false;
+            function showPopup() {
+              var popup = document.getElementById("popup");
+              popup.style.display = "block";
+              popupVisible = true;
+              // Thêm sự kiện mousedown cho document để ẩn popup khi người dùng nhấp chuột ra ngoài
+              document.addEventListener("mousedown", hidePopupOutside);
+            }
+
+            function hidePopup() {
+              var popup = document.getElementById("popup");
+              popup.style.display = "none";
+              popupVisible = false;
+              // Gỡ bỏ sự kiện mousedown khỏi document
+              document.removeEventListener("mousedown", hidePopupOutside);
+            }
+
+            // Ẩn popup khi người dùng nhấp chuột ra ngoài
+            function hidePopupOutside(event) {
+              var popup = document.getElementById("popup");
+              if (!popup.contains(event.target)) {
+                hidePopup();
+              }
+            }
+
+
+
+
+
+
+
+
+
+
+          </script>
+
+
+</body>
+
+</html>

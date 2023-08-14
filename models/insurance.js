@@ -14,6 +14,9 @@ module.exports = (sequelize, DataTypes) => {
       Insurance.belongsTo(models.Insurance_type, {
         foreignKey: "idInsurance_type",
       })
+      Insurance.belongsTo(models.Staff, {
+        foreignKey: "idStaff",
+      })
       Insurance.hasMany(models.Detail_contract, {
         foreignKey: "idInsurance",
       });
@@ -27,6 +30,15 @@ module.exports = (sequelize, DataTypes) => {
       });
       Insurance.hasMany(models.Catalog_insurance, {
         foreignKey: "idInsurance",
+      });
+      Insurance.hasMany(models.Insurance, {
+        foreignKey: "idMainInsurance",
+        as: 'main'
+      });
+      Insurance.belongsTo(models.Insurance, {
+        foreignKey: "idMainInsurance",
+        targetKey: "idInsurance",
+        as: 'sub'
       });
     }
   }
@@ -79,6 +91,18 @@ module.exports = (sequelize, DataTypes) => {
 
 
       references: { model: "Insurance_type", key: "idInsurance_type" },
+      type: DataTypes.INTEGER
+    },
+   
+    date: {
+      allowNull: false,
+      type: DataTypes.DATEONLY
+    },
+    idMainInsurance: {
+      allowNull: true,
+
+
+      references: { model: "Insurance", key: "idInsurance" },
       type: DataTypes.INTEGER
     },
   }, {
