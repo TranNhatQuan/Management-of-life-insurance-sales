@@ -1,4 +1,4 @@
-const { Staff, Account, Permission, Screen, Staff_permission, Contract, Detail_contract, Payment_schedule, User, Benefit_history } = require("../models");
+const { Staff, Account, Permission, Screen, Staff_permission, Insurance, Contract, Detail_contract, Payment_schedule, User, Benefit_history } = require("../models");
 const { QueryTypes, Op, where, STRING, NUMBER } = require("sequelize");
 const db = require("../models/index");
 const bcrypt = require("bcryptjs");
@@ -101,7 +101,7 @@ const getUserHome = async (req, res) => {
                 }
             ]
         })
-
+        let maxIndex = 0
         contracts.forEach((contract) => {
             if (contract.status == 1) {
                 contract.dataValues.status = 'Đang thu phí'
@@ -112,11 +112,9 @@ const getUserHome = async (req, res) => {
             let currentIndex = 0
             contract.dataValues.paymentStatus = 'Chưa tới hạn đóng phí'
             contract.Payment_schedules.forEach((payment) => {
-                if (payment.status == 1) {
-                    currentIndex += 1
+                if (payment.status == 1 && payment.index >= currentIndex) {
+                    currentIndex = payment.index
                 }
-
-
                 if (payment.status == 3) {
                     contract.dataValues.paymentStatus = 'Đến hạn đóng phí'
                 }
@@ -125,9 +123,19 @@ const getUserHome = async (req, res) => {
                 }
             })
             contract.dataValues.index = currentIndex
+            let currentMax = 0
+            if (contract.frequency == 0) {
+                currentMax = 1
+            }
+            else {
+                currentMax = Math.floor(contract.premiumPaymentTerm / contract.frequency)
+            }
 
+            if (currentMax >= maxIndex) {
+                maxIndex = currentMax
+            }
 
-            contract.dataValues.maxIndex = Math.floor(contract.premiumPaymentTerm / contract.frequency) + 1
+            contract.dataValues.maxIndex = maxIndex
             contract.Detail_contracts.forEach((detail) => {
 
                 if (detail.status == 1) {
@@ -176,18 +184,17 @@ const getUserHome = async (req, res) => {
 const selectBank = async (req, res) => {
     try {
 
-        const idPayment_schedule = req.query.idPayment_schedule
-        console.log(idPayment_schedule)
+        const idContract = req.query.idContract
+        const total = req.query.total
+        const index = req.query.index
+
         const error = req.flash('error')[0];
-        const payment = await Payment_schedule.findOne({
+        const payment = await Contract.findOne({
             where: {
-                idPayment_schedule: idPayment_schedule,
-                status: {
-                    [db.Sequelize.Op.not]: [1, 0, 7],
-                }
+                idContract
             }
         })
-        console.log(1)
+
         if (!payment) {
             //const error = 'Không tìm thấy thông tin khách hàng!'
             req.flash('error', 'Không tìm thấY thông tin trả phí!');
@@ -197,13 +204,7 @@ const selectBank = async (req, res) => {
         else {
 
 
-            console.log(2)
-            payment.dataValues.total = (Number(payment.total) * 1000).toLocaleString()
-
-
-
-            console.log(3)
-            return res.render('payment/selectBank', { error: error, payment, url: req.query.url });
+            return res.render('payment/selectBank', { error: error, idContract, index, total, url: req.query.url });
 
         }
 
@@ -234,28 +235,70 @@ const payWithoutUser = async (req, res) => {
 
         else {
 
-            const payments = await Payment_schedule.findAll({
+            let payments = await Payment_schedule.findAll({
                 where: {
                     idUser: user.idUser,
 
                 },
                 include: [
+
                     {
                         model: Contract,
+                        include: [
+                            {
+                                model: Payment_schedule,
+                                include: [
+                                    {
+                                        model: Detail_contract,
+                                        include: [
+                                            {
+                                                model: Insurance,
+                                            }
+                                        ]
+                                    }
+                                ]
 
+                            }
+                        ]
                     }
                 ]
             })
 
-            payments.forEach((payment) => {
-                payment.dataValues.total = (Number(payment.total) * 1000).toLocaleString()
-                if (payment.Contract.status == 0) {
-                    if (payment.status >= 2 && payment.status <= 6) {
-                        payment.dataValues.status = 0
-                    }
+            const uniquePairs = new Set(); // Sử dụng Set để theo dõi các cặp duy nhất
+            payments = payments.filter((payment) => {
+                let idContract = payment.Contract.dataValues.idContract;
+                let index = payment.dataValues.index;
 
+                let pair = `${idContract}-${index}`;
+
+                if (uniquePairs.has(pair)) {
+
+                    return false; // Không bao gồm payment trong mảng mới
+                } else {
+                    uniquePairs.add(pair);
+                    return true; // Bao gồm payment trong mảng mới
                 }
-            })
+            });
+            payments.forEach((payment) => {
+
+
+                let total = 0
+                let totalText = ""
+                let index = payment.index
+                payment.Contract.Payment_schedules.forEach((paymentContract) => {
+                    if (index == paymentContract.index) {
+
+                        let text = "Sản phẩm " + paymentContract.Detail_contract.Insurance.name + ": " + (Number(paymentContract.total) * 1000).toLocaleString() + " đồng<br>"
+                        total += Number(paymentContract.total) * 1000
+                        totalText += text
+                    }
+                })
+                total = total.toLocaleString()
+                totalText += "Tổng " + total + " đồng"
+                payment.dataValues.total = totalText
+
+
+            });
 
             const { listType, listPostType, listCatalog } = await getData()
             url = '/user/pay?CCCD=' + ID
@@ -299,26 +342,24 @@ const detail = async (req, res) => {
 const confirmPay = async (req, res) => {
     try {
 
-        const { idPayment_schedule, bank, id } = req.body
-
-        let payment = await Payment_schedule.findOne({
-            where: {
-                idPayment_schedule: idPayment_schedule
-            }
-        })
+        const { idContract, index, bank, id } = req.body
+        console.log(req.body)
+        console.log(1.1)
         let user = await User.findOne({
             include: [
                 {
                     model: Payment_schedule,
                     where: {
-                        idPayment_schedule: idPayment_schedule
+                        idContract: idContract,
+                        index: index
                     },
                     required: true,
                 }
             ]
         })
+        console.log(1.2)
         let isSend = false
-        if (!payment) {
+        if (!user) {
             //const error = 'Không tìm thấy thông tin khách hàng!'
 
             return res.status(404).json({ error: 'Không tìm thấy thông tin trả phí!' });
@@ -326,11 +367,24 @@ const confirmPay = async (req, res) => {
         }
         else {
             const info = "Bank: " + bank + ". Số tài khoản: " + id + ""
-            payment.status = 1;
-            payment.info = info
-            payment.date = new Date()
+            const now = new Date()
+            console.log(now)
+            await Payment_schedule.update(
+                {
+                    info: info,
+                    status: 1,
+                    date: now,
+                },
+                {
+                    where: {
+                        idContract: idContract, index: index
+                    }
+                }
+            )
+            console.log(2)
+
             isSend = true
-            await payment.save();
+
 
 
             if (isSend == true) {
@@ -340,7 +394,7 @@ const confirmPay = async (req, res) => {
 
                 const sendMailToUser = await sendMail(user.mail, content, title, filePath)
                 const error = req.flash('error')[0];
-
+                console.log(3)
                 req.flash('error', 'Thanh toán thành công!');
                 return res.redirect(req.query.url)
             }
@@ -358,7 +412,8 @@ const confirmPay = async (req, res) => {
 
 
     } catch (error) {
-        return res.status(500).json({ error: 'Có lỗi xảy ra khi thanh toán phí hợp đồng!' });
+        req.flash('error', 'Có lỗi xảy ra khi thanh toán!');
+        return res.redirect(req.query.url)
     }
 };
 const prePay = async (req, res) => {
@@ -389,16 +444,71 @@ const payWithUser = async (req, res) => {
 
         const name = user.name
 
-        const payments = await Payment_schedule.findAll({
+        let payments = await Payment_schedule.findAll({
             where: {
                 idUser: user.idUser,
 
             },
+            include: [
+
+                {
+                    model: Contract,
+                    include: [
+                        {
+                            model: Payment_schedule,
+                            include: [
+                                {
+                                    model: Detail_contract,
+                                    include: [
+                                        {
+                                            model: Insurance,
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        }
+                    ]
+                }
+            ]
         })
 
+        const uniquePairs = new Set(); // Sử dụng Set để theo dõi các cặp duy nhất
+        payments = payments.filter((payment) => {
+            let idContract = payment.Contract.dataValues.idContract;
+            let index = payment.dataValues.index;
+
+            let pair = `${idContract}-${index}`;
+
+            if (uniquePairs.has(pair)) {
+
+                return false; // Không bao gồm payment trong mảng mới
+            } else {
+                uniquePairs.add(pair);
+                return true; // Bao gồm payment trong mảng mới
+            }
+        });
         payments.forEach((payment) => {
-            payment.dataValues.total = (Number(payment.total) * 1000).toLocaleString()
-        })
+
+
+            let total = 0
+            let totalText = ""
+            let index = payment.index
+            payment.Contract.Payment_schedules.forEach((paymentContract) => {
+                if (index == paymentContract.index) {
+
+                    let text = "Sản phẩm " + paymentContract.Detail_contract.Insurance.name + ": " + (Number(paymentContract.total) * 1000).toLocaleString() + " đồng<br>"
+                    total += Number(paymentContract.total) * 1000
+                    totalText += text
+                }
+            })
+            total = total.toLocaleString()
+            totalText += "Tổng " + total + " đồng"
+            payment.dataValues.total = totalText
+
+
+        });
+
 
         const error = req.flash('error')[0];
         url = '/user/payWithUser'
@@ -445,7 +555,7 @@ const getAllContract = async (req, res) => {
                 }
             ]
         })
-
+        let maxIndex = 0
         contracts.forEach((contract) => {
 
             if (contract.status == 1) {
@@ -465,8 +575,8 @@ const getAllContract = async (req, res) => {
             let currentIndex = 0
             contract.dataValues.paymentStatus = 'Chưa tới hạn đóng phí'
             contract.Payment_schedules.forEach((payment) => {
-                if (payment.status == 1) {
-                    currentIndex += 1
+                if (payment.status == 1 && payment.index >= currentIndex) {
+                    currentIndex = payment.index
                 }
 
 
@@ -478,9 +588,19 @@ const getAllContract = async (req, res) => {
                 }
             })
             contract.dataValues.index = currentIndex
+            let currentMax = 0
+            if (contract.frequency == 0) {
+                currentMax = 1
+            }
+            else {
+                currentMax = Math.floor(contract.premiumPaymentTerm / contract.frequency)
+            }
 
+            if (currentMax >= maxIndex) {
+                maxIndex = currentMax
+            }
 
-            contract.dataValues.maxIndex = Math.floor(contract.premiumPaymentTerm / contract.frequency) + 1
+            contract.dataValues.maxIndex = maxIndex
 
 
 

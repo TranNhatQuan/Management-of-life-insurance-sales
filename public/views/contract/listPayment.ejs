@@ -118,8 +118,8 @@
 
 
           <div class="container">
-            <h2>Danh sách thu phi</h2>
-            <h3>Đây là danh sách thu phi, ấn vào dòng chứa thông tin thu phí bất kỳ để xem và sửa thông tin thu phi
+            <h2>Danh sách thu phí</h2>
+            <h3>Đây là danh sách thu phí, ấn vào dòng chứa thông tin thu phí bất kỳ để xem và sửa thông tin thu phi
               đó.
             </h3>
 
@@ -128,6 +128,7 @@
                 <tr>
                   <th>ID Thu phí</th>
                   <th>ID Hợp đồng</th>
+                  <th>Chi tiết</th>
                   <th>Người phụ trách</th>
                   <th>Hạn cuối</th>
                   <th>Ngày thu</th>
@@ -143,7 +144,10 @@
                       TP-<%= payment.idPayment_schedule %>
                     </td>
                     <td>
-                      CTHD-<%= payment.idDetail_contract %>
+                      HD-<%= payment.idContract %>
+                    </td>
+                    <td>
+                      CTHD-<%=payment.idDetail_contract%>_BH-<%=payment.Detail_contract.idInsurance%>
                     </td>
                     <td>
                       NV-<%= payment.idStaff %>
@@ -190,6 +194,7 @@
                     </td>
                   </tr>
                   <% }); %>
+                  
               </tbody>
 
             </table>
@@ -212,6 +217,7 @@
 
 
           <script>
+
             $(document).ready(function () {
               var table = $('#paymentTable').DataTable({
                 dom: 'Blfrtip',
@@ -226,7 +232,24 @@
 
               });
             });
+            function dropDetail(idContract) {
 
+              // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
+              var popup = document.getElementById(idContract);
+              if (varblockDetail == true) {
+                popup.style.display = "none";
+                varblockDetail = false
+              }
+              else {
+                popup.style.display = "block";
+                varblockDetail = true
+              }
+
+
+
+
+
+            }
             var popupVisible = false;
 
             function showPopup() {

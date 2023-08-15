@@ -10,13 +10,15 @@ const pdfParse = require('pdf-parse');
 const fs = require('fs');
 const { fail } = require("assert");
 const path = require("path");
-const createPayment = async (total, premiumPaymentTerm, frequency, idDetail_contract, idUser, idStaff, startDate, options) => {
+const createPayment = async (total, premiumPaymentTerm, frequency, idDetail_contract, idContract, idUser, idStaff, startDate, options) => {
     const start = new Date(startDate)
     let totalIndex = 1
-    if (premiumPaymentTerm == 0) {
+    if (frequency == 0) {
         totalIndex = 1
+        total = (total * Number(premiumPaymentTerm))
     } else {
-        totalIndex = (Math.floor(premiumPaymentTerm / frequency) + 1)
+        totalIndex = (Math.floor(premiumPaymentTerm / frequency))
+        total = (total * Number(frequency))
     }
 
 
@@ -37,6 +39,7 @@ const createPayment = async (total, premiumPaymentTerm, frequency, idDetail_cont
                     date: start,
                     status: 1,
                     total: total,
+                    idContract,
                     idDetail_contract,
                     index: index,
                 }, options);
@@ -60,7 +63,7 @@ const createPayment = async (total, premiumPaymentTerm, frequency, idDetail_cont
                     idUser,
                     startDate: newStart,
                     endDate: newEnd,
-
+                    idContract,
                     status: 2,
                     total: total,
                     idDetail_contract,
@@ -76,7 +79,7 @@ const createPayment = async (total, premiumPaymentTerm, frequency, idDetail_cont
 
     return { isSuccessPay, failPay }
 }
-const createDetailContract = async (endDate,start, idStaff, idInsurance, idUser, idContract, isMain, options) => {
+const createDetailContract = async (status,start, idStaff, idInsurance, frequency, idUser, idContract, isMain, options) => {
 
 
 
@@ -93,7 +96,7 @@ const createDetailContract = async (endDate,start, idStaff, idInsurance, idUser,
                 idInsurance
             }
         })
-
+        const endDate = new Date(start.getTime() + 30 * insurance.contractTerm * 24 * 60 * 60 * 1000);
         if (!insurance) {
             const msg = 'Bảo hiểm có mã: ' + idInsurance + ' không tồn tại!'
             isSuccess = false
@@ -105,13 +108,13 @@ const createDetailContract = async (endDate,start, idStaff, idInsurance, idUser,
             idContract,
             isMain,
             endDate: endDate,
-            status: 1,
+            status: status,
             premium: insurance.premium,
             insuranceAmount: insurance.insuranceAmount,
         }, options);
         total = insurance.premium
-        let { isSuccessPay, failPay } = await createPayment(total, insurance.premiumPaymentTerm, insurance.frequency,
-            detailContract.idDetail_contract, idUser, idStaff, start, options)
+        let { isSuccessPay, failPay } = await createPayment(total, insurance.premiumPaymentTerm, frequency,
+            detailContract.idDetail_contract, idContract, idUser, idStaff, start, options)
         if (!isSuccessPay) {
 
             throw new Error(failPay);
@@ -160,6 +163,13 @@ const getListPayment = async (req, res) => {
         let payments = await Payment_schedule.findAll({
 
             //raw: true,
+            include:[
+              
+                {
+                    model:Detail_contract,
+                    
+                }
+            ]
 
         })
 
@@ -858,8 +868,8 @@ const addPdf = async (req, res) => {
 const addContract = async (req, res) => {
     try {
 
-        let { idUser, idInsurance, startDate, selectedSubInsuranceIds } = req.body
-        
+        let { idUser, idInsurance, startDate, selectedSubInsuranceIds, frequency } = req.body
+        frequency = Number(frequency)
         const user = await User.findOne({
             where: {
                 idUser,
@@ -915,16 +925,20 @@ const addContract = async (req, res) => {
         let failContract = ''
         let filePath = ''
         let totalContract = 0
+        let status = 1
+        if(frequency==0){
+            status = 2
+        }
         try {
             
             let contract = await Contract.create({
                 idUser,
-                status: 1,
+                status: status,
                 pdf: '/public/uploads/',
                 startDate: start,
-                endDate: endDate,
+                
                 idStaff: staff.idStaff,
-                frequency: insurance.frequency,
+                frequency: frequency,
                 premiumPaymentTerm: insurance.premiumPaymentTerm,
             }, { transaction: t })
 
@@ -938,7 +952,7 @@ const addContract = async (req, res) => {
             // Lưu file PDF từ yêu cầu vào thư mục 'uploads' trên server
             await pdfFile.mv(filePath);
 
-            let { isSuccess, fail, total } = await createDetailContract(endDate, start, staff.idStaff, idInsurance, idUser, contract.idContract, true, { transaction: t })
+            let { isSuccess, fail, total } = await createDetailContract(status, start, staff.idStaff, idInsurance, frequency, idUser, contract.idContract, true, { transaction: t })
             if (!isSuccess) {
                 throw new Error(fail);
             }
@@ -946,16 +960,11 @@ const addContract = async (req, res) => {
             totalContract += Number(total)
             let id = ''
             for (const item of selectedSubInsuranceIds) {
-            
-                if (item != '[') {
-                    console.log(item)
-                    if(item==']'||item==','){
-                        console.log('test')
-                        let { isSuccess, fail, total } = await createDetailContract(endDate,start, staff.idStaff, id, idUser, contract.idContract, false, { transaction: t })
-                        totalContract += Number(total)
-                        console.log(totalContract)
-                        if (!isSuccess) {
-    
+                if (item != '[') {                  
+                    if(item==']'||item==','){                       
+                        let { isSuccess, fail, total } = await createDetailContract(status,start, staff.idStaff, id, frequency, idUser, contract.idContract, false, { transaction: t })
+                        totalContract += Number(total)                        
+                        if (!isSuccess) {   
                             throw new Error(fail);
                         }
                         id = ''
@@ -963,32 +972,18 @@ const addContract = async (req, res) => {
                     else{
                         id+=item
                     }
-                    
-                    
-
                 }
-
             }
-            console.log("test9")
-            console.log(totalContract)
-            
-         
-            await t.commit(); // Lưu thay đổi và kết thúc transaction
-
+            await t.commit(); 
         } catch (error) {
-
-            await t.rollback(); // Hoàn tác các thay đổi và hủy bỏ transaction
+            await t.rollback(); 
             failContract = error.message
             req.flash('error', 'Thêm mới hợp đồng thất bại. ' + failContract);
             return res.redirect(req.query.url);
         }
-
-
         req.flash('error', 'Thêm mới hợp đồng thành công!');
-
         const title = 'Thông báo về việc hợp đồng bảo hiểm'
-        const content = 'Kính gửi quý khách,<br>Hợp đồng bảo hiểm của bạn đã được nhân viên khi vào hệ thống, bạn có thể tra cứu thông tin và trả tiền bảo hiểm ngay trên trang web của chúng tôi: life.vn<br>Mọi thắc mắc xin vui lòng liên hệ với chúng tôi theo thông tin dưới đây:<br>Email:trannhatquan.2001@gmail.com<br>Xin cảm ơn sự hợp tác của bạn.<br>Trân trọng,<br> LIFE'
-        console.log('start')
+        const content = 'Kính gửi quý khách,<br>Hợp đồng bảo hiểm của bạn đã được nhân viên ghi vào hệ thống, bạn có thể tra cứu thông tin và trả tiền bảo hiểm ngay trên trang web của chúng tôi: life.vn<br>Mọi thắc mắc xin vui lòng liên hệ với chúng tôi theo thông tin dưới đây:<br>trannhatquan.2001@gmail.com<br>Xin cảm ơn sự hợp tác của bạn.<br>Trân trọng,<br> LIFE'
         const sendMailToUser = await sendMail(user.mail, content, title, filePath)
         return res.redirect(req.query.url);
     } catch (error) {
@@ -1000,136 +995,37 @@ const fake = async (req, res) => {
     try {
         //const { idInsurance } = req.params
 
-        let insurances = await Insurance.findAll({
+        const payments = await Payment_schedule.findAll({
+            where: {
+                idUser: 1,
 
+            },
             include: [
                 {
-                    model: Insurance_type,
-                },
-
-                {
                     model: Detail_contract,
-
-                    include: [
-
+                    include:[
                         {
-                            model: Benefit_history,
+                            model: Insurance,
 
-                            required: false
-                        },
+                        }
+                    ]
+                },
+                {
+                    model:Contract,
+                    include:[
                         {
-                            model: Contract,
-                            required: false,
-                            include: [
-                                {
-                                    model: Payment_schedule,
-                                    where: {
-                                        status: 1,
-
-                                    },
-                                    required: false,
-
-                                },
-                            ]
-                        },
+                            model:Payment_schedule
+                        }
                     ]
                 }
             ]
         })
-        let quantityInsurance = 0
-        let totalInput = 0
-        let totalOutput = 0
-        let totalQuantityContract = 0
-        let totalQuantityContractCancel = 0
-        let totalQuantityContractPayInDate = 0
-        let totalQuantityContractInDate = 0
-        let totalNewContract = 0
-        insurances.forEach((insurance) => {
-            console.log(1)
-            quantityInsurance += 1
-            insurance.dataValues.typeName = insurance.Insurance_type.dataValues.name
-            delete insurance.dataValues.Insurance_type
-            console.log(2)
-            if (insurance.isDel == 1) {
-                insurance.dataValues.isDel = 'Đã huỷ'
-            }
-            else {
-                insurance.dataValues.isDel = 'Còn hoạt động'
-            }
-            console.log(3)
-            let input = 0
-            let output = 0
-
-            let quantityContract = 0
-            let quantityContractCancel = 0
-            let quantityContractPayInDate = 0
-            let quantityContractInDate = 0
-            let newContract = 0
-            
-            console.log(4)
-            insurance.Detail_contracts.forEach((detail) => {
-
-                if (detail.Contract != null) {
-                    newContract += 1
-                }
-                quantityContract += 1
-                if (detail.status == 0) {
-                    quantityContractCancel += 1
-
-                }
-                if (detail.status == 1) {
-                    quantityContractPayInDate += 1
-                }
-                if (detail.status == 2) {
-                    quantityContractInDate += 1
-                }
-
-
-                detail.Benefit_histories.forEach((benefit) => {
-                    output += Number(benefit.total) * 1000
-                })
-                detail.Contract.Payment_schedules.forEach((payment) => {
-                    input += Number(payment.total) * 1000
-                    //console.log(input)
-                })
-                //insurance.dataValues.Contract = detail.dataValues.Contract
-            })
-            console.log(5)
-           // delete insurance.dataValues.Detail_contracts
-            insurance.dataValues.input = input.toLocaleString()
-            insurance.dataValues.output = output.toLocaleString()
-            insurance.dataValues.newContract = newContract.toLocaleString()
-            insurance.dataValues.quantityContract = quantityContract.toLocaleString()
-            insurance.dataValues.quantityContractCancel = quantityContractCancel.toLocaleString()
-            insurance.dataValues.quantityContractInDate = quantityContractInDate.toLocaleString()
-            insurance.dataValues.quantityContractPayInDate = quantityContractPayInDate.toLocaleString()
-            totalNewContract += newContract
-            totalQuantityContract += quantityContract
-            totalQuantityContractCancel += quantityContractCancel
-            totalQuantityContractInDate += quantityContractInDate
-            totalQuantityContractPayInDate += quantityContractPayInDate
-            totalInput += input
-            totalOutput += output
-        })
-        totalInput = totalInput.toLocaleString()
-        totalOutput = totalOutput.toLocaleString()
-        totalNewContract = totalNewContract.toLocaleString()
-        totalQuantityContract = totalQuantityContract.toLocaleString()
-        totalQuantityContractCancel = totalQuantityContractCancel.toLocaleString()
-        totalQuantityContractInDate = totalQuantityContractInDate.toLocaleString()
-        totalQuantityContractPayInDate = totalQuantityContractPayInDate.toLocaleString()
-        console.log(6)
-        const report = {
-            totalInput, totalOutput, totalQuantityContract, totalQuantityContractCancel,
-            totalQuantityContractInDate, totalQuantityContractPayInDate, quantityInsurance, totalNewContract
-        }
-        console.log(7)
 
 
         res
             .status(200)
             .json({
-               report, insurances
+                payments
             });
     } catch (error) {
         req.flash('error', 'Đã xảy ra lỗi khi thêm hợp đồng!');

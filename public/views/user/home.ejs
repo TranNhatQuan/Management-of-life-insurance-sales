@@ -249,8 +249,14 @@
                     </div>
                     <div class="contract" style="display: flex; margin: 10px;">Ngày kết thúc: <%= contract.endDate%>
                     </div>
-                    <div class="contract" style="display: flex; margin: 10px;">Chu kỳ đóng phí: <%= contract.frequency%>
-                        tháng
+                    <div class="contract" style="display: flex; margin: 10px;">
+                      <%if (contract.frequency==0){%>
+                        Chu kỳ đóng phí: Đóng 1 lần khi ký hợp đồng
+                        <%}else{%>
+                          Chu kỳ đóng phí: <%= contract.frequency%>
+                          tháng
+                          <%}%>
+                     
                     </div>
 
 

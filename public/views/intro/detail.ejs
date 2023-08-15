@@ -264,14 +264,12 @@
                   Giá trị hợp đồng: <%=((insurance.insuranceAmount)*1000).toLocaleString()%> đồng
                 </div>
                 <div>
-                  Thời gian đóng tiền: <%=insurance.paymentTerm%> tháng
+                  Thời gian đóng tiền: <%=insurance.premiumPaymentTerm%> tháng
                 </div>
                 <div>
                   Phí bảo hiểm: <%=((insurance.premium)*1000).toLocaleString()%> đồng
                 </div>
-                <div>
-                  Khoảng cách mỗi lần đóng tiền: <%=insurance.frequency%> tháng
-                </div>
+               
                 <div style="font-weight: bold;">Minh hoạ quyền lợi:</div>
                 <div style="text-align: center;">
                   <img src="../../uploads/infoInsurance/<%=insurance.idInsurance%>.jpg" alt=""

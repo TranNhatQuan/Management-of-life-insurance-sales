@@ -55,13 +55,13 @@
 
 
 
-  <h2>Thanh toán phí bảo hiểm - Mã thu phí: <%=payment.idPayment_schedule%></h2>
+  <h2>Thanh toán phí bảo hiểm - Hợp đồng: <%=idContract%> Kỳ thứ:<%=index%> </h2>
   <form action="/user/confirmPay?url=<%=url%>" method="post">
-    <p>Số tiền: <%=payment.total%></p>
+    <p>Số tiền: <br><%-total%></p>
     <div class="form-group">
     
-      <input type="text" id="idPayment_schedule" name="idPayment_schedule" readonly hidden value="<%=payment.idPayment_schedule%>">
-        
+      <input type="text" id="idContract" name="idContract" readonly hidden value="<%=idContract%>">
+      <input type="text" id="index" name="index" readonly hidden value="<%=index%>">
     </div>
     <div class="form-group">
       <label for="bank">Chọn ngân hàng:</label>

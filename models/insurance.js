@@ -70,10 +70,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.INTEGER,
     },
-    frequency: {
-      allowNull: false,
-      type: DataTypes.INTEGER,
-    },
+ 
     insuranceAmount: {
       allowNull: false,
       type: DataTypes.INTEGER,

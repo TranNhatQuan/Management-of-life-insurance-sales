@@ -14,6 +14,9 @@ module.exports = (sequelize, DataTypes) => {
       Payment_schedule.belongsTo(models.Detail_contract, {
         foreignKey: "idDetail_contract",
       });
+      Payment_schedule.belongsTo(models.Contract, {
+        foreignKey: "idContract",
+      });
       Payment_schedule.belongsTo(models.Staff, {
         foreignKey: "idStaff",
       })

@@ -143,23 +143,23 @@
               </thead>
               <tbody>
                 <% users.forEach(function(user) { %>
-                  <tr onclick="viewEmployeeDetail('<%= user.idUser %>')">
-                    <td>
+                  <tr >
+                    <td onclick="viewEmployeeDetail('<%= user.idUser %>')">
                       KH-<%= user.idUser %>
                     </td>
-                    <td>
+                    <td onclick="viewEmployeeDetail('<%= user.idUser %>')">
                       <%= user.name %>
                     </td>
-                    <td>
+                    <td onclick="viewEmployeeDetail('<%= user.idUser %>')">
                       <%= user.mail %>
                     </td>
-                    <td>
+                    <td onclick="viewEmployeeDetail('<%= user.idUser %>')">
                       <%= user.address %>
                     </td>
-                    <td>
+                    <td onclick="viewEmployeeDetail('<%= user.idUser %>')">
                       <%= user.phone %>
                     </td>
-                    <td>
+                    <td onclick="viewEmployeeDetail('<%= user.idUser %>')">
                       <%= user.idCard %>
                     </td>
                     <td>

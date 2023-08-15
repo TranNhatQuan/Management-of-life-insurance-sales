@@ -20,7 +20,9 @@ module.exports = (sequelize, DataTypes) => {
       Contract.hasMany(models.Detail_contract,{
         foreignKey: "idContract",
       });
-      
+      Contract.hasMany(models.Payment_schedule,{
+        foreignKey: "idContract",
+      });
       
     }
   }
@@ -45,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     endDate: {
       type: DataTypes.DATEONLY,
-      allowNull: false,
+      allowNull: true,
     },
     premiumPaymentTerm: {
       allowNull: false,

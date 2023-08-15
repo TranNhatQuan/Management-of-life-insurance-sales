@@ -60,6 +60,7 @@
     .popup {
       position: fixed;
       top: 50%;
+      z-index: 99;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 400px;
@@ -235,28 +236,29 @@
               <h3>Thông tin trả phí bảo hiểm của khách hàng <%=user.name%>
               </h3>
               <div class="blockInfo">
-                <table id="paymentTable" class="table table-striped table-bordered" style="width:100%">
-                  <thead>
-                    <tr>
-                      <th>ID Thu phí</th>
-                      <th>ID Hợp đồng</th>
-                      <th>Ngày bắt đầu</th>
+                <table id="paymentTable" class="table table-striped table-bordered" style="width:100%;">
+                  <thead >
+                    <tr >
 
+                      <th>ID Hợp đồng</th>
+                      <th>Kỳ thứ</th>
+                      <th>Ngày bắt đầu</th>
                       <th>Hạn cuối</th>
                       <th>Ngày thu</th>
-                      <th>Tổng tiền</th>
+                      <th >Tổng tiền</th>
                       <th>Trạng thái</th>
                       <th>Đóng phí</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody >
                     <% payments.forEach(function(payment) { %>
-                      <tr>
-                        <td>
-                          <%= payment.idPayment_schedule %>
-                        </td>
+                      <tr >
+
                         <td>
                           HD-<%= payment.idContract %>
+                        </td>
+                        <td>
+                          <%= payment.index %>
                         </td>
                         <td>
                           <%= payment.startDate %>
@@ -267,8 +269,8 @@
                         <td>
                           <%= payment.date %>
                         </td>
-                        <td>
-                          <%= payment.total %> đồng
+                        <td class="text-truncate">
+                          <%- payment.total %>
                         </td>
                         <td>
                           <% if (payment.status===1) { %>
@@ -292,7 +294,7 @@
                         </td>
                         <td>
                           <% if (payment.status<=6&&payment.status>=2){%>
-                            <button onclick="checkPayment('<%= payment.idPayment_schedule%>','<%=url%>')">
+                            <button onclick="checkPayment('<%= payment.idContract%>','<%= payment.total%>','<%= payment.index%>','<%=url%>')">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                 class="bi bi-check" viewBox="0 0 16 16">
                                 <path
@@ -390,11 +392,11 @@
 
 
             }
-            function checkPayment(employeeId, a) {
+            function checkPayment(employeeId,total,index, a) {
               console.log(employeeId)
               //window.location.href = '/user/confirmPay?idPayment_schedule='+employeeId+'url='+url;
               $.ajax({
-                url: '/user/selectBank?idPayment_schedule=' + employeeId+'&url='+a ,
+                url: '/user/selectBank?idContract=' + employeeId + '&url=' + a+'&index=' + index+'&total=' + total,
 
                 type: 'GET',
                 dataType: 'html',
@@ -407,9 +409,8 @@
                 error: function (xhr, status, error) {
                   // Xử lý lỗi nếu có
 
-                  window.location.href = ""+a;
-                  console.log(a)
-                  console.log(error);
+                  window.location.href = "" + a;
+                  
                 }
               });
             }

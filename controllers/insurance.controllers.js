@@ -165,11 +165,11 @@ const addSubInsurance = async (req, res) => {
             }
         })
         if (insurance) {
-            let frequency = insurance.frequency
+           
             let premiumPaymentTerm = insurance.premiumPaymentTerm
             let contractTerm = insurance.contractTerm
             const newInsurance = await Insurance.create({
-                name, info, premium, premiumPaymentTerm, frequency,
+                name, info, premium, premiumPaymentTerm, 
                 insuranceAmount, contractTerm, isMain, idInsurance_type: idType, isDel: 0, idMainInsurance: idInsurance
 
             });
@@ -211,7 +211,7 @@ const addInsurance = async (req, res) => {
 
         const staff = req.staff
 
-        let { name, info, premium, premiumPaymentTerm, frequency,
+        let { name, info, premium, premiumPaymentTerm,
             insuranceAmount, contractTerm, idType, } = req.body
 
 
@@ -220,7 +220,7 @@ const addInsurance = async (req, res) => {
 
         const now = new Date()
         const newInsurance = await Insurance.create({
-            name, info, premium, premiumPaymentTerm, frequency,
+            name, info, premium, premiumPaymentTerm, 
             insuranceAmount, contractTerm, isMain, idInsurance_type: idType, isDel: 0, idStaff: staff.idStaff, date: now
 
         });
@@ -542,14 +542,14 @@ const editInsurance = async (req, res) => {
         }
         if (insurance) {
            
-            let { name, info, premium, premiumPaymentTerm, frequency,
+            let { name, info, premium, premiumPaymentTerm, 
                 insuranceAmount, contractTerm, idInsurance_type } = req.body
 
             insurance.name = name
             insurance.info = info
             insurance.premium = premium
             insurance.premiumPaymentTerm = premiumPaymentTerm
-            insurance.frequency = frequency
+ 
             insurance.insuranceAmount = insuranceAmount
             insurance.contractTerm = contractTerm
             insurance.idInsurance_type = idInsurance_type
@@ -557,7 +557,7 @@ const editInsurance = async (req, res) => {
             if(insurance.isMain==true){
                 let update = Insurance.update({
                     premiumPaymentTerm:premiumPaymentTerm,
-                    frequency:frequency,
+                    
                     contractTerm:contractTerm
                 },
                 {
