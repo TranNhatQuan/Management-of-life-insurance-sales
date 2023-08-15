@@ -406,31 +406,51 @@ const addMain = async (req, res) => {
         })
         if (insurance) {
             const { item } = req.body
-            let sub_insurance = await Sub_insurance.destroy({
-                where: {
-                    idSubInsurance: idInsurance
+            if(insurance.isMain==true){
+                let sub_insurance = await Sub_insurance.destroy({
+                    where: {
+                        idMainInsurance: idInsurance
+                    }
+                })
+    
+                if (item != null) {
+                    let arr
+                    if (Array.isArray(item)) {
+                        arr = item
+                    } else {
+                        arr = [item]
+                    }
+                    const edit = await editSub(arr, idInsurance)
                 }
-            })
-
-            if (item != null) {
-                let arr
-                if (Array.isArray(item)) {
-                    arr = item
-                } else {
-                    arr = [item]
-                }
-                const edit = await editMain(arr, idInsurance)
             }
-            req.flash('error', 'Thêm sản phẩm chính cho sản phẩm bổ trợ thành công!');
+            else{
+                let sub_insurance = await Sub_insurance.destroy({
+                    where: {
+                        idSubInsurance: idInsurance
+                    }
+                })
+    
+                if (item != null) {
+                    let arr
+                    if (Array.isArray(item)) {
+                        arr = item
+                    } else {
+                        arr = [item]
+                    }
+                    const edit = await editMain(arr, idInsurance)
+                }
+            }
+           
+            req.flash('error', 'Thêm liên kết thành công!');
             return res.redirect(req.query.url);
         }
         else {
-            req.flash('error', 'Thêm sản phẩm chính cho sản phẩm bổ trợ thất bại, bảo hiểm bạn chọn không tồn tại!');
+            req.flash('error', 'Thêm liên kết thất bại, bảo hiểm bạn chọn không tồn tại!');
             return res.redirect(req.query.url);
         }
 
     } catch (error) {
-        req.flash('error', 'Có lỗi xảy ra khi gắn sản phẩm chính cho sản phẩm bổ trợ!');
+        req.flash('error', 'Có lỗi xảy ra khi gắn liên kết!');
         return res.redirect(req.query.url);
     }
 };
@@ -823,35 +843,63 @@ const getFormAddMain = async (req, res) => {
         let insurance = await Insurance.findOne({
             where: {
                 idInsurance: idInsurance,
-                isMain: 0,
+               
             },
         })
-        let sub = await Insurance.findAll({
-            where: {
-                isMain: 1,
-                isDel: false,
-            },
-        })
-        let insurance_sub = await Sub_insurance.findAll({
-            where: {
-                idSubInsurance: insurance.idInsurance,
-            },
-        })
-        insurance_sub.forEach((item) => {
-            let id = item['idMainInsurance']
-            insurance.dataValues[id] = true
-        })
-        sub.forEach((item) => {
-            if (insurance.dataValues[item.dataValues.idInsurance] == true) {
-                item.dataValues.check = true
-            }
-        })
+        let sub
+        if(insurance.isMain==true){
+            insurance.dataValues.isMain = "Sản phẩm chính"
+            sub = await Insurance.findAll({
+                where: {
+                    isMain: 0,
+                    isDel: false,
+                },
+            })
+            let insurance_sub = await Sub_insurance.findAll({
+                where: {
+                    idMainInsurance: insurance.idInsurance,
+                },
+            })
+            insurance_sub.forEach((item) => {
+                let id = item['idMainInsurance']
+                insurance.dataValues[id] = true
+            })
+            sub.forEach((item) => {
+                if (insurance.dataValues[item.dataValues.idInsurance] == true) {
+                    item.dataValues.check = true
+                }
+            })
+        }
+        else{
+            insurance.dataValues.isMain = "Sản phẩm bổ trợ"
+            sub = await Insurance.findAll({
+                where: {
+                    isMain: 1,
+                    isDel: false,
+                },
+            })
+            let insurance_sub = await Sub_insurance.findAll({
+                where: {
+                    idSubInsurance: insurance.idInsurance,
+                },
+            })
+            insurance_sub.forEach((item) => {
+                let id = item['idMainInsurance']
+                insurance.dataValues[id] = true
+            })
+            sub.forEach((item) => {
+                if (insurance.dataValues[item.dataValues.idInsurance] == true) {
+                    item.dataValues.check = true
+                }
+            })
+        }
+       
 
 
-        return res.render('insurance/insurance_main', { sub: sub, idInsurance: idInsurance });
+        return res.render('insurance/insurance_main', { sub: sub, idInsurance: idInsurance, insurance });
 
     } catch (error) {
-        req.flash('error', 'Có lỗi xảy ra khi tạo form thêm sản phẩm chính');
+        req.flash('error', 'Có lỗi xảy ra khi tạo form thêm liên kết!');
         return res.status(500).json({ isSuccess: false })
     }
 };

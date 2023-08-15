@@ -55,13 +55,16 @@
 
 
 
-  <h2>Form sửa danh mục sản phẩm chính</h2>
+  <h2>Form sửa liên kết sản phẩm chính - bổ trợ</h2>
+  <p>Sản phẩm: <%=insurance.name%>(BH-<%=insurance.idInsurance%>)</p>
+  <p>Loại sản phẩm: <%=insurance.isMain%></p>
+  
   <form action="/insurance/addMain/<%= idInsurance %>?url=/insurance/listInsurance" method="post">
     <table>
       <tr>
         <th>ID</th>
-        <th>Tên sản phẩm chính</th>
-        <th>Check</th>
+        <th>Tên sản phẩm</th>
+        <th>Liên kết</th>
       </tr>
       <% sub.forEach(function(item) { %>
         <tr>
