@@ -34,11 +34,7 @@
       margin: 10px;
     }
 
-    #idStaff {
-      outline: none;
-      border: none;
-
-    }
+   
 
     button {
       display: inline-block;
@@ -61,53 +57,74 @@
 
 
   <h2>Form sửa thông tin lịch thu phí</h2>
-  <form action="/contract/editPayment/<%=payment_schedule.idPayment_schedule%>?url=/contract/listPayment" method="post">
-    <p><strong>ID Lịch thu phí:</strong>
-      <%=payment_schedule.idPayment_schedule%>
-    </p>
-    <p><strong>ID Khách hàng:</strong>
-      <%=payment_schedule.idUser%>
-    </p>
-    <p><strong>ID Nhân viên thu:</strong>
-      <%=payment_schedule.idStaff%>
-    </p>
-    <p><strong>ID Chi tiết hợp đồng:</strong>
-      <%=payment_schedule.idDetail_contract%>
-    </p>
-    <p><strong>Số tiền:</strong>
-      <%=payment_schedule.total%>
-    </p>
-    <p><strong>Kỳ thứ:</strong>
-      <%=payment_schedule.index%>
-    </p>
+  <form action="/contract/editPayment?url=/contract/listPayment" method="post">
+
+    <div class="form-group">
+      <label for="idContract">ID Hợp đồng:</label>
+      <div>
+        <input type="text" id="idContract" name="idContract" readonly value=" <%=payment_schedule.idContract%>">
+        <input type="text" id="index" name="index" readonly hidden value="<%=index%>">
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <label for="idStaff">Nhân viên thu:</label>
+      <div>
+        <input type="text" id="idStaff" name="idStaff" value="<%=idStaff%>">
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <label for="info">Thông tin:</label>
+      <div>
+        <input type="text" id="info" name="info" value="<%=info%>" required>
+      </div>
+
+    </div>
+    <div class="form-group">
+      <label for="index">Kỳ thứ:</label>
+      <div>
+        <%=index%>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="total">Số tiền:</label>
+      <div>
+        <%-total%>
+      </div>
+    </div>
+
+
 
     <div class="form-group">
       <label for="total">Trạng thái:</label>
       <select id="status" name="status" required>
 
-        <option value="0" <%=payment_schedule.status===0 ? "selected" : "" %>>
+        <option value="0" <%=status===0 ? "selected" : "" %>>
           Đã huỷ
         </option>
-        <option value="1" <%=payment_schedule.status===1 ? "selected" : "" %>>
+        <option value="1" <%=status===1 ? "selected" : "" %>>
           Đã thu
         </option>
 
-        <option value="2" <%=payment_schedule.status===2 ? "selected" : "" %>>
+        <option value="2" <%=status===2 ? "selected" : "" %>>
           Chưa thu
         </option>
-        <option value="3" <%=payment_schedule.status===3 ? "selected" : "" %>>
+        <option value="3" <%=status===3 ? "selected" : "" %>>
           Đang thu
         </option>
-        <option value="4" <%=payment_schedule.status===4 ? "selected" : "" %>>
+        <option value="4" <%=status===4 ? "selected" : "" %>>
           Phạt lần 1
         </option>
-        <option value="5" <%=payment_schedule.status===5 ? "selected" : "" %>>
+        <option value="5" <%=status===5 ? "selected" : "" %>>
           Phạt lần 2
         </option>
-        <option value="6" <%=payment_schedule.status===6 ? "selected" : "" %>>
+        <option value="6" <%=status===6 ? "selected" : "" %>>
           Phạt lần 3
         </option>
-        <option value="7" <%=payment_schedule.status===7 ? "selected" : "" %>>
+        <option value="7" <%=status===7 ? "selected" : "" %>>
           Hết hạn
         </option>
       </select>
@@ -124,14 +141,17 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
     function restoreValues() {
-      var index = document.getElementById("index");
+      var idStaff = document.getElementById("idStaff");
 
-      index.value = "<%= payment_schedule.index %>";
+      idStaff.value = "<%= idStaff%>";
+      var info = document.getElementById("info");
+
+      info.value = "<%= info%>";
 
       var status = document.getElementById("status");
 
 
-      status.value = "<%= payment_schedule.status %>";
+      status.value = "<%= status %>";
     }
   </script>
 

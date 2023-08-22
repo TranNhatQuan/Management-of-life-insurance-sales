@@ -63,13 +63,17 @@
     <table>
       <tr>
         <th>ID</th>
-        <th>Tên sản phẩm</th>
+        <th>Tên sản phẩm <% if(insurance.isMain=="Sản phẩm chính"){%>
+          bổ trợ
+        <%}else{%>
+          chính
+        <%}%></th>
         <th>Liên kết</th>
       </tr>
       <% sub.forEach(function(item) { %>
         <tr>
           <td>
-            <%= item.idInsurance %>
+            BH-<%= item.idInsurance %>
           </td>
           <td>
             <%= item.name %>

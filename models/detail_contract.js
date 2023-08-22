@@ -54,7 +54,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.INTEGER,
     },
-
+    premiumPaymentTerm: {
+      allowNull: false,
+      type: DataTypes.INTEGER,
+    },
   }, {
     sequelize,
     modelName: 'Detail_contract',

@@ -116,35 +116,32 @@ const changeContractToStatus2 = async (contracts) => {
         contracts.forEach(async (contract) => {
 
 
-            let detail = await Contract.findOne({
+            let contractF = await Contract.findOne({
                 where: {
-                    idContract: contract.idContract,
+                    idContract: contractF.idContract,
                     status: 1,
                 }
 
             })
-            const [numAffectedRows, affectedRows] = await Detail_contract.update(
-                { status: 2 },
-                {
-                    where: {
-                        idContract: contract.idContract,
-                        status: 1,
-                    },
+            detail = await Detail_contract.findOne({
+                where: {
+                    idContract: contractF.idContract,
+                    status: 1,
                 }
-                
-               
-
-            )
-        detail.status = 2
-        await detail.save()
-
+            })
+            if (!detail) {
+                contractF.status = 2
+                await contractF.save()
+            }
 
 
-    });
-    return true
-} catch (error) {
-    return false
-}
+
+
+        });
+        return true
+    } catch (error) {
+        return false
+    }
 
 
 }
@@ -152,30 +149,28 @@ const changeContractToStatus3 = async (contracts) => {
     try {
 
         contracts.forEach(async (contract) => {
-           
-            
-                let detail = await Contract.findOne({
-                    where: {
-                        idContract: contract.idContract,
-                        status: 2,
-                    }
 
-                })
-                const [numAffectedRows, affectedRows] = await Detail_contract.update(
-                    { status: 3 },
-                    {
-                        where: {
-                            idContract: contract.idContract,
-                            status: 2,
-                        },
-                    }
-                    
-                   
-    
-                )
-                detail.status = 3
-                await detail.save()
-            
+
+            let contractF = await Contract.findOne({
+                where: {
+                    idContract: contractF.idContract,
+                    status: 2,
+                }
+
+            })
+            detail = await Detail_contract.findOne({
+                where: {
+                    idContract: contractF.idContract,
+                    status: {
+                        [db.Sequelize.Op.or]: [1, 2]
+                    },
+                }
+            })
+            if (!detail) {
+                contractF.status = 3
+                await contractF.save()
+            }
+
         });
         return true
     } catch (error) {
@@ -439,8 +434,8 @@ const checkDateDetailContract = async () => {
             raw: true,
             where: {
                 status: 2,
-                startDate: {
-                    [db.Sequelize.Op.eq]: db.sequelize.literal(`DATE_ADD(DATE_SUB(NOW(), INTERVAL contractTerm MONTH), INTERVAL 1 DAY)`),
+                endDate: {
+                    [db.Sequelize.Op.lte]: now
                 }
 
             }
@@ -461,9 +456,7 @@ const checkContract = async () => {
             raw: true,
             where: {
                 status: 1,
-                startDate: {
-                    [db.Sequelize.Op.lte]: db.sequelize.literal(`DATE_ADD(DATE_SUB(NOW(), INTERVAL premiumPaymentTerm MONTH), INTERVAL 1 DAY)`),
-                }
+
             }
         })
         if (contractStatus2.length !== 0) {
@@ -473,9 +466,7 @@ const checkContract = async () => {
             raw: true,
             where: {
                 status: 2,
-                endDate: {
-                    [db.Sequelize.Op.lte]: now
-                }
+
 
             }
         })

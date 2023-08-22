@@ -126,9 +126,9 @@
             <table id="paymentTable" class="table table-striped table-bordered" style="width:100%">
               <thead>
                 <tr>
-                  <th>ID Thu phí</th>
+                 
                   <th>ID Hợp đồng</th>
-                  <th>Chi tiết</th>
+                  <th>Kỳ thứ</th>
                   <th>Người phụ trách</th>
                   <th>Hạn cuối</th>
                   <th>Ngày thu</th>
@@ -139,18 +139,19 @@
               </thead>
               <tbody>
                 <% payments.forEach(function(payment) { %>
-                  <tr onclick="viewpaymentDetail('<%= payment.idPayment_schedule %>')">
-                    <td>
-                      TP-<%= payment.idPayment_schedule %>
-                    </td>
+                  <tr onclick="viewpaymentDetail('<%= payment.idContract %>','<%= payment.index %>','<%= payment.total %>','<%= payment.status %>','<%= payment.idStaff %>','<%= payment.info %>')">
+                    
                     <td>
                       HD-<%= payment.idContract %>
                     </td>
                     <td>
-                      CTHD-<%=payment.idDetail_contract%>_BH-<%=payment.Detail_contract.idInsurance%>
+                      <%= payment.index %>
                     </td>
                     <td>
+                      <% if(payment.idStaff){%>
+
                       NV-<%= payment.idStaff %>
+                      <%}%>
                     </td>
                     <td>
                       <%= payment.endDate %>
@@ -159,7 +160,7 @@
                       <%= payment.date %>
                     </td>
                     <td>
-                      <%= payment.total %>
+                      <%- payment.total %>
                     </td>
                     <td>
                       <% if (payment.status===1) { %>
@@ -297,10 +298,10 @@
 
 
 
-            function viewpaymentDetail(paymentId) {
+            function viewpaymentDetail(paymentId, index, total, status, idStaff, info) {
               // Sử dụng AJAX để tải nội dung trang chi tiết nhân viên
               $.ajax({
-                url: '/contract/editPayment/' + paymentId + '?url=/contract/listPayment',
+                url: '/contract/editPayment?idContract=' + paymentId+'&index='+index+'&total='+total+'&status='+status+'&idStaff='+idStaff+'&info='+info + '&url=/contract/listPayment',
                 type: 'GET',
                 dataType: 'html',
                 success: function (response) {

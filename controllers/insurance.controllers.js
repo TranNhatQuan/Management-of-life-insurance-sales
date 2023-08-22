@@ -51,7 +51,7 @@ const getListInsurance = async (req, res) => {
             if (emp.isMain == true) {
                 emp.dataValues.isMain = "Sản phẩm chính"
             } else {
-                emp.dataValues.isMain = "Sản phẩm bổ trợ của"
+                emp.dataValues.isMain = "Sản phẩm bổ trợ"
             }
         });
         console.log(3)
@@ -165,11 +165,11 @@ const addSubInsurance = async (req, res) => {
             }
         })
         if (insurance) {
-           
+
             let premiumPaymentTerm = insurance.premiumPaymentTerm
             let contractTerm = insurance.contractTerm
             const newInsurance = await Insurance.create({
-                name, info, premium, premiumPaymentTerm, 
+                name, info, premium, premiumPaymentTerm,
                 insuranceAmount, contractTerm, isMain, idInsurance_type: idType, isDel: 0, idMainInsurance: idInsurance
 
             });
@@ -212,15 +212,15 @@ const addInsurance = async (req, res) => {
         const staff = req.staff
 
         let { name, info, premium, premiumPaymentTerm,
-            insuranceAmount, contractTerm, idType, } = req.body
+            insuranceAmount, contractTerm, idType, isMain } = req.body
 
 
-        let isMain = true
+
 
 
         const now = new Date()
         const newInsurance = await Insurance.create({
-            name, info, premium, premiumPaymentTerm, 
+            name, info, premium, premiumPaymentTerm,
             insuranceAmount, contractTerm, isMain, idInsurance_type: idType, isDel: 0, idStaff: staff.idStaff, date: now
 
         });
@@ -406,13 +406,13 @@ const addMain = async (req, res) => {
         })
         if (insurance) {
             const { item } = req.body
-            if(insurance.isMain==true){
+            if (insurance.isMain == true) {
                 let sub_insurance = await Sub_insurance.destroy({
                     where: {
                         idMainInsurance: idInsurance
                     }
                 })
-    
+
                 if (item != null) {
                     let arr
                     if (Array.isArray(item)) {
@@ -423,13 +423,13 @@ const addMain = async (req, res) => {
                     const edit = await editSub(arr, idInsurance)
                 }
             }
-            else{
+            else {
                 let sub_insurance = await Sub_insurance.destroy({
                     where: {
                         idSubInsurance: idInsurance
                     }
                 })
-    
+
                 if (item != null) {
                     let arr
                     if (Array.isArray(item)) {
@@ -440,12 +440,12 @@ const addMain = async (req, res) => {
                     const edit = await editMain(arr, idInsurance)
                 }
             }
-           
-            req.flash('error', 'Thêm liên kết thành công!');
+
+            req.flash('error', 'Sửa liên kết thành công!');
             return res.redirect(req.query.url);
         }
         else {
-            req.flash('error', 'Thêm liên kết thất bại, bảo hiểm bạn chọn không tồn tại!');
+            req.flash('error', 'Sửa liên kết thất bại, bảo hiểm bạn chọn không tồn tại!');
             return res.redirect(req.query.url);
         }
 
@@ -552,39 +552,39 @@ const editInsurance = async (req, res) => {
             }
         })
         let contract = await Detail_contract.findOne({
-            where:{
+            where: {
                 idInsurance,
             }
         })
-        if(contract){
+        if (contract) {
             req.flash('error', 'Sửa bảo hiểm thất bại, bảo hiểm đã đã tồn tại trong ít nhất một hợp đồng!');
             return res.redirect(req.query.url);
         }
         if (insurance) {
-           
-            let { name, info, premium, premiumPaymentTerm, 
+
+            let { name, info, premium, premiumPaymentTerm,
                 insuranceAmount, contractTerm, idInsurance_type } = req.body
 
             insurance.name = name
             insurance.info = info
             insurance.premium = premium
             insurance.premiumPaymentTerm = premiumPaymentTerm
- 
+
             insurance.insuranceAmount = insuranceAmount
             insurance.contractTerm = contractTerm
             insurance.idInsurance_type = idInsurance_type
             await insurance.save()
-            if(insurance.isMain==true){
+            if (insurance.isMain == true) {
                 let update = Insurance.update({
-                    premiumPaymentTerm:premiumPaymentTerm,
-                    
-                    contractTerm:contractTerm
+                    premiumPaymentTerm: premiumPaymentTerm,
+
+                    contractTerm: contractTerm
                 },
-                {
-                    where:{
-                        idMainInsurance:idInsurance
-                    }
-                })
+                    {
+                        where: {
+                            idMainInsurance: idInsurance
+                        }
+                    })
             }
             if (req.files && req.files.image1 && req.files.image2) {
                 console.log('test');
@@ -699,11 +699,21 @@ const detailForUser = async (req, res) => {
 
         let sub = await Insurance.findAll({
             where: {
+
                 isMain: false,
-                isDel: 0,
-                idMainInsurance:idInsurance
             },
-            
+            include: [
+                {
+                    model: Sub_insurance,
+                    as: 'subInsurance',
+                    where: {
+                        idMainInsurance: idInsurance
+                    },
+                    required: true,
+                }
+            ]
+
+
         })
 
         if (req.user) {
@@ -843,11 +853,11 @@ const getFormAddMain = async (req, res) => {
         let insurance = await Insurance.findOne({
             where: {
                 idInsurance: idInsurance,
-               
+
             },
         })
         let sub
-        if(insurance.isMain==true){
+        if (insurance.isMain == true) {
             insurance.dataValues.isMain = "Sản phẩm chính"
             sub = await Insurance.findAll({
                 where: {
@@ -861,7 +871,7 @@ const getFormAddMain = async (req, res) => {
                 },
             })
             insurance_sub.forEach((item) => {
-                let id = item['idMainInsurance']
+                let id = item['idSubInsurance']
                 insurance.dataValues[id] = true
             })
             sub.forEach((item) => {
@@ -870,7 +880,7 @@ const getFormAddMain = async (req, res) => {
                 }
             })
         }
-        else{
+        else {
             insurance.dataValues.isMain = "Sản phẩm bổ trợ"
             sub = await Insurance.findAll({
                 where: {
@@ -893,7 +903,7 @@ const getFormAddMain = async (req, res) => {
                 }
             })
         }
-       
+
 
 
         return res.render('insurance/insurance_main', { sub: sub, idInsurance: idInsurance, insurance });

@@ -1,4 +1,4 @@
-const { Staff, Account, Permission, Screen, Staff_permission, Contract, Detail_contract, Payment_schedule, User } = require("../models");
+const { Staff, Account, Permission, Screen, Staff_permission, Contract, Detail_contract, Insurance, Payment_schedule, User } = require("../models");
 const { QueryTypes, Op, where, STRING, NUMBER } = require("sequelize");
 const db = require("../models/index");
 const bcrypt = require("bcryptjs");
@@ -154,51 +154,84 @@ const getInfoHome = async (req, res) => {
         const error = req.flash('error')[0];
         const staff = req.staff
         const name = staff.name
-
-        let contracts = await Contract.findAll({
+        console.log(1)
+        let contracts = await Payment_schedule.findAll({
             where: {
-                idStaff: staff.idStaff,
-                status: 1
+                status: {
+                    [db.Sequelize.Op.and]: [
+                        { [db.Sequelize.Op.gte]: 3 }, // Greater than or equal to 3
+                        { [db.Sequelize.Op.lte]: 6 }  // Less than or equal to 6
+                    ]
+
+                }
             },
             include: [
+
                 {
-
-
-                    model: Payment_schedule,
+                    model: Contract,
                     where: {
-                        status: {
-                            [db.Sequelize.Op.gte]: 3 // Sử dụng Op.gte để lọc status lớn hơn hoặc bằng 2
-                        },
-
+                        idStaff: staff.idStaff
                     },
-                    required: true
+                    required: true,
+                    include: [
+                        {
+                            model: Payment_schedule,
+                            include: [
+                                {
+                                    model: Detail_contract,
+                                    include: [
+                                        {
+                                            model: Insurance,
+                                        }
+                                    ]
+                                }
+                            ]
 
-
-
-                },
+                        }
+                    ]
+                }
+                ,
                 {
                     model: User,
-                    required: true,
+
                 }
-            ],
-            raw: true,
+            ]
         })
+        console.log(2)
+        const uniquePairs = new Set(); // Sử dụng Set để theo dõi các cặp duy nhất
+        contracts = contracts.filter((payment) => {
+            let idContract = payment.Contract.dataValues.idContract;
+            let index = payment.dataValues.index;
 
-        contracts = contracts.map(item => {
+            let pair = `${idContract}-${index}`;
 
+            if (uniquePairs.has(pair)) {
 
-            return {
-                idPayment_schedule: item['Payment_schedules.idPayment_schedule'],
-                idContract: item['idContract'],
-                endDate: item['Payment_schedules.endDate'],
-                total: item['Payment_schedules.total'],
-                idUser: item['User.idUser'],
-                name: item['User.name'],
-                address: item['User.address'],
-                phone: item['User.phone'],
-                mail: item['User.mail'],
-
+                return false; // Không bao gồm payment trong mảng mới
+            } else {
+                uniquePairs.add(pair);
+                return true; // Bao gồm payment trong mảng mới
             }
+        });
+        contracts.forEach((payment) => {
+
+
+            let total = 0
+            let totalText = ""
+            let index = payment.index
+            payment.Contract.Payment_schedules.forEach((paymentContract) => {
+                if (index == paymentContract.index) {
+
+                    let text = "Sản phẩm " + paymentContract.Detail_contract.Insurance.name + ": " + (Number(paymentContract.total) * 1000).toLocaleString() + " đồng<br>"
+                    total += Number(paymentContract.total) * 1000
+                    totalText += text
+                }
+            })
+            total = total.toLocaleString()
+            totalText += "Tổng " + total + " đồng"
+            payment.dataValues.total = totalText
+
+
         });
 
 
@@ -428,25 +461,25 @@ const checkPay = async (req, res) => {
         let staff = req.staff
         let name = staff.name
 
-        const { idPayment_schedule } = req.params
-        let pay = await Payment_schedule.findOne({
-            where: {
-                idPayment_schedule,
-                status: {
-                    [db.Sequelize.Op.gte]: 3 // Sử dụng Op.gte để lọc status lớn hơn hoặc bằng 2
-                },
+        const idContract = req.query.idContract
+        const index = req.query.index
+        await Payment_schedule.update(
+            {
+
+                status: 1,
+                idStaff: staff.idStaff,
+            },
+            {
+                where: {
+                    idContract: idContract, index: index
+                }
             }
-        })
-        if (pay) {
-            pay.status = 1
-            await pay.save()
-            req.flash('error', 'Thanh toán thành công!');
-            return res.redirect('/staff/home');
-        }
-        else {
-            req.flash('error', 'Không tìm thấy thông tin trả phí!');
-            return res.redirect('/staff/home');
-        }
+        )
+
+        req.flash('error', 'Thanh toán thành công!');
+        return res.redirect('/staff/home');
+
+
 
 
     } catch (error) {

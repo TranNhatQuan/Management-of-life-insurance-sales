@@ -49,10 +49,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
-    premiumPaymentTerm: {
-      allowNull: false,
-      type: DataTypes.INTEGER,
-    },
+   
     frequency: {
       allowNull: false,
       type: DataTypes.INTEGER,

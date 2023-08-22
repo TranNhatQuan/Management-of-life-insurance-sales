@@ -99,10 +99,7 @@
         <input type="number" id="premiumPaymentTerm" name="premiumPaymentTerm" required
           value="<%=insurance.premiumPaymentTerm%>" min="0">
       </div>
-      <div class="form-group">
-        <label for="frequency">Khoảng cách giữa mỗi lần đóng bảo hiểm(tháng):</label>
-        <input type="number" id="frequency" name="frequency" required value="<%=insurance.frequency%>" min="0">
-      </div>
+
 
       <div class="form-group">
         <label for="contractTerm">Thời hạn bảo hiểm(tháng):</label>
@@ -114,11 +111,12 @@
           <input type="number" id="premiumPaymentTerm" name="premiumPaymentTerm" required readonly
             value="<%=insurance.premiumPaymentTerm%>" min="0">
         </div>
-       
-    
+
+
         <div class="form-group">
           <label for="contractTerm">Thời hạn bảo hiểm(tháng):</label>
-          <input type="number" id="contractTerm" name="contractTerm" required value="<%=insurance.contractTerm%>" min="1" readonly>
+          <input type="number" id="contractTerm" name="contractTerm" required value="<%=insurance.contractTerm%>"
+            min="1" readonly>
         </div>
         <%}%>
 

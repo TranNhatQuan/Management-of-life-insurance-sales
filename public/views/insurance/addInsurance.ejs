@@ -100,7 +100,7 @@
 
 <body>
 
-  <h2>Tạo sản phẩm chính mới</h2>
+  <h2>Tạo sản phẩm mới</h2>
   <form action="/insurance/addInsurance?url=/insurance/listInsurance" method="post" enctype="multipart/form-data">
     <div class="form-group">
       <label for="name">Tên:</label>
@@ -141,6 +141,18 @@
             <%= type.name %>
           </option>
           <% }); %>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="isMain">Sản phẩm chính/bổ trợ:</label>
+      <select id="isMain" name="isMain" required>
+        
+          <option value='true'>
+            Sản phẩm chính
+          </option>
+          <option value='false'>
+            Sản phẩm bổ trợ
+          </option>
       </select>
     </div>
     <div class="form-group">

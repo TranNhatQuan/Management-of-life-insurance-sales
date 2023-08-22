@@ -50,12 +50,18 @@ const jobStart = new cron.CronJob('0 0 1 1 * *', async () => {
   // job này chạy vào 01:00:00 ngày 1 hàng tháng
   console.log('startCron')
   await checkPayment()
+  
+  console.log('done')
+});
+const jobContract = new cron.CronJob('0 3 * * *', async () => {
+  // job này chạy vào 3 h sáng hàng ngày
+  console.log('startCron')
+  await checkDateDetailContract()
   await checkContract()
   console.log('done')
 });
-
 jobStart.start(); // Bắt đầu chạy CronJob
-
+jobContract.start();
 //lắng nghe sự kiện kết nối
 app.listen(port, async () => {
   console.log(`App listening on http://localhost:${port}`);

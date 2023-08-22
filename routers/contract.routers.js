@@ -23,11 +23,11 @@ contractRouter.post("/addBenefit/:idDetail_contract", authenticateStaff, authori
 //Sửa
 contractRouter.get("/editDetail/:idDetail_contract", authenticateStaff, authorize('editContract'), getFromEditDetail)
 contractRouter.get("/editContract/:idContract", authenticateStaff, authorize('editContract'), getFromEditContract)
-contractRouter.get("/editPayment/:idPayment_schedule", authenticateStaff, authorize('editPayment'), getFormEditPayment)
+contractRouter.get("/editPayment", authenticateStaff, authorize('editPayment'), getFormEditPayment)
 contractRouter.get("/editBenefit/:idBenefit_history", authenticateStaff, authorize('editBenefit'), getFormEditBenefit)
 contractRouter.post("/editContract/:idContract", authenticateStaff, authorize('editContract'), editContract)
 contractRouter.post("/editDetail/:idDetail_contract", authenticateStaff, authorize('editContract'), editDetail)
-contractRouter.post("/editPayment/:idPayment_schedule", authenticateStaff, authorize('editPayment'), editPayment)
+contractRouter.post("/editPayment", authenticateStaff, authorize('editPayment'), editPayment)
 contractRouter.post("/editBenefit/:idBenefit_history", authenticateStaff, authorize('editBenefit'), editBenefit)
 contractRouter.put("/editContract/:idContract", authenticateStaff, authorize('editContract'), editStatusContract)
 contractRouter.put("/editDetail_contract/:idDetail_contract", authenticateStaff, authorize('editContract'), editStatusDetail_contract)

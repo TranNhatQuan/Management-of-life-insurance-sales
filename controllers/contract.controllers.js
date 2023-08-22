@@ -29,7 +29,7 @@ const createPayment = async (total, premiumPaymentTerm, frequency, idDetail_cont
     try {
 
         for (let index = 1; index <= totalIndex; index++) {
-          
+
             if (index == 1) {
                 let payment = await Payment_schedule.create({
                     idUser,
@@ -79,7 +79,7 @@ const createPayment = async (total, premiumPaymentTerm, frequency, idDetail_cont
 
     return { isSuccessPay, failPay }
 }
-const createDetailContract = async (status,start, idStaff, idInsurance, frequency, idUser, idContract, isMain, options) => {
+const createDetailContract = async (status, start, idStaff, idInsurance, frequency, idUser, idContract, isMain, options) => {
 
 
 
@@ -111,6 +111,7 @@ const createDetailContract = async (status,start, idStaff, idInsurance, frequenc
             status: status,
             premium: insurance.premium,
             insuranceAmount: insurance.insuranceAmount,
+            premiumPaymentTerm: insurance.premiumPaymentTerm,
         }, options);
         total = insurance.premium
         let { isSuccessPay, failPay } = await createPayment(total, insurance.premiumPaymentTerm, frequency,
@@ -162,16 +163,65 @@ const getListPayment = async (req, res) => {
 
         let payments = await Payment_schedule.findAll({
 
-            //raw: true,
-            include:[
-              
+            include: [
+
                 {
-                    model:Detail_contract,
-                    
+                    model: Contract,
+                    include: [
+                        {
+                            model: Payment_schedule,
+                            include: [
+                                {
+                                    model: Detail_contract,
+                                    include: [
+                                        {
+                                            model: Insurance,
+                                        }
+                                    ]
+                                }
+                            ]
+
+                        }
+                    ]
                 }
             ]
-
         })
+
+        const uniquePairs = new Set(); // Sử dụng Set để theo dõi các cặp duy nhất
+        payments = payments.filter((payment) => {
+            let idContract = payment.Contract.dataValues.idContract;
+            let index = payment.dataValues.index;
+
+            let pair = `${idContract}-${index}`;
+
+            if (uniquePairs.has(pair)) {
+
+                return false; // Không bao gồm payment trong mảng mới
+            } else {
+                uniquePairs.add(pair);
+                return true; // Bao gồm payment trong mảng mới
+            }
+        });
+        payments.forEach((payment) => {
+
+
+            let total = 0
+            let totalText = ""
+            let index = payment.index
+            payment.Contract.Payment_schedules.forEach((paymentContract) => {
+                if (index == paymentContract.index) {
+
+                    let text = "Sản phẩm " + paymentContract.Detail_contract.Insurance.name + ": " + (Number(paymentContract.total) * 1000).toLocaleString() + " đồng<br>"
+                    total += Number(paymentContract.total) * 1000
+                    totalText += text
+                }
+            })
+            total = total.toLocaleString()
+            totalText += "Tổng " + total + " đồng"
+            payment.dataValues.total = totalText
+
+
+        });
 
         const error = req.flash('error')[0];
         return res.render('contract/listPayment', { error: error, payments: payments, name: name });
@@ -249,11 +299,20 @@ const getDetailAndSub = async (req, res) => {
         })
         let subInsurance = await Insurance.findAll({
             where: {
-                idMainInsurance: idInsurance,
+
                 isMain: false,
             },
+            include: [
+                {
+                    model: Sub_insurance,
+                    as: 'subInsurance',
+                    where: {
+                        idMainInsurance: idInsurance
+                    },
+                    required: true,
+                }
+            ]
 
-            raw: true,
 
         })
 
@@ -604,22 +663,23 @@ const addBenefit = async (req, res) => {
 };
 const getFormEditPayment = async (req, res) => {
     try {
-        const { idPayment_schedule } = req.params
-        let now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        now = '' + year + '-' + month + '-' + day
-        let payment_schedule = await Payment_schedule.findOne({
+        const idContract = req.query.idContract
+        const total = req.query.total
+        const index = req.query.index
+        const status = req.query.status
+        const idStaff = req.query.idStaff
+        const info = req.query.info
+        console.log('t')
+        const payment_schedule = await Contract.findOne({
             where: {
-                idPayment_schedule
+                idContract
             }
         })
         if (!payment_schedule) {
             req.flash('error', 'Không tìm thấy lịch trả phí bạn chọn!');
             return res.status(500).json({ isSuccess: false })
         }
-        return res.render('contract/editPayment', { payment_schedule: payment_schedule, now: now });
+        return res.render('contract/editPayment', { payment_schedule: payment_schedule, info, total, index, status, idStaff });
 
     } catch (error) {
         req.flash('error', 'Có lỗi xảy ra khi tạo form sửa lịch trả phí!');
@@ -629,29 +689,29 @@ const getFormEditPayment = async (req, res) => {
 
 const editPayment = async (req, res) => {
     try {
-        const staff = req.staff
-        const idStaff = staff.idStaff
-        const { idPayment_schedule } = req.params
-        let payment_schedule = await Payment_schedule.findOne({
-            where: {
-                idPayment_schedule
+
+
+        const { idContract, index, status, idStaff, info } = req.body
+
+        await Payment_schedule.update(
+            {
+                info: info,
+                status: status,
+                idStaff: idStaff
+            },
+            {
+                where: {
+                    idContract: idContract, index: index
+                }
             }
-        })
-        let { status } = req.body
-        if (payment_schedule) {
-            payment_schedule.status = status
-            await payment_schedule.save()
-            const text = 'Sửa lịch trả phí thành công!'
-            req.flash('error', text);
-            return res.redirect(req.query.url);
-        }
-        else {
-            req.flash('error', 'Không tìm thấy thông tin hợp đồng bạn chọn!');
-            return res.redirect(req.query.url);
-        }
+        )
+        const text = 'Sửa lịch trả phí thành công!'
+        req.flash('error', text);
+        return res.redirect(req.query.url);
+
 
     } catch (error) {
-        req.flash('error', 'Có lỗi xảy ra khi thêm mới lịch trả phí!');
+        req.flash('error', 'Có lỗi xảy ra khi sửa lịch trả phí!');
         return res.redirect(req.query.url);
     }
 };
@@ -723,7 +783,7 @@ const editDetail = async (req, res) => {
 const editContract = async (req, res) => {
     try {
         const staff = req.staff
-       
+
         const { idContract } = req.params
         let contract = await Contract.findOne({
             where: {
@@ -752,7 +812,7 @@ const editContract = async (req, res) => {
                     await pdfFile.mv(filePath);
                     console.log('test2')
                 }
-                
+
                 req.flash('error', 'Sửa thông tin hợp đồng thành công!');
                 return res.redirect(req.query.url);
             }
@@ -876,7 +936,7 @@ const addContract = async (req, res) => {
                 isActive: 1,
             }
         })
-       
+
         if (!user) {
             req.flash('error', 'Thêm mới hợp đồng thất bại, mã khách hàng: ' + idUser + ' không tồn tại!');
             return res.redirect(req.query.url);
@@ -887,7 +947,7 @@ const addContract = async (req, res) => {
                 isMain: true,
             }
         })
-    
+
         if (!insurance) {
             req.flash('error', 'Thêm mới hợp đồng thất bại, mã sản phẩm: ' + idInsurance + ' không tồn tại!');
             return res.redirect(req.query.url);
@@ -906,46 +966,47 @@ const addContract = async (req, res) => {
                     model: Detail_contract,
                     where: {
                         idInsurance,
+                        isMain: true,
                     },
                     required: true,
                 }
             ]
         })
-        
+
         if (currentContract) {
             req.flash('error', 'Thêm mới hợp đồng thất bại, mã sản phẩm: ' + idInsurance + ' đang được áp dụng với khách hàng!');
             return res.redirect(req.query.url);
         }
-   
+
         const staff = req.staff
         const start = new Date(startDate)
         const endDate = new Date(start.getTime() + 30 * insurance.contractTerm * 24 * 60 * 60 * 1000);
         const t = await db.sequelize.transaction(); // Bắt đầu transaction\
-        
+
         let failContract = ''
         let filePath = ''
         let totalContract = 0
         let status = 1
-        if(frequency==0){
+        if (frequency == 0) {
             status = 2
         }
         try {
-            
+
             let contract = await Contract.create({
                 idUser,
                 status: status,
                 pdf: '/public/uploads/',
                 startDate: start,
-                
+
                 idStaff: staff.idStaff,
                 frequency: frequency,
-                premiumPaymentTerm: insurance.premiumPaymentTerm,
+
             }, { transaction: t })
 
             if (!req.files || !req.files.pdfFile) {
                 throw new Error('Đã xảy ra lỗi khi gửi file!');
             }
-         
+
             const pdfFile = req.files.pdfFile;
             filePath = `public/uploads/${contract.idContract}.pdf`;
 
@@ -956,27 +1017,27 @@ const addContract = async (req, res) => {
             if (!isSuccess) {
                 throw new Error(fail);
             }
-           
+
             totalContract += Number(total)
             let id = ''
             for (const item of selectedSubInsuranceIds) {
-                if (item != '[') {                  
-                    if(item==']'||item==','){                       
-                        let { isSuccess, fail, total } = await createDetailContract(status,start, staff.idStaff, id, frequency, idUser, contract.idContract, false, { transaction: t })
-                        totalContract += Number(total)                        
-                        if (!isSuccess) {   
+                if (item != '[') {
+                    if (item == ']' || item == ',') {
+                        let { isSuccess, fail, total } = await createDetailContract(status, start, staff.idStaff, id, frequency, idUser, contract.idContract, false, { transaction: t })
+                        totalContract += Number(total)
+                        if (!isSuccess) {
                             throw new Error(fail);
                         }
                         id = ''
                     }
-                    else{
-                        id+=item
+                    else {
+                        id += item
                     }
                 }
             }
-            await t.commit(); 
+            await t.commit();
         } catch (error) {
-            await t.rollback(); 
+            await t.rollback();
             failContract = error.message
             req.flash('error', 'Thêm mới hợp đồng thất bại. ' + failContract);
             return res.redirect(req.query.url);
@@ -1003,7 +1064,7 @@ const fake = async (req, res) => {
             include: [
                 {
                     model: Detail_contract,
-                    include:[
+                    include: [
                         {
                             model: Insurance,
 
@@ -1011,10 +1072,10 @@ const fake = async (req, res) => {
                     ]
                 },
                 {
-                    model:Contract,
-                    include:[
+                    model: Contract,
+                    include: [
                         {
-                            model:Payment_schedule
+                            model: Payment_schedule
                         }
                     ]
                 }

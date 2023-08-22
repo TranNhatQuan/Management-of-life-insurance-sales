@@ -140,12 +140,10 @@
                         <table id="paymentTable" class="table table-striped table-bordered" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>ID thu phí</th>
+                                    <th>ID Hợp đồng</th>
                                     <th>ID Khách</th>
-                                    <th>Tên khách hàng</th>
-                                    <th>Số điện thoại</th>
-                                    <th>Địa chỉ</th>
-                                    <th>Email</th>
+                                    <th>Thông tin liên hệ</th>
+                                    
                                     <th>Ngày hết hạn</th>
                                     <th>Số tiền</th>
                                     <th>Đã thu</th>
@@ -155,31 +153,28 @@
                                 <% contracts.forEach(function(contract) { %>
                                     <tr>
                                         <td>
-                                            <%= contract.idPayment_schedule %>
+                                            HD-<%= contract.idContract %>
                                         </td>
                                         <td>
-                                            <%= contract.idUser %>
+                                            KH-<%= contract.idUser %>
                                         </td>
                                         <td>
-                                            <%= contract.name %>
-                                        </td>
-                                        <td>
-                                            <%= contract.phone %>
-                                        </td>
-                                        <td>
-                                            <%= contract.address %>
-                                        </td>
-                                        <td>
-                                            <%= contract.mail %>
+                                            <%= contract.User.name %>
+                                        <br>
+                                            <%= contract.User.phone %>
+                                       <br>
+                                            <%= contract.User.address %>
+                                       <br>
+                                            <%= contract.User.mail %>
                                         </td>
                                         <td>
                                             <%= contract.endDate %>
                                         </td>
                                         <td>
-                                            <%= (contract.total*1000).toLocaleString() %> đồng
+                                            <%-contract.total %>
                                         </td>
                                         <td>
-                                            <button onclick="checkPayment('<%= contract.idPayment_schedule%>', event)">
+                                            <button onclick="checkPayment('<%= contract.idContract%>','<%= contract.index%>', event)">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                                                     <path
@@ -229,10 +224,10 @@
 
                             });
                         });
-                        function checkPayment(contractId, event) {
+                        function checkPayment(contractId,index, event) {
                             event.stopPropagation();
                             $.ajax({
-                                url: '/staff/check/' + contractId + '?url=/staff/home',
+                                url: '/staff/check?idContract=' + contractId+'&index='+index + '&url=/staff/home',
                                 type: 'PUT',
                                 success: function (response) {
                                    
